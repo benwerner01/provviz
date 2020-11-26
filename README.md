@@ -1,1 +1,2 @@
-# provviz
+# ProvViz - An Interactive PROV Visualiser
+
