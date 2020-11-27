@@ -1,7 +1,7 @@
 import React, {
   useState, useEffect, useRef,
 } from 'react';
-import { select, BaseType } from 'd3';
+import { select, BaseType, Selection } from 'd3';
 import { wasmFolder } from '@hpcc-js/wasm';
 import { Graphviz, graphviz } from 'd3-graphviz';
 import { makeStyles } from '@material-ui/core/styles';
@@ -73,17 +73,19 @@ const Visualiser: React.FC<VisualiserProps> = ({
 }) => {
   if (!tbdIsPROVJSONDocument(document)) throw new Error('Could not parse PROV JSON Document');
   const classes = useStyles();
+  const graphvizWrapper = useRef<HTMLDivElement>(null);
 
   const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(document);
   const [displayEditor, setDisplayEditor] = useState<boolean>(false);
 
-  const wrapper = useRef<HTMLDivElement>(null);
-  const graphvizWrapper = useRef<HTMLDivElement>(null);
-
+  const [selectedNodeID, setSelectedNodeID] = useState<string | undefined>();
   const [
     graphvizInstance,
     setGraphvizInstance] = useState<Graphviz<BaseType, any, BaseType, any> | undefined>();
-  const [selectedNodeID, setSelectedNodeID] = useState<string | undefined>();
+  const [
+    d3Nodes,
+    setD3Nodes,
+  ] = useState<Selection<SVGGElement, NodeGroupDatum, SVGSVGElement, unknown> | undefined>();
 
   const graphvizHeight = height - HEADER_HEIGHT - TABS_HEIGHT;
 
@@ -117,38 +119,50 @@ const Visualiser: React.FC<VisualiserProps> = ({
         .on('end', () => {
           const svg = select(graphvizWrapper.current).select<SVGSVGElement>('svg');
 
-          const nodes = svg.selectAll<SVGGElement, NodeGroupDatum>('.node');
-
-          const edges = svg.selectAll<SVGGElement, unknown>('.edge');
-
-          nodes.on('mouseover', function mouseover() {
-            select(this).style('cursor', 'pointer');
-          });
-          nodes.on('mouseout', function mouseout() {
-            select(this).style('cursor', 'default');
-          });
-          nodes.on('click', ({ key, children }) => {
-            setSelectedNodeID(key);
-            const zoom = graphvizInstance.zoomBehavior();
-
-            const { center } = children.find(({ tag }) => tag === 'ellipse' || tag === 'polygon') || {};
-
-            if (zoom && center) {
-              const graph = svg.select<SVGGElement>('.graph');
-              const graphHeight = graph.node()!.getBBox().height;
-              const graphWidth = graph.node()!.getBBox().width;
-
-              const { x, y } = center;
-              const translateToX = parseFloat(x) + graphWidth / 2;
-              const translateToY = parseFloat(y) + height / 2;
-
-              // zoom.scaleTo(svg.transition(), 1);
-              // zoom.translateTo(svg.transition(), translateToX, translateToY);
-            }
-          });
+          setD3Nodes(svg.selectAll<SVGGElement, NodeGroupDatum>('.node'));
         });
     }
   }, [graphvizInstance, localDocument]);
+
+  useEffect(() => {
+    if (graphvizWrapper.current && graphvizInstance && d3Nodes) {
+      const svg = select<HTMLDivElement, unknown>(graphvizWrapper.current).select<SVGSVGElement>('svg');
+
+      d3Nodes.on('mouseover', function mouseover() {
+        const nodeGroup = select(this);
+        nodeGroup.style('cursor', 'pointer');
+
+        nodeGroup.selectAll('ellipse, polygon').attr('stroke', 'red');
+      });
+
+      d3Nodes.on('mouseout', function mouseout() {
+        const nodeGroup = select(this);
+        nodeGroup.style('cursor', 'default');
+
+        nodeGroup.selectAll('ellipse, polygon').attr('stroke', 'black');
+      });
+
+      d3Nodes.on('click', ({ key, children }) => {
+        setSelectedNodeID(key);
+        const zoom = graphvizInstance.zoomBehavior();
+
+        const { center } = children.find(({ tag }) => tag === 'ellipse' || tag === 'polygon') || {};
+
+        if (zoom && center) {
+          const graph = svg.select<SVGGElement>('.graph');
+          const graphHeight = graph.node()!.getBBox().height;
+          const graphWidth = graph.node()!.getBBox().width;
+
+          const { x, y } = center;
+          const translateToX = parseFloat(x) + graphWidth / 2;
+          const translateToY = parseFloat(y) + height / 2;
+
+          // zoom.scaleTo(svg.transition(), 1);
+          // zoom.translateTo(svg.transition(), translateToX, translateToY);
+        }
+      });
+    }
+  }, [d3Nodes]);
 
   const handleCreateAgent = () => {
     setLocalDocument(createAgent(localDocument)('test', '1'));
