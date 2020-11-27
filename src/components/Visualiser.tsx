@@ -1,18 +1,13 @@
-import React, {
-  useState, useEffect, useRef,
-} from 'react';
-import { select, BaseType, Selection } from 'd3';
-import { wasmFolder } from '@hpcc-js/wasm';
-import { Graphviz, graphviz } from 'd3-graphviz';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
-import { mapDocumentToDots } from '../util/dot';
 import {
   createActivity, createAgent, createEntity, PROVJSONDocument, tbdIsPROVJSONDocument,
 } from '../util/document';
 import DocumentContext from './contexts/DocumentContext';
 import Editor from './Editor';
+import D3Graphviz from './D3Graphviz';
 
 export type VisualiserProps = {
   document: object;
@@ -24,45 +19,6 @@ export type VisualiserProps = {
 
 const HEADER_HEIGHT = 48;
 const TABS_HEIGHT = 48;
-
-interface Datum {
-  attributes: {
-    id: string;
-    class: string;
-  }
-  key: string;
-  tag: string;
-}
-
-interface EllipseDatum extends Datum {
-  center: { x: string; y: string; }
-  tag: 'ellipse'
-}
-
-interface PolygonDatum extends Datum {
-  center: { x: string; y: string; }
-  tag: 'polygon'
-}
-
-interface PathDatum extends Datum {
-  center: { x: string; y: string; }
-  tag: 'path'
-}
-
-interface GroupDatum extends Datum {
-  children: Datum[];
-  tag: 'g';
-}
-
-interface NodeGroupDatum extends GroupDatum {
-  children: (EllipseDatum | PolygonDatum)[];
-  tag: 'g';
-}
-
-interface EdgeGroupDatum extends GroupDatum {
-  children: (PathDatum | PolygonDatum)[];
-  tag: 'g';
-}
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -88,121 +44,11 @@ const Visualiser: React.FC<VisualiserProps> = ({
 }) => {
   if (!tbdIsPROVJSONDocument(document)) throw new Error('Could not parse PROV JSON Document');
   const classes = useStyles();
-  const graphvizWrapper = useRef<HTMLDivElement>(null);
 
   const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(document);
   const [displayEditor, setDisplayEditor] = useState<boolean>(false);
 
   const [selectedNodeID, setSelectedNodeID] = useState<string | undefined>();
-  const [
-    graphvizInstance,
-    setGraphvizInstance] = useState<Graphviz<BaseType, any, BaseType, any> | undefined>();
-  const [
-    d3Nodes,
-    setD3Nodes,
-  ] = useState<Selection<SVGGElement, NodeGroupDatum, SVGSVGElement, unknown> | undefined>();
-  const [
-    d3Edges,
-    setD3Edges,
-  ] = useState<Selection<SVGGElement, EdgeGroupDatum, SVGSVGElement, unknown> | undefined>();
-
-  const graphvizHeight = height - HEADER_HEIGHT - TABS_HEIGHT;
-
-  useEffect(() => {
-    wasmFolder(wasmFolderURL);
-
-    if (graphvizWrapper.current) {
-      setGraphvizInstance(
-        graphviz(graphvizWrapper.current, { useWorker: false })
-          .width(width)
-          .height(graphvizHeight)
-          .fit(true)
-          .transition(() => 'ease'),
-      );
-    }
-  }, [graphvizWrapper]);
-
-  useEffect(() => {
-    if (graphvizWrapper.current) {
-      select<HTMLDivElement, unknown>(graphvizWrapper.current)
-        .select<SVGSVGElement>('svg')
-        .attr('width', `${width}px`)
-        .attr('height', `${graphvizHeight}px`);
-    }
-  }, [graphvizWrapper, width, height]);
-
-  useEffect(() => {
-    if (graphvizInstance) {
-      graphvizInstance
-        .renderDot(mapDocumentToDots(localDocument))
-        .on('end', () => {
-          const svg = select(graphvizWrapper.current).select<SVGSVGElement>('svg');
-
-          setD3Nodes(svg.selectAll<SVGGElement, NodeGroupDatum>('.node'));
-          setD3Edges(svg.selectAll<SVGGElement, EdgeGroupDatum>('.edge'));
-        });
-    }
-  }, [graphvizInstance, localDocument]);
-
-  useEffect(() => {
-    if (graphvizWrapper.current && graphvizInstance && d3Nodes && d3Edges) {
-      const svg = select<HTMLDivElement, unknown>(graphvizWrapper.current).select<SVGSVGElement>('svg');
-
-      if (selectedNodeID) {
-        const selectedNodeGroup = d3Nodes.filter(({ key }) => selectedNodeID === key);
-
-        selectedNodeGroup.selectAll('ellipse, polygon').attr('stroke', 'red');
-
-        const selectedEdges = d3Edges.filter(({ key }) => key.startsWith(`${selectedNodeID}->`));
-        selectedEdges.selectAll('path, polygon').attr('stroke', 'red');
-        selectedEdges.selectAll('polygon').attr('fill', 'red');
-      }
-
-      const deselectedNodeGroups = d3Nodes.filter(({ key }) => selectedNodeID !== key);
-
-      if (deselectedNodeGroups) deselectedNodeGroups.selectAll('ellipse, polygon').attr('stroke', 'black');
-
-      const deselectedEdges = d3Edges.filter(({ key }) => !key.startsWith(`${selectedNodeID}->`));
-      deselectedEdges.selectAll('path, polygon').attr('stroke', 'black');
-      deselectedEdges.selectAll('polygon').attr('fill', 'black');
-
-      d3Nodes.on('mouseover', function mouseover() {
-        const nodeGroup = select(this);
-        nodeGroup.style('cursor', 'pointer');
-
-        nodeGroup.selectAll('ellipse, polygon').attr('stroke', 'red');
-      });
-
-      d3Nodes.on('mouseout', function mouseout({ key }) {
-        const nodeGroup = select(this);
-        nodeGroup.style('cursor', 'default');
-
-        if (key !== selectedNodeID) {
-          nodeGroup.selectAll('ellipse, polygon').attr('stroke', 'black');
-        }
-      });
-
-      d3Nodes.on('click', ({ key, children }) => {
-        setSelectedNodeID(key);
-        const zoom = graphvizInstance.zoomBehavior();
-
-        const { center } = children.find(({ tag }) => tag === 'ellipse' || tag === 'polygon') || {};
-
-        if (zoom && center) {
-          const graph = svg.select<SVGGElement>('.graph');
-          const graphHeight = graph.node()!.getBBox().height;
-          const graphWidth = graph.node()!.getBBox().width;
-
-          const { x, y } = center;
-          const translateToX = parseFloat(x) + graphWidth / 2;
-          const translateToY = parseFloat(y) + height / 2;
-
-          // zoom.scaleTo(svg.transition(), 1);
-          // zoom.translateTo(svg.transition(), translateToX, translateToY);
-        }
-      });
-    }
-  }, [d3Nodes, d3Edges, selectedNodeID]);
 
   const handleCreateAgent = () => {
     setLocalDocument(createAgent(localDocument)('test', '1'));
@@ -224,10 +70,12 @@ const Visualiser: React.FC<VisualiserProps> = ({
           <Button onClick={handleCreateActivity} variant="contained">Create Activity</Button>
           <Button onClick={handleCreateEntity} variant="contained">Create Entity</Button>
         </Box>
-        <div
-          style={{ maxHeight: graphvizHeight }}
-          className={classes.graphvizWrapper}
-          ref={graphvizWrapper}
+        <D3Graphviz
+          selectedNodeID={selectedNodeID}
+          setSelectedNodeID={setSelectedNodeID}
+          width={width}
+          wasmFolderURL={wasmFolderURL}
+          height={height - HEADER_HEIGHT - TABS_HEIGHT}
         />
         <Editor
           selectedNodeID={selectedNodeID}
