@@ -173,6 +173,48 @@ export const createEntity = (document: PROVJSONDocument) => (
   },
 });
 
+const maybeUpdateIdentifier = (identifier: string) => (
+  prevID: string,
+  updatedID: string,
+) => (identifier === prevID
+  ? updatedID
+  : identifier);
+
+const updateIdentifiersInObject = (obj: { [key: string]: any }) => (
+  prevID: string,
+  updatedID: string,
+): { [key: string]: any } => {
+  // The keys we need to update
+  const updatedKeys = Object.keys(obj).filter((key) => key === prevID);
+  // The keys we don't need to update
+  const nonUpdatedKeys = Object.keys(obj).filter((key) => key !== prevID);
+
+  return updatedKeys.reduce((prevObj, key) => Object.assign(prevObj, {
+    [updatedID]: typeof obj[key] === 'object'
+      ? updateIdentifiersInObject(obj[key])(prevID, updatedID)
+      : typeof obj[key] === 'string'
+        ? maybeUpdateIdentifier(obj[key])(prevID, updatedID)
+        : obj[key],
+  }), nonUpdatedKeys.reduce((prevObj, key) => Object.assign(prevObj, {
+    [key]: typeof obj[key] === 'object'
+      ? updateIdentifiersInObject(obj[key])(prevID, updatedID)
+      : typeof obj[key] === 'string'
+        ? maybeUpdateIdentifier(obj[key])(prevID, updatedID)
+        : obj[key],
+  }), {}));
+};
+
+export const updateIdentifier = (document: PROVJSONDocument) => (
+  prevID: string, updatedID: string,
+): PROVJSONDocument => {
+  const { prefix, ...remaining } = document;
+
+  return ({
+    prefix,
+    ...updateIdentifiersInObject(remaining)(prevID, updatedID),
+  });
+};
+
 const maybeUpdatePrefixNameInIdentifier = (identifier: string) => (
   prevPrefixName: string,
   updatedPrefixName: string,
