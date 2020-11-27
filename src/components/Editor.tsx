@@ -130,7 +130,10 @@ const Editor: React.FC<EditorProps> = ({
           {tabs.map(({ name, variant }) => (
             <Tab
               classes={{ root: classes.tabRoot }}
-              onClick={() => setOpen(true)}
+              onClick={() => {
+                setSelectedNodeID(name);
+                setOpen(true);
+              }}
               key={name}
               label={variant === 'default'
                 ? name
