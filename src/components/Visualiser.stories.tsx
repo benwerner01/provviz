@@ -14,7 +14,7 @@ const meta: Meta<VisualiserProps> = {
   argTypes: {
     height: {
       name: 'height',
-      defaultValue: 600,
+      defaultValue: 1000,
       control: {
         type: 'range', min: 50, max: 1500, step: 50,
       },

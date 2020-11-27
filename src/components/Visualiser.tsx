@@ -12,7 +12,7 @@ import {
   createActivity, createAgent, createEntity, PROVJSONDocument, tbdIsPROVJSONDocument,
 } from '../util/document';
 import DocumentContext from './contexts/DocumentContext';
-import EditablePrefixes from './EditablePrefixes';
+import Editor, { EDITOR_CONTENT_HEIGHT } from './Editor';
 
 export type VisualiserProps = {
   document: object;
@@ -21,6 +21,9 @@ export type VisualiserProps = {
   height: number;
   wasmFolderURL: string;
 }
+
+const HEADER_HEIGHT = 48;
+const TABS_HEIGHT = 48;
 
 interface NodeDatum {
   attributes: {
@@ -46,16 +49,21 @@ interface NodeGroupDatum extends NodeDatum {
   tag: 'g';
 }
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   wrapper: {
     position: 'relative',
+    overflow: 'hidden',
     borderStyle: 'solid',
-    borderColor: 'black',
+    borderColor: theme.palette.grey[300],
     borderWidth: 1,
+  },
+  heading: {
+    height: HEADER_HEIGHT,
   },
   graphvizWrapper: {
     width: '100%',
-    height: 'calc(100% - 36px)',
+    height: '100%',
+    transition: theme.transitions.create('max-height'),
     overflow: 'hidden',
   },
 }));
@@ -67,6 +75,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
   const classes = useStyles();
 
   const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(document);
+  const [displayEditor, setDisplayEditor] = useState<boolean>(false);
 
   const wrapper = useRef<HTMLDivElement>(null);
   const graphvizWrapper = useRef<HTMLDivElement>(null);
@@ -76,6 +85,8 @@ const Visualiser: React.FC<VisualiserProps> = ({
     setGraphvizInstance] = useState<Graphviz<BaseType, any, BaseType, any> | undefined>();
   const [selectedNodeID, setSelectedNodeID] = useState<string | undefined>();
 
+  const graphvizHeight = height - HEADER_HEIGHT - TABS_HEIGHT;
+
   useEffect(() => {
     wasmFolder(wasmFolderURL);
 
@@ -83,6 +94,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
       setGraphvizInstance(
         graphviz(graphvizWrapper.current, { useWorker: false })
           .width(width)
+          .height(graphvizHeight)
           .fit(true)
           .transition(() => 'ease'),
       );
@@ -94,7 +106,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
       select<HTMLDivElement, unknown>(graphvizWrapper.current)
         .select<SVGSVGElement>('svg')
         .attr('width', `${width}px`)
-        .attr('height', null);
+        .attr('height', `${graphvizHeight}px`);
     }
   }, [graphvizWrapper, width, height]);
 
@@ -153,14 +165,23 @@ const Visualiser: React.FC<VisualiserProps> = ({
   return (
     <DocumentContext.Provider value={{ document: localDocument, setDocument: setLocalDocument }}>
       <Box className={classes.wrapper} style={{ width, height }}>
-        <Box display="flex">
+        <Box display="flex" className={classes.heading}>
           <Button onClick={handleCreateAgent} variant="contained">Create Agent</Button>
           <Button onClick={handleCreateActivity} variant="contained">Create Activity</Button>
           <Button onClick={handleCreateEntity} variant="contained">Create Entity</Button>
         </Box>
-        <div className={classes.graphvizWrapper} ref={graphvizWrapper} />
+        <div
+          style={{ maxHeight: graphvizHeight }}
+          className={classes.graphvizWrapper}
+          ref={graphvizWrapper}
+        />
+        <Editor
+          selectedNodeID={selectedNodeID}
+          setSelectedNodeID={setSelectedNodeID}
+          open={displayEditor}
+          setOpen={setDisplayEditor}
+        />
       </Box>
-      <EditablePrefixes />
     </DocumentContext.Provider>
   );
 };

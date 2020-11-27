@@ -125,6 +125,10 @@ export interface PROVJSONDocument extends PROVJSONBundle {
 
 export const tbdIsPROVJSONDocument = (tbd: object): tbd is PROVJSONDocument => true;
 
+export const bundleHasAgent = ({ agent, bundle }: PROVJSONBundle) => (identifier: string) => (
+  (agent && Object.keys(agent).includes(identifier)) || (bundle && bundleHasAgent(bundle))
+);
+
 export const createAgent = (document: PROVJSONDocument) => (
   prefix: string, agentID: string,
 ): PROVJSONDocument => ({
@@ -137,6 +141,10 @@ export const createAgent = (document: PROVJSONDocument) => (
   },
 });
 
+export const bundleHasActivity = ({ activity, bundle }: PROVJSONBundle) => (identifier: string) => (
+  (activity && Object.keys(activity).includes(identifier)) || (bundle && bundleHasAgent(bundle))
+);
+
 export const createActivity = (document: PROVJSONDocument) => (
   prefix: string, activityID: string,
 ): PROVJSONDocument => ({
@@ -148,6 +156,10 @@ export const createActivity = (document: PROVJSONDocument) => (
     },
   },
 });
+
+export const bundleHasEntity = ({ entity, bundle }: PROVJSONBundle) => (identifier: string) => (
+  (entity && Object.keys(entity).includes(identifier)) || (bundle && bundleHasAgent(bundle))
+);
 
 export const createEntity = (document: PROVJSONDocument) => (
   prefix: string, entityID: string,
