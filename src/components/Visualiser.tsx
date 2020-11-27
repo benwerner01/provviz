@@ -128,6 +128,15 @@ const Visualiser: React.FC<VisualiserProps> = ({
     if (graphvizWrapper.current && graphvizInstance && d3Nodes) {
       const svg = select<HTMLDivElement, unknown>(graphvizWrapper.current).select<SVGSVGElement>('svg');
 
+      const selectedNodeGroup = selectedNodeID
+        ? d3Nodes.filter(({ key }) => selectedNodeID === key)
+        : undefined;
+
+      const deselectedNodeGroups = d3Nodes.filter(({ key }) => selectedNodeID !== key);
+
+      if (selectedNodeGroup) selectedNodeGroup.selectAll('ellipse, polygon').attr('stroke', 'red');
+      if (deselectedNodeGroups) deselectedNodeGroups.selectAll('ellipse, polygon').attr('stroke', 'black');
+
       d3Nodes.on('mouseover', function mouseover() {
         const nodeGroup = select(this);
         nodeGroup.style('cursor', 'pointer');
@@ -135,11 +144,13 @@ const Visualiser: React.FC<VisualiserProps> = ({
         nodeGroup.selectAll('ellipse, polygon').attr('stroke', 'red');
       });
 
-      d3Nodes.on('mouseout', function mouseout() {
+      d3Nodes.on('mouseout', function mouseout({ key }) {
         const nodeGroup = select(this);
         nodeGroup.style('cursor', 'default');
 
-        nodeGroup.selectAll('ellipse, polygon').attr('stroke', 'black');
+        if (key !== selectedNodeID) {
+          nodeGroup.selectAll('ellipse, polygon').attr('stroke', 'black');
+        }
       });
 
       d3Nodes.on('click', ({ key, children }) => {
@@ -162,7 +173,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
         }
       });
     }
-  }, [d3Nodes]);
+  }, [d3Nodes, selectedNodeID]);
 
   const handleCreateAgent = () => {
     setLocalDocument(createAgent(localDocument)('test', '1'));
