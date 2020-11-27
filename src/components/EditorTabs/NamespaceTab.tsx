@@ -5,8 +5,8 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import {
   PROVJSONDocument, updatePrefixName, updatePrefixValue,
-} from '../util/document';
-import DocumentContext from './contexts/DocumentContext';
+} from '../../util/document';
+import DocumentContext from '../contexts/DocumentContext';
 
 const PREFIX_INPUT_WIDTH = 150;
 const PREFIX_VALUE_WIDTH = 300;
@@ -80,7 +80,7 @@ const EditablePrefix: React.FC<EditablePrefixProps> = ({
   );
 };
 
-type EditableNamespaceProps = {
+type NamespaceTabProps = {
 
 }
 
@@ -88,7 +88,7 @@ const mapDocumentToPrefixes = ({ prefix }: PROVJSONDocument) => Object
   .keys(prefix)
   .map((name) => ({ name, value: prefix[name] }));
 
-const EditableNamespace: React.FC<EditableNamespaceProps> = () => {
+const NamespaceTab: React.FC<NamespaceTabProps> = () => {
   const { document, setDocument } = useContext(DocumentContext);
   console.log('Document: ', document);
 
@@ -139,4 +139,4 @@ const EditableNamespace: React.FC<EditableNamespaceProps> = () => {
   );
 };
 
-export default EditableNamespace;
+export default NamespaceTab;

@@ -7,7 +7,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import EditableNamespace from './EditableNamespace';
+import NamespaceTab from './EditorTabs/NamespaceTab';
 import DocumentContext from './contexts/DocumentContext';
 import { bundleHasActivity, bundleHasAgent, bundleHasEntity } from '../util/document';
 
@@ -143,7 +143,7 @@ const Editor: React.FC<EditorProps> = ({
       </Box>
       <Collapse in={open}>
         <Box className={classes.content} py={2} px={4}>
-          {tabs[currentTabIndex].name === 'Namespace' && <EditableNamespace />}
+          {tabs[currentTabIndex].name === 'Namespace' && <NamespaceTab />}
         </Box>
       </Collapse>
     </Box>
