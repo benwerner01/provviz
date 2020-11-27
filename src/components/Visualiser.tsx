@@ -86,6 +86,10 @@ const Visualiser: React.FC<VisualiserProps> = ({
     d3Nodes,
     setD3Nodes,
   ] = useState<Selection<SVGGElement, NodeGroupDatum, SVGSVGElement, unknown> | undefined>();
+  const [
+    d3Edges,
+    setD3Edges,
+  ] = useState<Selection<SVGGElement, unknown, SVGSVGElement, unknown> | undefined>();
 
   const graphvizHeight = height - HEADER_HEIGHT - TABS_HEIGHT;
 
@@ -120,12 +124,13 @@ const Visualiser: React.FC<VisualiserProps> = ({
           const svg = select(graphvizWrapper.current).select<SVGSVGElement>('svg');
 
           setD3Nodes(svg.selectAll<SVGGElement, NodeGroupDatum>('.node'));
+          setD3Edges(svg.selectAll<SVGGElement, unknown>('.edge'));
         });
     }
   }, [graphvizInstance, localDocument]);
 
   useEffect(() => {
-    if (graphvizWrapper.current && graphvizInstance && d3Nodes) {
+    if (graphvizWrapper.current && graphvizInstance && d3Nodes && d3Edges) {
       const svg = select<HTMLDivElement, unknown>(graphvizWrapper.current).select<SVGSVGElement>('svg');
 
       const selectedNodeGroup = selectedNodeID
@@ -173,7 +178,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
         }
       });
     }
-  }, [d3Nodes, selectedNodeID]);
+  }, [d3Nodes, d3Edges, selectedNodeID]);
 
   const handleCreateAgent = () => {
     setLocalDocument(createAgent(localDocument)('test', '1'));
