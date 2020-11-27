@@ -12,7 +12,7 @@ import {
   createActivity, createAgent, createEntity, PROVJSONDocument, tbdIsPROVJSONDocument,
 } from '../util/document';
 import DocumentContext from './contexts/DocumentContext';
-import Editor, { EDITOR_CONTENT_HEIGHT } from './Editor';
+import Editor from './Editor';
 
 export type VisualiserProps = {
   document: object;
@@ -25,7 +25,7 @@ export type VisualiserProps = {
 const HEADER_HEIGHT = 48;
 const TABS_HEIGHT = 48;
 
-interface NodeDatum {
+interface Datum {
   attributes: {
     id: string;
     class: string;
@@ -34,18 +34,33 @@ interface NodeDatum {
   tag: string;
 }
 
-interface NodeEllipseChildDatum extends NodeDatum {
+interface EllipseDatum extends Datum {
   center: { x: string; y: string; }
   tag: 'ellipse'
 }
 
-interface NodePolygonChildDatum extends NodeDatum {
+interface PolygonDatum extends Datum {
   center: { x: string; y: string; }
   tag: 'polygon'
 }
 
-interface NodeGroupDatum extends NodeDatum {
-  children: (NodeEllipseChildDatum | NodePolygonChildDatum)[];
+interface PathDatum extends Datum {
+  center: { x: string; y: string; }
+  tag: 'path'
+}
+
+interface GroupDatum extends Datum {
+  children: Datum[];
+  tag: 'g';
+}
+
+interface NodeGroupDatum extends GroupDatum {
+  children: (EllipseDatum | PolygonDatum)[];
+  tag: 'g';
+}
+
+interface EdgeGroupDatum extends GroupDatum {
+  children: (PathDatum | PolygonDatum)[];
   tag: 'g';
 }
 
@@ -89,7 +104,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
   const [
     d3Edges,
     setD3Edges,
-  ] = useState<Selection<SVGGElement, unknown, SVGSVGElement, unknown> | undefined>();
+  ] = useState<Selection<SVGGElement, EdgeGroupDatum, SVGSVGElement, unknown> | undefined>();
 
   const graphvizHeight = height - HEADER_HEIGHT - TABS_HEIGHT;
 
@@ -124,7 +139,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
           const svg = select(graphvizWrapper.current).select<SVGSVGElement>('svg');
 
           setD3Nodes(svg.selectAll<SVGGElement, NodeGroupDatum>('.node'));
-          setD3Edges(svg.selectAll<SVGGElement, unknown>('.edge'));
+          setD3Edges(svg.selectAll<SVGGElement, EdgeGroupDatum>('.edge'));
         });
     }
   }, [graphvizInstance, localDocument]);
@@ -133,14 +148,23 @@ const Visualiser: React.FC<VisualiserProps> = ({
     if (graphvizWrapper.current && graphvizInstance && d3Nodes && d3Edges) {
       const svg = select<HTMLDivElement, unknown>(graphvizWrapper.current).select<SVGSVGElement>('svg');
 
-      const selectedNodeGroup = selectedNodeID
-        ? d3Nodes.filter(({ key }) => selectedNodeID === key)
-        : undefined;
+      if (selectedNodeID) {
+        const selectedNodeGroup = d3Nodes.filter(({ key }) => selectedNodeID === key);
+
+        selectedNodeGroup.selectAll('ellipse, polygon').attr('stroke', 'red');
+
+        const selectedEdges = d3Edges.filter(({ key }) => key.startsWith(`${selectedNodeID}->`));
+        selectedEdges.selectAll('path, polygon').attr('stroke', 'red');
+        selectedEdges.selectAll('polygon').attr('fill', 'red');
+      }
 
       const deselectedNodeGroups = d3Nodes.filter(({ key }) => selectedNodeID !== key);
 
-      if (selectedNodeGroup) selectedNodeGroup.selectAll('ellipse, polygon').attr('stroke', 'red');
       if (deselectedNodeGroups) deselectedNodeGroups.selectAll('ellipse, polygon').attr('stroke', 'black');
+
+      const deselectedEdges = d3Edges.filter(({ key }) => !key.startsWith(`${selectedNodeID}->`));
+      deselectedEdges.selectAll('path, polygon').attr('stroke', 'black');
+      deselectedEdges.selectAll('polygon').attr('fill', 'black');
 
       d3Nodes.on('mouseover', function mouseover() {
         const nodeGroup = select(this);
