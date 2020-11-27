@@ -5,6 +5,7 @@ import Collapse from '@material-ui/core/Collapse';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import NamespaceTab from './EditorTabs/NamespaceTab';
@@ -49,9 +50,18 @@ const useStyles = makeStyles((theme) => ({
   headerWrapper: {
     backgroundColor: theme.palette.grey[100],
   },
+  tabsRoot: {
+    flexGrow: 1,
+  },
   tabRoot: {
     minWidth: 'unset',
     textTransform: 'none',
+  },
+  tabLabel: {
+    maxWidth: 200,
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
   },
   tabIndicator: {
     height: 3,
@@ -102,10 +112,7 @@ const Editor: React.FC<EditorProps> = ({
     const tabIndex = tabs.findIndex((t) => t.name === name);
     if (tabIndex !== -1) {
       setTabs([...tabs.slice(0, tabIndex), ...tabs.slice(tabIndex + 1, tabs.length)]);
-      if (currentTabIndex === tabIndex) {
-        setCurrentTabIndex(tabIndex - 1);
-        setSelectedNodeID(undefined);
-      }
+      if (currentTabIndex >= tabIndex) setCurrentTabIndex(currentTabIndex - 1);
     }
   };
 
@@ -116,7 +123,7 @@ const Editor: React.FC<EditorProps> = ({
           value={currentTabIndex}
           indicatorColor="primary"
           onChange={(_, newTab) => setCurrentTabIndex(newTab)}
-          classes={{ indicator: classes.tabIndicator }}
+          classes={{ root: classes.tabsRoot, indicator: classes.tabIndicator }}
           variant="scrollable"
           scrollButtons="auto"
         >
@@ -129,7 +136,7 @@ const Editor: React.FC<EditorProps> = ({
                 ? name
                 : (
                   <Box display="flex" alignItems="center">
-                    {name}
+                    <Typography className={classes.tabLabel}>{name}</Typography>
                     <Box display="flex" alignItems="center" onClick={handleCloseTab(name)} ml={1}><CloseIcon /></Box>
                   </Box>
                 )}
