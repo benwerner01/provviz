@@ -3,9 +3,14 @@ import React from 'react';
 import { Story, Meta } from '@storybook/react';
 import Visualiser, { VisualiserProps } from './Visualiser';
 import exampleDocument1 from '../../examples/document1.json';
+import exampleDocument2 from '../../examples/document2.json';
 
 export const Example1: Story<VisualiserProps> = (args) => (
   <Visualiser {...args} document={exampleDocument1} />
+);
+
+export const Example2: Story<VisualiserProps> = (args) => (
+  <Visualiser {...args} document={exampleDocument2} />
 );
 
 const meta: Meta<VisualiserProps> = {
