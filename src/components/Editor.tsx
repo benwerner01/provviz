@@ -117,6 +117,8 @@ const Editor: React.FC<EditorProps> = ({
           indicatorColor="primary"
           onChange={(_, newTab) => setCurrentTabIndex(newTab)}
           classes={{ indicator: classes.tabIndicator }}
+          variant="scrollable"
+          scrollButtons="auto"
         >
           {tabs.map(({ name, variant }) => (
             <Tab
