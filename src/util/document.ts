@@ -151,6 +151,12 @@ export const bundleHasActivity = ({ activity, bundle }: PROVJSONBundle) => (iden
   (activity && Object.keys(activity).includes(identifier)) || (bundle && bundleHasAgent(bundle))
 );
 
+export const generateActivityName = (document: PROVJSONDocument) => (
+  prefix: string, index: number = 0,
+): string => (bundleHasActivity(document)(`${prefix}:Activity${index > 0 ? ` ${index}` : ''}`)
+  ? generateActivityName(document)(prefix, index + 1)
+  : `Activity${index > 0 ? ` ${index}` : ''}`);
+
 export const createActivity = (document: PROVJSONDocument) => (
   prefix: string, activityID: string,
 ): PROVJSONDocument => ({
