@@ -129,13 +129,19 @@ export const bundleHasAgent = ({ agent, bundle }: PROVJSONBundle) => (identifier
   (agent && Object.keys(agent).includes(identifier)) || (bundle && bundleHasAgent(bundle))
 );
 
+export const generateAgentName = (document: PROVJSONDocument) => (
+  prefix: string, index: number = 0,
+): string => (bundleHasAgent(document)(`${prefix}:Agent${index > 0 ? ` ${index}` : ''}`)
+  ? generateAgentName(document)(prefix, index + 1)
+  : `Agent${index > 0 ? ` ${index}` : ''}`);
+
 export const createAgent = (document: PROVJSONDocument) => (
-  prefix: string, agentID: string,
+  prefix: string, agentName: string,
 ): PROVJSONDocument => ({
   ...document,
   agent: {
     ...document.agent,
-    [`${prefix}:${agentID}`]: {
+    [`${prefix}:${agentName}`]: {
 
     },
   },
