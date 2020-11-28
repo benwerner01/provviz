@@ -173,6 +173,12 @@ export const bundleHasEntity = ({ entity, bundle }: PROVJSONBundle) => (identifi
   (entity && Object.keys(entity).includes(identifier)) || (bundle && bundleHasAgent(bundle))
 );
 
+export const generateEntityName = (document: PROVJSONDocument) => (
+  prefix: string, index: number = 0,
+): string => (bundleHasEntity(document)(`${prefix}:Entity${index > 0 ? ` ${index}` : ''}`)
+  ? generateEntityName(document)(prefix, index + 1)
+  : `Entity${index > 0 ? ` ${index}` : ''}`);
+
 export const createEntity = (document: PROVJSONDocument) => (
   prefix: string, entityID: string,
 ): PROVJSONDocument => ({
