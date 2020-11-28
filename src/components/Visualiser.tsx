@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
-import Button from '@material-ui/core/Button';
-import {
-  createActivity, createAgent, createEntity, PROVJSONDocument, tbdIsPROVJSONDocument,
-} from '../util/document';
+import { PROVJSONDocument, tbdIsPROVJSONDocument } from '../util/document';
 import DocumentContext from './contexts/DocumentContext';
 import Editor from './Editor';
 import D3Graphviz from './D3Graphviz';
+import MenuBar, { MENU_BAR_HEIGHT } from './MenuBar';
 
 export type VisualiserProps = {
   document: object;
@@ -17,7 +15,6 @@ export type VisualiserProps = {
   wasmFolderURL: string;
 }
 
-const HEADER_HEIGHT = 48;
 const TABS_HEIGHT = 48;
 
 const useStyles = makeStyles((theme) => ({
@@ -27,9 +24,6 @@ const useStyles = makeStyles((theme) => ({
     borderStyle: 'solid',
     borderColor: theme.palette.grey[300],
     borderWidth: 1,
-  },
-  heading: {
-    height: HEADER_HEIGHT,
   },
   graphvizWrapper: {
     width: '100%',
@@ -50,32 +44,16 @@ const Visualiser: React.FC<VisualiserProps> = ({
 
   const [selectedNodeID, setSelectedNodeID] = useState<string | undefined>();
 
-  const handleCreateAgent = () => {
-    setLocalDocument(createAgent(localDocument)('test', '1'));
-  };
-
-  const handleCreateActivity = () => {
-    setLocalDocument(createActivity(localDocument)('test', '1'));
-  };
-
-  const handleCreateEntity = () => {
-    setLocalDocument(createEntity(localDocument)('test', '1'));
-  };
-
   return (
     <DocumentContext.Provider value={{ document: localDocument, setDocument: setLocalDocument }}>
       <Box className={classes.wrapper} style={{ width, height }}>
-        <Box display="flex" className={classes.heading}>
-          <Button onClick={handleCreateAgent} variant="contained">Create Agent</Button>
-          <Button onClick={handleCreateActivity} variant="contained">Create Activity</Button>
-          <Button onClick={handleCreateEntity} variant="contained">Create Entity</Button>
-        </Box>
+        <MenuBar />
         <D3Graphviz
           selectedNodeID={selectedNodeID}
           setSelectedNodeID={setSelectedNodeID}
           width={width}
           wasmFolderURL={wasmFolderURL}
-          height={height - HEADER_HEIGHT - TABS_HEIGHT}
+          height={height - MENU_BAR_HEIGHT - TABS_HEIGHT}
         />
         <Editor
           selectedNodeID={selectedNodeID}
