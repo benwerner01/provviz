@@ -125,6 +125,8 @@ export interface PROVJSONDocument extends PROVJSONBundle {
 
 export const tbdIsPROVJSONDocument = (tbd: object): tbd is PROVJSONDocument => true;
 
+export const getDefaultNamespacePrefix = ({ prefix }: PROVJSONDocument) => Object.keys(prefix)[0];
+
 export const bundleHasAgent = ({ agent, bundle }: PROVJSONBundle) => (identifier: string) => (
   (agent && Object.keys(agent).includes(identifier)) || (bundle && bundleHasAgent(bundle))
 );
@@ -136,12 +138,12 @@ export const generateAgentName = (document: PROVJSONDocument) => (
   : `Agent${index > 0 ? ` ${index}` : ''}`);
 
 export const createAgent = (document: PROVJSONDocument) => (
-  prefix: string, agentName: string,
+  prefix: string, name: string,
 ): PROVJSONDocument => ({
   ...document,
   agent: {
     ...document.agent,
-    [`${prefix}:${agentName}`]: {
+    [`${prefix}:${name}`]: {
 
     },
   },
@@ -158,12 +160,12 @@ export const generateActivityName = (document: PROVJSONDocument) => (
   : `Activity${index > 0 ? ` ${index}` : ''}`);
 
 export const createActivity = (document: PROVJSONDocument) => (
-  prefix: string, activityID: string,
+  prefix: string, name: string,
 ): PROVJSONDocument => ({
   ...document,
   activity: {
     ...document.activity,
-    [`${prefix}:${activityID}`]: {
+    [`${prefix}:${name}`]: {
 
     },
   },
@@ -180,12 +182,12 @@ export const generateEntityName = (document: PROVJSONDocument) => (
   : `Entity${index > 0 ? ` ${index}` : ''}`);
 
 export const createEntity = (document: PROVJSONDocument) => (
-  prefix: string, entityID: string,
+  prefix: string, name: string,
 ): PROVJSONDocument => ({
   ...document,
   entity: {
     ...document.entity,
-    [`${prefix}:${entityID}`]: {
+    [`${prefix}:${name}`]: {
 
     },
   },
