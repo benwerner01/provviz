@@ -2,13 +2,19 @@ import { PROVJSONBundle, PROVJSONDocument } from './document';
 
 export const palette = {
   entity: {
+    light: '#fcfba9',
     main: '#fffc87',
+    dark: '#e3e15d',
   },
   activity: {
+    light: '#bbc8fc',
     main: '#9fb1fc',
+    dark: '#7a8bcc',
   },
   agent: {
+    light: '#ffdfa1',
     main: '#fed37f',
+    dark: '#d6ae5c',
   },
 };
 

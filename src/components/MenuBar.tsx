@@ -4,9 +4,11 @@ import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
 import {
-  createActivity, createAgent, createEntity,
+  createActivity, createAgent, createEntity, generateAgentName,
+  generateActivityName, generateEntityName, getDefaultNamespacePrefix,
 } from '../util/document';
 import DocumentContext from './contexts/DocumentContext';
+import { palette } from '../util/dot';
 
 export const MENU_BAR_HEIGHT = 48;
 
@@ -26,35 +28,62 @@ const useStyles = makeStyles((theme) => ({
   buttonLabel: {
     textTransform: 'none',
   },
+  agentButton: {
+    backgroundColor: palette.agent.main,
+    '&:hover': {
+      backgroundColor: palette.agent.light,
+    },
+  },
+  activityButton: {
+    backgroundColor: palette.activity.main,
+    '&:hover': {
+      backgroundColor: palette.activity.light,
+    },
+  },
+  entityButton: {
+    backgroundColor: palette.entity.main,
+    '&:hover': {
+      backgroundColor: palette.entity.light,
+    },
+  },
 }));
 
 type MenuBarProps = {
-
+  setSelectedNodeID: (id: string) => void;
 }
 
-const MenuBar: React.FC<MenuBarProps> = () => {
+const MenuBar: React.FC<MenuBarProps> = ({ setSelectedNodeID }) => {
   const classes = useStyles();
   const { document, setDocument } = useContext(DocumentContext);
 
   const handleCreateAgent = () => {
-    setDocument(createAgent(document)('test', '1'));
+    const prefix = getDefaultNamespacePrefix(document);
+    const name = generateAgentName(document)(prefix);
+    setDocument(createAgent(document)(prefix, name));
+    setSelectedNodeID(`${prefix}:${name}`);
   };
 
   const handleCreateActivity = () => {
-    setDocument(createActivity(document)('test', '1'));
+    const prefix = getDefaultNamespacePrefix(document);
+    const name = generateActivityName(document)(prefix);
+    setDocument(createActivity(document)(prefix, name));
+    setSelectedNodeID(`${prefix}:${name}`);
   };
 
   const handleCreateEntity = () => {
-    setDocument(createEntity(document)('test', '1'));
+    const prefix = getDefaultNamespacePrefix(document);
+    const name = generateEntityName(document)(prefix);
+    setDocument(createEntity(document)(prefix, name));
+    setSelectedNodeID(`${prefix}:${name}`);
   };
 
   const buttonClasses = { root: classes.buttonRoot, label: classes.buttonLabel };
 
   return (
     <Box px={1} display="flex" alignItems="center" className={classes.wrapper}>
-      <Button classes={buttonClasses} onClick={handleCreateAgent} variant="contained" endIcon={<AddIcon />}>Agent</Button>
-      <Button classes={buttonClasses} onClick={handleCreateActivity} variant="contained" endIcon={<AddIcon />}>Activity</Button>
-      <Button classes={buttonClasses} onClick={handleCreateEntity} variant="contained" endIcon={<AddIcon />}>Entity</Button>
+      <Button className={classes.agentButton} classes={buttonClasses} onClick={handleCreateAgent} variant="contained" endIcon={<AddIcon />}>Agent</Button>
+      <Button className={classes.activityButton} classes={buttonClasses} onClick={handleCreateActivity} variant="contained" endIcon={<AddIcon />}>Activity</Button>
+      <Button className={classes.entityButton} classes={buttonClasses} onClick={handleCreateEntity} variant="contained" endIcon={<AddIcon />}>Entity</Button>
     </Box>
   );
 };
