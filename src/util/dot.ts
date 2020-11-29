@@ -44,7 +44,7 @@ const mapBundleToDots = (json: PROVJSONBundle): string => [
     `"${value['prov:informed']}" -> "${value['prov:informant']}" [label="wasInformedBy"]`
   )),
   ...Object.entries(json.wasAssociatedWith || {}).map(([_, value]) => (
-    `"${value['prov:activity']}" -> "${value['prov:plan']}" [label="wasAssociatedWith"]`
+    `"${value['prov:activity']}" -> "${value['prov:agent']}" [label="wasAssociatedWith"]`
   )),
   ...(Object.entries(json.entity || {}).map(([entityID, _]) => (
     `"${entityID}" [shape="oval" label="${entityID}" style="filled" fillcolor="${palette.entity.main}"]`

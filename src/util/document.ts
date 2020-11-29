@@ -48,7 +48,7 @@ export const relations: Relation[] = [
     name: 'wasAttributedTo', domain: 'entity', domainKey: 'prov:entity', range: 'agent', rangeKey: 'prov:agent',
   },
   {
-    name: 'wasAssociatedWith', domain: 'activity', domainKey: 'prov:activity', range: 'entity', rangeKey: 'prov:plan',
+    name: 'wasAssociatedWith', domain: 'activity', domainKey: 'prov:activity', range: 'agent', rangeKey: 'prov:agent',
   },
   {
     name: 'actedOnBehalfOf', domain: 'agent', domainKey: 'prov:delegate', range: 'agent', rangeKey: 'prov:responsible',
@@ -113,7 +113,7 @@ export interface PROVJSONBundle {
   wasAssociatedWith?: {
     [relationID: string]: {
       'prov:activity': string;
-      'prov:plan': string;
+      'prov:agent': string;
     }
   }
   entity?: {
