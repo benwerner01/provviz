@@ -10,7 +10,8 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import NamespaceTab from './EditorTabs/NamespaceTab';
 import DocumentContext from './contexts/DocumentContext';
-import { bundleHasActivity, bundleHasAgent, bundleHasEntity } from '../util/document';
+import queries from '../util/queries';
+import EntityTab from './EditorTabs/NodeTab';
 
 export const EDITOR_CONTENT_HEIGHT = 400;
 
@@ -89,11 +90,11 @@ const Editor: React.FC<EditorProps> = ({
       const existingTabIndex = tabs.findIndex(({ name }) => name === selectedNodeID);
 
       if (existingTabIndex < 0) {
-        const variant: 'entity' | 'activity' | 'agent' | undefined = bundleHasEntity(document)(selectedNodeID)
+        const variant: 'entity' | 'activity' | 'agent' | undefined = queries.bundle.hasEntity(document)(selectedNodeID)
           ? 'entity'
-          : bundleHasActivity(document)(selectedNodeID)
+          : queries.bundle.hasActivity(document)(selectedNodeID)
             ? 'activity'
-            : bundleHasAgent(document)(selectedNodeID)
+            : queries.bundle.hasAgent(document)(selectedNodeID)
               ? 'agent'
               : undefined;
 
@@ -115,6 +116,20 @@ const Editor: React.FC<EditorProps> = ({
       if (currentTabIndex >= tabIndex) setCurrentTabIndex(currentTabIndex - 1);
     }
   };
+
+  const handleTabIDChange = (tabIndex: number) => (updatedID: string) => {
+    const prevID = tabs[tabIndex].name;
+    const { variant } = tabs[tabIndex];
+    setTabs([
+      ...tabs.slice(0, tabIndex),
+      { name: updatedID, variant },
+      ...tabs.slice(tabIndex + 1, tabs.length),
+    ]);
+    if (selectedNodeID === prevID) setSelectedNodeID(updatedID);
+  };
+
+  const currentTabVariant = tabs[currentTabIndex].variant;
+  const currentTabName = tabs[currentTabIndex].name;
 
   return (
     <Box className={classes.wrapper}>
@@ -155,7 +170,15 @@ const Editor: React.FC<EditorProps> = ({
       </Box>
       <Collapse in={open}>
         <Box className={classes.content} py={2} px={4}>
-          {tabs[currentTabIndex].name === 'Namespace' && <NamespaceTab />}
+          {currentTabVariant === 'default'
+            ? (currentTabName === 'Namespace' && <NamespaceTab />)
+            : (
+              <EntityTab
+                variant={currentTabVariant}
+                id={tabs[currentTabIndex].name}
+                onIDChange={handleTabIDChange(currentTabIndex)}
+              />
+            )}
         </Box>
       </Collapse>
     </Box>
