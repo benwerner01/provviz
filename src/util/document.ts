@@ -19,6 +19,22 @@ export const relationNames: RelationName[] = [
   'hadMember',
 ];
 
+type AgentRelationName = 'actedOnBehalfOf'
+
+type ActivityRelationName = 'wasInformedBy' | 'wasStartedBy' | 'wasEndedBy' | 'wasAssociatedWith'
+
+type EntityRelationName = 'wasGeneratedBy' | 'used' | 'wasInvalidatedBy' | 'wasDerivedFrom' | 'wasAttributedTo' | 'wasInfluencedBy' | 'specializationOf' | 'alternateOf' | 'hadMember'
+
+export const agentRelationNames: AgentRelationName[] = [
+  'actedOnBehalfOf',
+];
+export const activityRelationNames: ActivityRelationName[] = [
+  'wasInformedBy', 'wasStartedBy', 'wasEndedBy', 'wasAssociatedWith',
+];
+export const entityRelationNames: EntityRelationName[] = [
+  'wasGeneratedBy', 'used', 'wasInvalidatedBy', 'wasDerivedFrom', 'wasAttributedTo', 'wasInfluencedBy', 'specializationOf', 'alternateOf', 'hadMember',
+];
+
 export interface PROVJSONBundle {
   bundle?: {
     [bundleID: string]: PROVJSONBundle;
