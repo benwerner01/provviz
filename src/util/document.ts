@@ -1,3 +1,24 @@
+type RelationName = 'wasGeneratedBy' | 'used' | 'wasInformedBy' | 'wasStartedBy' | 'wasEndedBy'
+  | 'wasInvalidatedBy' | 'wasDerivedFrom' | 'wasAttributedTo' | 'wasAssociatedWith'
+  | 'actedOnBehalfOf' | 'wasInfluencedBy' | 'specializationOf' | 'alternateOf' | 'hadMember'
+
+export const relationNames: RelationName[] = [
+  'wasGeneratedBy',
+  'used',
+  'wasInformedBy',
+  'wasStartedBy',
+  'wasEndedBy',
+  'wasInvalidatedBy',
+  'wasDerivedFrom',
+  'wasAttributedTo',
+  'wasAssociatedWith',
+  'actedOnBehalfOf',
+  'wasInfluencedBy',
+  'specializationOf',
+  'alternateOf',
+  'hadMember',
+];
+
 export interface PROVJSONBundle {
   bundle?: {
     [bundleID: string]: PROVJSONBundle;
@@ -56,8 +77,8 @@ export interface PROVJSONBundle {
     [relationID: string]: {
       'prov:entity': string;
       'prov:activity': string;
-      'prov:time': string;
-      'ex:port': string;
+      'prov:time'?: string;
+      'ex:port'?: string;
     }
   }
   wasStartedBy?: {
