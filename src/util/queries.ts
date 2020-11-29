@@ -9,27 +9,36 @@ const queries = {
   bundle: {
     hasRelation: (bundle: PROVJSONBundle) => (
       identifier: string,
-    ): boolean => ((
-      relations.find(({ name }) => {
-        const relation = bundle[name];
-        return (
-          (relation && Object.keys(relation).includes(identifier)));
-      }) !== undefined)
-      || (bundle.bundle
-        ? queries.bundle.hasRelation(bundle.bundle)(identifier)
-        : false)),
+    ): boolean => {
+      const nestedBundle = bundle.bundle;
+      return ((
+        relations.find(({ name }) => {
+          const relation = bundle[name];
+          return (
+            (relation && Object.keys(relation).includes(identifier)));
+        }) !== undefined)
+      || (
+        nestedBundle
+          ? Object.keys(nestedBundle).find((key) => (
+            queries.bundle.hasRelation(nestedBundle[key])(identifier)
+          )) !== undefined
+          : false));
+    },
     hasActivity: ({ activity, bundle }: PROVJSONBundle) => (identifier: string): boolean => (
       (activity !== undefined && Object.keys(activity).includes(identifier))
-      || (bundle !== undefined && queries.bundle.hasActivity(bundle)(identifier))
-    ),
+      || (bundle !== undefined && Object.keys(bundle).find(((key) => (
+        queries.bundle.hasActivity(bundle[key])(identifier)
+      ))) !== undefined)),
     hasAgent: ({ agent, bundle }: PROVJSONBundle) => (identifier: string): boolean => (
       (agent !== undefined && Object.keys(agent).includes(identifier))
-      || (bundle !== undefined && queries.bundle.hasAgent(bundle)(identifier))
-    ),
+      || (bundle !== undefined && Object.keys(bundle).find(((key) => (
+        queries.bundle.hasAgent(bundle[key])(identifier)
+      ))) !== undefined)),
     hasEntity: ({ entity, bundle }: PROVJSONBundle) => (identifier: string): boolean => (
       (entity !== undefined && Object.keys(entity).includes(identifier))
-      || (bundle !== undefined && queries.bundle.hasEntity(bundle)(identifier))
-    ),
+      || (bundle !== undefined && Object.keys(bundle).find(((key) => (
+        queries.bundle.hasEntity(bundle[key])(identifier)
+      ))) !== undefined)),
   },
   node: {
     getFullName: ({ prefix }: PROVJSONDocument) => (identifier: string) => (
@@ -39,7 +48,7 @@ const queries = {
   agent: {
     getAll: ({ agent, bundle }: PROVJSONBundle): string[] => [
       ...(agent ? Object.keys(agent) : []),
-      ...(bundle ? queries.agent.getAll(bundle) : []),
+      ...(bundle ? Object.keys(bundle).map((key) => queries.agent.getAll(bundle[key])).flat() : []),
     ],
     generateName: (document: PROVJSONDocument) => (
       prefix: string, index: number = 0,
@@ -50,7 +59,9 @@ const queries = {
   activity: {
     getAll: ({ activity, bundle }: PROVJSONBundle): string[] => [
       ...(activity ? Object.keys(activity) : []),
-      ...(bundle ? queries.activity.getAll(bundle) : []),
+      ...(bundle
+        ? Object.keys(bundle).map((key) => queries.activity.getAll(bundle[key])).flat()
+        : []),
     ],
     generateName: (document: PROVJSONDocument) => (
       prefix: string, index: number = 0,
@@ -61,7 +72,9 @@ const queries = {
   entity: {
     getAll: ({ entity, bundle }: PROVJSONBundle): string[] => [
       ...(entity ? Object.keys(entity) : []),
-      ...(bundle ? queries.entity.getAll(bundle) : []),
+      ...(bundle
+        ? Object.keys(bundle).map((key) => queries.entity.getAll(bundle[key])).flat()
+        : []),
     ],
     generateName: (document: PROVJSONDocument) => (
       prefix: string, index: number = 0,
@@ -81,6 +94,7 @@ const queries = {
     ): string | null => {
       const entry = bundle[relationName];
       const relation = relations.find((r) => r.name === relationName)!;
+      const nestedBundles = bundle.bundle;
       return ((
         entry
           ? Object.entries(entry)
@@ -88,8 +102,10 @@ const queries = {
               value[relation.domainKey] === domainID
               && value[relation.rangeKey] === rangeID))?.[0]
           : null) || (
-        bundle.bundle
-          ? queries.relation.getID(bundle.bundle)(relationName, domainID, rangeID)
+        nestedBundles
+          ? Object.values(nestedBundles).map((nestedBundle) => (
+            queries.relation.getID(nestedBundle)(relationName, domainID, rangeID)
+          )).find((id) => id !== null) || null
           : null
       ));
     },
@@ -98,15 +114,18 @@ const queries = {
     ): string[] => {
       const entry = bundle[relationName];
       const relation = relations.find((r) => r.name === relationName)!;
+      const nestedBundles = bundle.bundle;
       return [
         ...(entry
           ? Object.entries(entry)
             .filter(([_, value]) => value[relation.domainKey] === domainID)
             .map(([_, value]) => value[relation.rangeKey])
           : []),
-        ...(bundle.bundle
-          ? queries.relation.getRangeWithDomain(bundle.bundle)(relationName, domainID)
-          : []),
+        ...nestedBundles
+          ? Object.values(nestedBundles).map((nestedBundle) => (
+            queries.relation.getRangeWithDomain(nestedBundle)(relationName, domainID)
+          )).flat()
+          : [],
       ];
     },
   },
