@@ -1,4 +1,6 @@
-import { PROVJSONDocument, RelationName, relations } from './document';
+import {
+  PROVJSONBundle, PROVJSONDocument, RelationName, relations,
+} from './document';
 
 const maybeUpdateIdentifier = (identifier: string) => (
   prevID: string,
@@ -150,13 +152,20 @@ const mutations = {
         },
       };
     },
-    wasGeneratedBy: {
-      delete: (document: PROVJSONDocument) => (
-        relationID: string,
-      ): PROVJSONDocument => {
-        const { [relationID]: value, ...wasGeneratedBy } = document.wasGeneratedBy || {};
-        return ({ ...document, wasGeneratedBy });
-      },
+    delete: (bundle: PROVJSONBundle) => (
+      relationName: RelationName, relationID: string,
+    ): PROVJSONBundle => {
+      const { [relationID]: value, ...remaining } = bundle[relationName] || {};
+      return ({
+        ...bundle,
+        [relationName]: remaining,
+        bundle: bundle.bundle
+          ? Object.keys(bundle.bundle).reduce((prev, key) => ({
+            ...prev,
+            [key]: mutations.relation.delete(prev[key])(relationName, relationID),
+          }), bundle.bundle)
+          : bundle.bundle,
+      });
     },
   },
 };
