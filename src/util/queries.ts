@@ -77,10 +77,10 @@ const queries = {
         : id;
     },
     getID: (bundle: PROVJSONBundle) => (
-      name: RelationName, domainID: string, rangeID: string,
+      relationName: RelationName, domainID: string, rangeID: string,
     ): string | null => {
-      const entry = bundle[name];
-      const relation = relations.find((r) => r.name === name)!;
+      const entry = bundle[relationName];
+      const relation = relations.find((r) => r.name === relationName)!;
       return ((
         entry
           ? Object.entries(entry)
@@ -89,9 +89,25 @@ const queries = {
               && value[relation.rangeKey] === rangeID))?.[0]
           : null) || (
         bundle.bundle
-          ? queries.relation.getID(bundle.bundle)(name, domainID, rangeID)
+          ? queries.relation.getID(bundle.bundle)(relationName, domainID, rangeID)
           : null
       ));
+    },
+    getRangeWithDomain: (bundle: PROVJSONBundle) => (
+      relationName: RelationName, domainID: string,
+    ): string[] => {
+      const entry = bundle[relationName];
+      const relation = relations.find((r) => r.name === relationName)!;
+      return [
+        ...(entry
+          ? Object.entries(entry)
+            .filter(([_, value]) => value[relation.domainKey] === domainID)
+            .map(([_, value]) => value[relation.rangeKey])
+          : []),
+        ...(bundle.bundle
+          ? queries.relation.getRangeWithDomain(bundle.bundle)(relationName, domainID)
+          : []),
+      ];
     },
   },
 };
