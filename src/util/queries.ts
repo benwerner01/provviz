@@ -1,4 +1,6 @@
-import { PROVJSONBundle, PROVJSONDocument, relations } from './document';
+import {
+  PROVJSONBundle, PROVJSONDocument, RelationName, relations,
+} from './document';
 
 const queries = {
   prefix: {
@@ -74,31 +76,22 @@ const queries = {
         ? queries.relation.generateID(bundle, index + 1)
         : id;
     },
-    wasGeneratedBy: {
-      getID: ({ wasGeneratedBy, bundle }: PROVJSONBundle) => (
-        entityID: string, activityID: string,
-      ): string | null => ((
-        wasGeneratedBy
-          ? Object
-            .entries(wasGeneratedBy)
-            .find(([_, value]) => value['prov:entity'] === entityID && value['prov:activity'] === activityID)
-            ?.[0]
-          : undefined
-      ) || (
-        bundle
-          ? queries.relation.wasGeneratedBy.getID(bundle)(entityID, activityID)
-          : null)),
-      getRangeWithDomain: ({ wasGeneratedBy, bundle }: PROVJSONBundle) => (
-        entityID: string,
-      ): string[] => [
-        ...(wasGeneratedBy
-          ? Object
-            .entries(wasGeneratedBy)
-            .filter(([_, value]) => value['prov:entity'] === entityID)
-            .map(([_, value]) => value['prov:activity'])
-          : []),
-        ...(bundle ? queries.relation.wasGeneratedBy.getRangeWithDomain(bundle)(entityID) : []),
-      ],
+    getID: (bundle: PROVJSONBundle) => (
+      name: RelationName, domainID: string, rangeID: string,
+    ): string | null => {
+      const entry = bundle[name];
+      const relation = relations.find((r) => r.name === name)!;
+      return ((
+        entry
+          ? Object.entries(entry)
+            .find(([_, value]) => (
+              value[relation.domainKey] === domainID
+              && value[relation.rangeKey] === rangeID))?.[0]
+          : null) || (
+        bundle.bundle
+          ? queries.relation.getID(bundle.bundle)(name, domainID, rangeID)
+          : null
+      ));
     },
   },
 };
