@@ -16,31 +16,55 @@ export type RelationName = 'wasGeneratedBy'
 export type Relation = {
   name: RelationName;
   domain: 'activity' | 'agent' | 'entity';
+  domainKey: string;
   range: 'activity' | 'agent' | 'entity';
+  rangeKey: string;
   timestamp?: boolean;
 }
 
 export const relations: Relation[] = [
-  { name: 'wasGeneratedBy', domain: 'entity', range: 'activity' },
-  { name: 'used', domain: 'activity', range: 'entity' },
-  { name: 'wasInformedBy', domain: 'activity', range: 'activity' },
   {
-    name: 'wasStartedBy', domain: 'activity', range: 'entity', timestamp: true,
+    name: 'wasGeneratedBy', domain: 'entity', domainKey: 'prov:entity', range: 'activity', rangeKey: 'prov:activity',
   },
   {
-    name: 'wasEndedBy', domain: 'activity', range: 'entity', timestamp: true,
+    name: 'used', domain: 'activity', domainKey: 'prov:activity', range: 'entity', rangeKey: 'prov:entity',
   },
   {
-    name: 'wasInvalidatedBy', domain: 'entity', range: 'activity', timestamp: true,
+    name: 'wasInformedBy', domain: 'activity', domainKey: 'prov:informed', range: 'activity', rangeKey: 'prov:informant',
   },
-  { name: 'wasDerivedFrom', domain: 'entity', range: 'entity' },
-  { name: 'wasAttributedTo', domain: 'entity', range: 'agent' },
-  { name: 'wasAssociatedWith', domain: 'activity', range: 'entity' },
-  { name: 'actedOnBehalfOf', domain: 'agent', range: 'agent' },
-  { name: 'wasInfluencedBy', domain: 'entity', range: 'agent' },
-  { name: 'specializationOf', domain: 'entity', range: 'entity' },
-  { name: 'alternateOf', domain: 'entity', range: 'entity' },
-  { name: 'hadMember', domain: 'entity', range: 'entity' },
+  {
+    name: 'wasStartedBy', domain: 'activity', domainKey: 'prov:activity', range: 'entity', rangeKey: 'prov:trigger', timestamp: true,
+  },
+  {
+    name: 'wasEndedBy', domain: 'activity', domainKey: 'prov:activity', range: 'entity', rangeKey: 'prov:trigger', timestamp: true,
+  },
+  {
+    name: 'wasInvalidatedBy', domain: 'entity', domainKey: 'prov:entity', range: 'activity', rangeKey: 'prov:activity', timestamp: true,
+  },
+  {
+    name: 'wasDerivedFrom', domain: 'entity', domainKey: 'prov:generatedEntity', range: 'entity', rangeKey: 'prov:usedEntity',
+  },
+  {
+    name: 'wasAttributedTo', domain: 'entity', domainKey: 'prov:entity', range: 'agent', rangeKey: 'prov:agent',
+  },
+  {
+    name: 'wasAssociatedWith', domain: 'activity', domainKey: 'prov:activity', range: 'entity', rangeKey: 'prov:plan',
+  },
+  {
+    name: 'actedOnBehalfOf', domain: 'agent', domainKey: 'prov:delegate', range: 'agent', rangeKey: 'prov:responsible',
+  },
+  {
+    name: 'wasInfluencedBy', domain: 'entity', domainKey: 'prov:influencer', range: 'agent', rangeKey: 'prov:influencee',
+  },
+  {
+    name: 'specializationOf', domain: 'entity', domainKey: 'prov:specificEntity', range: 'entity', rangeKey: 'prov:generalEntity',
+  },
+  {
+    name: 'alternateOf', domain: 'entity', domainKey: 'prov:alternate1', range: 'entity', rangeKey: 'prov:alternate2',
+  },
+  {
+    name: 'hadMember', domain: 'entity', domainKey: 'prov:collection', range: 'entity', rangeKey: 'prov:entity',
+  },
 ];
 
 export interface PROVJSONBundle {
