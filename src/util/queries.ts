@@ -1,10 +1,21 @@
-import { PROVJSONBundle, PROVJSONDocument } from './document';
+import { PROVJSONBundle, PROVJSONDocument, relationNames } from './document';
 
 const queries = {
   prefix: {
     getAll: ({ prefix }: PROVJSONDocument) => Object.keys(prefix),
   },
   bundle: {
+    hasRelation: (bundle: PROVJSONBundle) => (
+      identifier: string,
+    ): boolean => ((
+      relationNames.find((relationName) => {
+        const relation = bundle[relationName];
+        return (
+          (relation && Object.keys(relation).includes(identifier)));
+      }) !== undefined)
+      || (bundle.bundle
+        ? queries.bundle.hasRelation(bundle.bundle)(identifier)
+        : false)),
     hasActivity: ({ activity, bundle }: PROVJSONBundle) => (identifier: string): boolean => (
       (activity !== undefined && Object.keys(activity).includes(identifier))
       || (bundle !== undefined && queries.bundle.hasActivity(bundle)(identifier))
@@ -17,6 +28,14 @@ const queries = {
       (entity !== undefined && Object.keys(entity).includes(identifier))
       || (bundle !== undefined && queries.bundle.hasEntity(bundle)(identifier))
     ),
+  },
+  relation: {
+    generateID: (bundle: PROVJSONBundle, index: number = 1): string => {
+      const id = `_:id${index}`;
+      return queries.bundle.hasRelation(bundle)(id)
+        ? queries.relation.generateID(bundle, index + 1)
+        : id;
+    },
   },
   agent: {
     getAll: ({ agent, bundle }: PROVJSONBundle): string[] => [
@@ -61,6 +80,19 @@ const queries = {
         : []),
       ...(bundle ? queries.entity.wasGeneratedBy(bundle)(entityID) : []),
     ],
+    getWasGeneratedByID: ({ wasGeneratedBy, bundle }: PROVJSONBundle) => (
+      entityID: string, activityID: string,
+    ): string | null => ((
+      wasGeneratedBy
+        ? Object
+          .entries(wasGeneratedBy)
+          .find(([_, value]) => value['prov:entity'] === entityID && value['prov:activity'] === activityID)
+          ?.[0]
+        : undefined
+    ) || (
+      bundle
+        ? queries.entity.getWasGeneratedByID(bundle)(entityID, activityID)
+        : null)),
   },
 };
 
