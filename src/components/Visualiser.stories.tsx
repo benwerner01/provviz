@@ -2,15 +2,14 @@
 import React from 'react';
 import { Story, Meta } from '@storybook/react';
 import Visualiser, { VisualiserProps } from './Visualiser';
-import exampleDocument1 from '../../examples/document1.json';
-import exampleDocument2 from '../../examples/document2.json';
+import { document1, document2 } from '../lib/examples';
 
 export const Example1: Story<VisualiserProps> = (args) => (
-  <Visualiser {...args} document={exampleDocument1} />
+  <Visualiser {...args} document={document1} />
 );
 
 export const Example2: Story<VisualiserProps> = (args) => (
-  <Visualiser {...args} document={exampleDocument2} />
+  <Visualiser {...args} document={document2} />
 );
 
 const meta: Meta<VisualiserProps> = {
