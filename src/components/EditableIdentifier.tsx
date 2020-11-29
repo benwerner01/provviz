@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import FromControl from '@material-ui/core/FormControl';
+import Box from '@material-ui/core/Box';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
@@ -13,6 +14,10 @@ import queries from '../util/queries';
 import mutations from '../util/mutations';
 
 const useStyles = makeStyles((theme) => ({
+  wrapper: {
+    maxWidth: 500,
+    marginBottom: theme.spacing(2),
+  },
   prefixFormControlRoot: {
     '& div': {
       borderRadius: 8,
@@ -27,7 +32,8 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.common.white,
   },
   nameTextFieldRoot: {
-    width: 300,
+    display: 'flex',
+    flexGrow: 1,
   },
   nameInputRoot: {
     borderRadius: 8,
@@ -44,7 +50,9 @@ type EditableIdentifierProps = {
   onChange?: (id: string) => void;
 }
 
-const EditableIdentifier: React.FC<EditableIdentifierProps> = ({ initialID, onChange }) => {
+const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
+  initialID, onChange,
+}) => {
   const { document, setDocument } = useContext(DocumentContext);
   const classes = useStyles();
 
@@ -87,7 +95,7 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({ initialID, onCh
   };
 
   return (
-    <>
+    <Box className={classes.wrapper} display="flex">
       <FromControl variant="outlined" classes={{ root: classes.prefixFormControlRoot }}>
         <InputLabel className={classes.prefixLabel}>Prefix</InputLabel>
         <Select
@@ -109,7 +117,7 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({ initialID, onCh
         classes={{ root: classes.nameTextFieldRoot }}
         InputProps={{ classes: { root: classes.nameInputRoot, input: classes.nameInput } }}
       />
-    </>
+    </Box>
   );
 };
 
