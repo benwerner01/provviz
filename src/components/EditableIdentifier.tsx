@@ -9,9 +9,8 @@ import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
 import debounce from 'lodash.debounce';
 import DocumentContext from './contexts/DocumentContext';
-import {
-  bundleHasActivity, bundleHasAgent, bundleHasEntity, updateIdentifier,
-} from '../util/document';
+import queries from '../util/queries';
+import mutations from '../util/mutations';
 
 const useStyles = makeStyles((theme) => ({
   prefixFormControlRoot: {
@@ -62,12 +61,12 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({ initialID, onCh
 
   const prefixIsValid = prefix !== '';
   const nameIsValid = name !== ''
-    && !bundleHasAgent(document)(`${prefix}:${name}`)
-    && !bundleHasActivity(document)(`${prefix}:${name}`)
-    && !bundleHasEntity(document)(`${prefix}:${name}`);
+    && !queries.bundle.hasAgent(document)(`${prefix}:${name}`)
+    && !queries.bundle.hasActivity(document)(`${prefix}:${name}`)
+    && !queries.bundle.hasEntity(document)(`${prefix}:${name}`);
 
   const debouncedUpdateIdentifier = useCallback(debounce((prevID: string, updatedID: string) => {
-    setDocument(updateIdentifier(document)(prevID, updatedID));
+    setDocument(mutations.updateIdentifier(document)(prevID, updatedID));
     if (onChange) onChange(updatedID);
   }, 200), [document]);
 

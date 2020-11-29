@@ -3,10 +3,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
-import {
-  createActivity, createAgent, createEntity, generateAgentName,
-  generateActivityName, generateEntityName, getDefaultNamespacePrefix,
-} from '../util/document';
+import queries from '../util/queries';
+import mutations from '../util/mutations';
 import DocumentContext from './contexts/DocumentContext';
 import { palette } from '../util/dot';
 
@@ -57,23 +55,23 @@ const MenuBar: React.FC<MenuBarProps> = ({ setSelectedNodeID }) => {
   const { document, setDocument } = useContext(DocumentContext);
 
   const handleCreateAgent = () => {
-    const prefix = getDefaultNamespacePrefix(document);
-    const name = generateAgentName(document)(prefix);
-    setDocument(createAgent(document)(prefix, name));
+    const prefix = queries.prefix.getAll(document)[0];
+    const name = queries.agent.generateName(document)(prefix);
+    setDocument(mutations.agent.create(document)(prefix, name));
     setSelectedNodeID(`${prefix}:${name}`);
   };
 
   const handleCreateActivity = () => {
-    const prefix = getDefaultNamespacePrefix(document);
-    const name = generateActivityName(document)(prefix);
-    setDocument(createActivity(document)(prefix, name));
+    const prefix = queries.prefix.getAll(document)[0];
+    const name = queries.activity.generateName(document)(prefix);
+    setDocument(mutations.activity.create(document)(prefix, name));
     setSelectedNodeID(`${prefix}:${name}`);
   };
 
   const handleCreateEntity = () => {
-    const prefix = getDefaultNamespacePrefix(document);
-    const name = generateEntityName(document)(prefix);
-    setDocument(createEntity(document)(prefix, name));
+    const prefix = queries.prefix.getAll(document)[0];
+    const name = queries.entity.generateName(document)(prefix);
+    setDocument(mutations.entity.create(document)(prefix, name));
     setSelectedNodeID(`${prefix}:${name}`);
   };
 

@@ -3,9 +3,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import {
-  PROVJSONDocument, updatePrefixName, updatePrefixValue,
-} from '../../util/document';
+import { PROVJSONDocument } from '../../util/document';
+import mutations from '../../util/mutations';
 import DocumentContext from '../contexts/DocumentContext';
 
 const PREFIX_INPUT_WIDTH = 150;
@@ -103,7 +102,7 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
       ...prefixes.slice(index + 1, prefixes.length),
     ]);
 
-    setDocument(updatePrefixName(document)(prevName, name));
+    setDocument(mutations.prefix.updateName(document)(prevName, name));
   };
 
   const updateValue = (index: number) => (value: string) => {
@@ -115,7 +114,7 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
       ...prefixes.slice(index + 1, prefixes.length),
     ]);
 
-    setDocument(updatePrefixValue(document)(name, value));
+    setDocument(mutations.prefix.updateValue(document)(name, value));
   };
 
   return (

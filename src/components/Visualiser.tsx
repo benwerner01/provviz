@@ -47,7 +47,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
   return (
     <DocumentContext.Provider value={{ document: localDocument, setDocument: setLocalDocument }}>
       <Box className={classes.wrapper} style={{ width, height }}>
-        <MenuBar />
+        <MenuBar setSelectedNodeID={setSelectedNodeID} />
         <D3Graphviz
           selectedNodeID={selectedNodeID}
           setSelectedNodeID={setSelectedNodeID}
