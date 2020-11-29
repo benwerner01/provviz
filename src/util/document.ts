@@ -1,38 +1,46 @@
-type RelationName = 'wasGeneratedBy' | 'used' | 'wasInformedBy' | 'wasStartedBy' | 'wasEndedBy'
-  | 'wasInvalidatedBy' | 'wasDerivedFrom' | 'wasAttributedTo' | 'wasAssociatedWith'
-  | 'actedOnBehalfOf' | 'wasInfluencedBy' | 'specializationOf' | 'alternateOf' | 'hadMember'
+type RelationName = 'wasGeneratedBy'
+  | 'used'
+  | 'wasInformedBy'
+  | 'wasStartedBy'
+  | 'wasEndedBy'
+  | 'wasInvalidatedBy'
+  | 'wasDerivedFrom'
+  | 'wasAttributedTo'
+  | 'wasAssociatedWith'
+  | 'actedOnBehalfOf'
+  | 'wasInfluencedBy'
+  | 'specializationOf'
+  | 'alternateOf'
+  | 'hadMember'
 
-export const relationNames: RelationName[] = [
-  'wasGeneratedBy',
-  'used',
-  'wasInformedBy',
-  'wasStartedBy',
-  'wasEndedBy',
-  'wasInvalidatedBy',
-  'wasDerivedFrom',
-  'wasAttributedTo',
-  'wasAssociatedWith',
-  'actedOnBehalfOf',
-  'wasInfluencedBy',
-  'specializationOf',
-  'alternateOf',
-  'hadMember',
-];
+type Relation = {
+  name: RelationName;
+  domain: 'activity' | 'agent' | 'entity';
+  range: 'activity' | 'agent' | 'entity';
+  timestamp?: boolean;
+}
 
-type AgentRelationName = 'actedOnBehalfOf'
-
-type ActivityRelationName = 'wasInformedBy' | 'wasStartedBy' | 'wasEndedBy' | 'wasAssociatedWith'
-
-type EntityRelationName = 'wasGeneratedBy' | 'used' | 'wasInvalidatedBy' | 'wasDerivedFrom' | 'wasAttributedTo' | 'wasInfluencedBy' | 'specializationOf' | 'alternateOf' | 'hadMember'
-
-export const agentRelationNames: AgentRelationName[] = [
-  'actedOnBehalfOf',
-];
-export const activityRelationNames: ActivityRelationName[] = [
-  'wasInformedBy', 'wasStartedBy', 'wasEndedBy', 'wasAssociatedWith',
-];
-export const entityRelationNames: EntityRelationName[] = [
-  'wasGeneratedBy', 'used', 'wasInvalidatedBy', 'wasDerivedFrom', 'wasAttributedTo', 'wasInfluencedBy', 'specializationOf', 'alternateOf', 'hadMember',
+export const relations: Relation[] = [
+  { name: 'wasGeneratedBy', domain: 'entity', range: 'activity' },
+  { name: 'used', domain: 'activity', range: 'entity' },
+  { name: 'wasInformedBy', domain: 'activity', range: 'activity' },
+  {
+    name: 'wasStartedBy', domain: 'activity', range: 'entity', timestamp: true,
+  },
+  {
+    name: 'wasEndedBy', domain: 'activity', range: 'entity', timestamp: true,
+  },
+  {
+    name: 'wasInvalidatedBy', domain: 'entity', range: 'activity', timestamp: true,
+  },
+  { name: 'wasDerivedFrom', domain: 'entity', range: 'entity' },
+  { name: 'wasAttributedTo', domain: 'entity', range: 'agent' },
+  { name: 'wasAssociatedWith', domain: 'activity', range: 'entity' },
+  { name: 'actedOnBehalfOf', domain: 'agent', range: 'agent' },
+  { name: 'wasInfluencedBy', domain: 'entity', range: 'agent' },
+  { name: 'specializationOf', domain: 'entity', range: 'entity' },
+  { name: 'alternateOf', domain: 'entity', range: 'entity' },
+  { name: 'hadMember', domain: 'entity', range: 'entity' },
 ];
 
 export interface PROVJSONBundle {
