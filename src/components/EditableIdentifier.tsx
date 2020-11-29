@@ -74,7 +74,7 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
     && !queries.bundle.hasEntity(document)(`${prefix}:${name}`);
 
   const debouncedUpdateIdentifier = useCallback(debounce((prevID: string, updatedID: string) => {
-    setDocument(mutations.updateIdentifier(document)(prevID, updatedID));
+    setDocument((prev) => mutations.updateIdentifier(prev)(prevID, updatedID));
     if (onChange) onChange(updatedID);
   }, 200), [document]);
 

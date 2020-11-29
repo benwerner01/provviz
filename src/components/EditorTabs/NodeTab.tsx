@@ -31,16 +31,17 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
 
     add.forEach((activityID) => {
       const relationID = queries.relation.generateID(document);
-      setDocument(mutations.relation.create(document)(relationName, relationID, id, activityID));
+      setDocument((prevDocument) => (
+        mutations.relation.create(prevDocument)(relationName, relationID, id, activityID)));
     });
     remove.forEach((activityID) => {
       const relationID = queries.relation.getID(document)(relationName, id, activityID);
       if (!relationID) throw new Error('Could not find relationID');
 
-      setDocument({
-        ...document,
-        ...mutations.relation.delete(document)(relationName, relationID),
-      });
+      setDocument((prevDocument) => ({
+        ...prevDocument,
+        ...mutations.relation.delete(prevDocument)(relationName, relationID),
+      }));
     });
   };
 

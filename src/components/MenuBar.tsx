@@ -57,21 +57,21 @@ const MenuBar: React.FC<MenuBarProps> = ({ setSelectedNodeID }) => {
   const handleCreateAgent = () => {
     const prefix = queries.prefix.getAll(document)[0];
     const name = queries.agent.generateName(document)(prefix);
-    setDocument(mutations.agent.create(document)(prefix, name));
+    setDocument((prev) => mutations.agent.create(prev)(prefix, name));
     setSelectedNodeID(`${prefix}:${name}`);
   };
 
   const handleCreateActivity = () => {
     const prefix = queries.prefix.getAll(document)[0];
     const name = queries.activity.generateName(document)(prefix);
-    setDocument(mutations.activity.create(document)(prefix, name));
+    setDocument((prev) => mutations.activity.create(prev)(prefix, name));
     setSelectedNodeID(`${prefix}:${name}`);
   };
 
   const handleCreateEntity = () => {
     const prefix = queries.prefix.getAll(document)[0];
     const name = queries.entity.generateName(document)(prefix);
-    setDocument(mutations.entity.create(document)(prefix, name));
+    setDocument((prev) => mutations.entity.create(prev)(prefix, name));
     setSelectedNodeID(`${prefix}:${name}`);
   };
 

@@ -65,7 +65,7 @@ const useStyles = makeStyles((theme) => ({
     textOverflow: 'ellipsis',
   },
   tabIndicator: {
-    height: 3,
+    height: 4,
   },
 }));
 

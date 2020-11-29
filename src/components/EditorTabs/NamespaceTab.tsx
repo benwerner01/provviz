@@ -102,7 +102,7 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
       ...prefixes.slice(index + 1, prefixes.length),
     ]);
 
-    setDocument(mutations.prefix.updateName(document)(prevName, name));
+    setDocument((prev) => mutations.prefix.updateName(prev)(prevName, name));
   };
 
   const updateValue = (index: number) => (value: string) => {
@@ -114,7 +114,7 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
       ...prefixes.slice(index + 1, prefixes.length),
     ]);
 
-    setDocument(mutations.prefix.updateValue(document)(name, value));
+    setDocument((prev) => mutations.prefix.updateValue(prev)(name, value));
   };
 
   return (
