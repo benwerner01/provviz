@@ -131,6 +131,11 @@ export const bundleHasAgent = ({ agent, bundle }: PROVJSONBundle) => (identifier
   (agent && Object.keys(agent).includes(identifier)) || (bundle && bundleHasAgent(bundle))
 );
 
+export const getAllAgents = ({ agent, bundle }: PROVJSONBundle): string[] => [
+  ...(agent ? Object.keys(agent) : []),
+  ...(bundle ? getAllAgents(bundle) : []),
+];
+
 export const generateAgentName = (document: PROVJSONDocument) => (
   prefix: string, index: number = 0,
 ): string => (bundleHasAgent(document)(`${prefix}:Agent${index > 0 ? ` ${index}` : ''}`)
@@ -153,6 +158,11 @@ export const bundleHasActivity = ({ activity, bundle }: PROVJSONBundle) => (iden
   (activity && Object.keys(activity).includes(identifier)) || (bundle && bundleHasAgent(bundle))
 );
 
+export const getAllActivities = ({ activity, bundle }: PROVJSONBundle): string[] => [
+  ...(activity ? Object.keys(activity) : []),
+  ...(bundle ? getAllActivities(bundle) : []),
+];
+
 export const generateActivityName = (document: PROVJSONDocument) => (
   prefix: string, index: number = 0,
 ): string => (bundleHasActivity(document)(`${prefix}:Activity${index > 0 ? ` ${index}` : ''}`)
@@ -174,6 +184,11 @@ export const createActivity = (document: PROVJSONDocument) => (
 export const bundleHasEntity = ({ entity, bundle }: PROVJSONBundle) => (identifier: string) => (
   (entity && Object.keys(entity).includes(identifier)) || (bundle && bundleHasAgent(bundle))
 );
+
+export const getAllEntities = ({ entity, bundle }: PROVJSONBundle): string[] => [
+  ...(entity ? Object.keys(entity) : []),
+  ...(bundle ? getAllEntities(bundle) : []),
+];
 
 export const generateEntityName = (document: PROVJSONDocument) => (
   prefix: string, index: number = 0,
