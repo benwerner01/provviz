@@ -37,6 +37,11 @@ const queries = {
         : id;
     },
   },
+  node: {
+    getFullName: ({ prefix }: PROVJSONDocument) => (identifier: string) => (
+      `${prefix[identifier.split(':')[0]]}${identifier.split(':')[1]}`
+    ),
+  },
   agent: {
     getAll: ({ agent, bundle }: PROVJSONBundle): string[] => [
       ...(agent ? Object.keys(agent) : []),
