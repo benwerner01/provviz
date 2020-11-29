@@ -1,4 +1,4 @@
-import { PROVJSONDocument } from './document';
+import { PROVJSONDocument, RelationName, relations } from './document';
 
 const maybeUpdateIdentifier = (identifier: string) => (
   prevID: string,
@@ -135,16 +135,22 @@ const mutations = {
     }),
   },
   relation: {
-    wasGeneratedBy: {
-      create: (document: PROVJSONDocument) => (
-        relationID: string, entityID: string, activityID: string,
-      ): PROVJSONDocument => ({
+    create: (document: PROVJSONDocument) => (
+      relationName: RelationName, relationID: string, domainID: string, rangeID: string,
+    ): PROVJSONDocument => {
+      const { domainKey, rangeKey } = relations.find(({ name }) => name === relationName)!;
+      return {
         ...document,
-        wasGeneratedBy: {
-          ...document.wasGeneratedBy,
-          [relationID]: { 'prov:entity': entityID, 'prov:activity': activityID },
+        [relationName]: {
+          ...document[relationName],
+          [relationID]: {
+            [domainKey]: domainID,
+            [rangeKey]: rangeID,
+          },
         },
-      }),
+      };
+    },
+    wasGeneratedBy: {
       delete: (document: PROVJSONDocument) => (
         relationID: string,
       ): PROVJSONDocument => {
@@ -152,19 +158,6 @@ const mutations = {
         return ({ ...document, wasGeneratedBy });
       },
     },
-    used: {},
-    wasInformedBy: {},
-    wasStartedBy: {},
-    wasEndedBy: {},
-    wasInvalidatedBy: {},
-    wasDerivedFrom: {},
-    wasAttributedTo: {},
-    wasAssociatedWith: {},
-    actedOnBehalfOf: {},
-    wasInfluencedBy: {},
-    specializationOf: {},
-    alternateOf: {},
-    hadMember: {},
   },
 };
 
