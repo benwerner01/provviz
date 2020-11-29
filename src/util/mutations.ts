@@ -134,6 +134,38 @@ const mutations = {
       },
     }),
   },
+  relation: {
+    wasGeneratedBy: {
+      create: (document: PROVJSONDocument) => (
+        relationID: string, entityID: string, activityID: string,
+      ): PROVJSONDocument => ({
+        ...document,
+        wasGeneratedBy: {
+          ...document.wasGeneratedBy,
+          [relationID]: { 'prov:entity': entityID, 'prov:activity': activityID },
+        },
+      }),
+      delete: (document: PROVJSONDocument) => (
+        relationID: string,
+      ): PROVJSONDocument => {
+        const { [relationID]: value, ...wasGeneratedBy } = document.wasGeneratedBy || {};
+        return ({ ...document, wasGeneratedBy });
+      },
+    },
+    used: {},
+    wasInformedBy: {},
+    wasStartedBy: {},
+    wasEndedBy: {},
+    wasInvalidatedBy: {},
+    wasDerivedFrom: {},
+    wasAttributedTo: {},
+    wasAssociatedWith: {},
+    actedOnBehalfOf: {},
+    wasInfluencedBy: {},
+    specializationOf: {},
+    alternateOf: {},
+    hadMember: {},
+  },
 };
 
 export default mutations;

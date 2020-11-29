@@ -1,4 +1,4 @@
-import { PROVJSONBundle, PROVJSONDocument, relationNames } from './document';
+import { PROVJSONBundle, PROVJSONDocument, relations } from './document';
 
 const queries = {
   prefix: {
@@ -8,8 +8,8 @@ const queries = {
     hasRelation: (bundle: PROVJSONBundle) => (
       identifier: string,
     ): boolean => ((
-      relationNames.find((relationName) => {
-        const relation = bundle[relationName];
+      relations.find(({ name }) => {
+        const relation = bundle[name];
         return (
           (relation && Object.keys(relation).includes(identifier)));
       }) !== undefined)
@@ -28,14 +28,6 @@ const queries = {
       (entity !== undefined && Object.keys(entity).includes(identifier))
       || (bundle !== undefined && queries.bundle.hasEntity(bundle)(identifier))
     ),
-  },
-  relation: {
-    generateID: (bundle: PROVJSONBundle, index: number = 1): string => {
-      const id = `_:id${index}`;
-      return queries.bundle.hasRelation(bundle)(id)
-        ? queries.relation.generateID(bundle, index + 1)
-        : id;
-    },
   },
   node: {
     getFullName: ({ prefix }: PROVJSONDocument) => (identifier: string) => (
@@ -74,30 +66,40 @@ const queries = {
     ): string => (queries.bundle.hasEntity(document)(`${prefix}:Entity${index > 0 ? ` ${index}` : ''}`)
       ? queries.entity.generateName(document)(prefix, index + 1)
       : `Entity${index > 0 ? ` ${index}` : ''}`),
-    wasGeneratedBy: ({ wasGeneratedBy, bundle }: PROVJSONBundle) => (
-      entityID: string,
-    ): string[] => [
-      ...(wasGeneratedBy
-        ? Object
-          .entries(wasGeneratedBy)
-          .filter(([_, value]) => value['prov:entity'] === entityID)
-          .map(([_, value]) => value['prov:activity'])
-        : []),
-      ...(bundle ? queries.entity.wasGeneratedBy(bundle)(entityID) : []),
-    ],
-    getWasGeneratedByID: ({ wasGeneratedBy, bundle }: PROVJSONBundle) => (
-      entityID: string, activityID: string,
-    ): string | null => ((
-      wasGeneratedBy
-        ? Object
-          .entries(wasGeneratedBy)
-          .find(([_, value]) => value['prov:entity'] === entityID && value['prov:activity'] === activityID)
-          ?.[0]
-        : undefined
-    ) || (
-      bundle
-        ? queries.entity.getWasGeneratedByID(bundle)(entityID, activityID)
-        : null)),
+  },
+  relation: {
+    generateID: (bundle: PROVJSONBundle, index: number = 1): string => {
+      const id = `_:id${index}`;
+      return queries.bundle.hasRelation(bundle)(id)
+        ? queries.relation.generateID(bundle, index + 1)
+        : id;
+    },
+    wasGeneratedBy: {
+      getID: ({ wasGeneratedBy, bundle }: PROVJSONBundle) => (
+        entityID: string, activityID: string,
+      ): string | null => ((
+        wasGeneratedBy
+          ? Object
+            .entries(wasGeneratedBy)
+            .find(([_, value]) => value['prov:entity'] === entityID && value['prov:activity'] === activityID)
+            ?.[0]
+          : undefined
+      ) || (
+        bundle
+          ? queries.relation.wasGeneratedBy.getID(bundle)(entityID, activityID)
+          : null)),
+      getRangeWithDomain: ({ wasGeneratedBy, bundle }: PROVJSONBundle) => (
+        entityID: string,
+      ): string[] => [
+        ...(wasGeneratedBy
+          ? Object
+            .entries(wasGeneratedBy)
+            .filter(([_, value]) => value['prov:entity'] === entityID)
+            .map(([_, value]) => value['prov:activity'])
+          : []),
+        ...(bundle ? queries.relation.wasGeneratedBy.getRangeWithDomain(bundle)(entityID) : []),
+      ],
+    },
   },
 };
 

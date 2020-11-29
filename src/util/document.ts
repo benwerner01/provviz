@@ -1,4 +1,4 @@
-type RelationName = 'wasGeneratedBy'
+export type RelationName = 'wasGeneratedBy'
   | 'used'
   | 'wasInformedBy'
   | 'wasStartedBy'
@@ -13,7 +13,7 @@ type RelationName = 'wasGeneratedBy'
   | 'alternateOf'
   | 'hadMember'
 
-type Relation = {
+export type Relation = {
   name: RelationName;
   domain: 'activity' | 'agent' | 'entity';
   range: 'activity' | 'agent' | 'entity';
