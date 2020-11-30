@@ -11,7 +11,7 @@ import Tab from '@material-ui/core/Tab';
 import NamespaceTab from './EditorTabs/NamespaceTab';
 import DocumentContext from './contexts/DocumentContext';
 import queries from '../util/queries';
-import EntityTab from './EditorTabs/NodeTab';
+import NodeTab from './EditorTabs/NodeTab';
 
 export const EDITOR_CONTENT_HEIGHT = 400;
 
@@ -173,7 +173,8 @@ const Editor: React.FC<EditorProps> = ({
           {currentTabVariant === 'default'
             ? (currentTabName === 'Namespace' && <NamespaceTab />)
             : (
-              <EntityTab
+              <NodeTab
+                key={currentTabIndex}
                 variant={currentTabVariant}
                 id={tabs[currentTabIndex].name}
                 onIDChange={handleTabIDChange(currentTabIndex)}
