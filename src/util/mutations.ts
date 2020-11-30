@@ -97,6 +97,19 @@ const mutations = {
       });
     },
   },
+  bundle: {
+    create: (document: PROVJSONDocument) => (
+      prefix: string, name: string,
+    ): PROVJSONDocument => ({
+      ...document,
+      bundle: {
+        ...document.bundle,
+        [`${prefix}:${name}`]: {
+
+        },
+      },
+    }),
+  },
   agent: {
     create: (document: PROVJSONDocument) => (
       prefix: string, name: string,
