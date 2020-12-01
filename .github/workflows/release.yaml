@@ -2,20 +2,18 @@ name: Release
 on: [push]
 
 jobs:
-test-and-release:
+release:
     name: Release
     runs-on: ubuntu-18.04
     steps:
-    - name: Checkout
-        uses: actions/checkout@v1
-    - name: Setup Node.js
-        uses: actions/setup-node@v1
-        with:
-        node-version: 12
-    - name: Install dependencies
-        run: npm ci
-    - name: Release
-        env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm run semantic-release
+        - uses: actions/checkout@v2
+        - uses: actions/setup-node@v1
+            with:
+                node-version: 12
+        - name: Install dependencies
+            run: npm ci
+        - name: Release
+            env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+            run: npm run semantic-release
