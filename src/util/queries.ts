@@ -7,6 +7,14 @@ const queries = {
     getAll: ({ prefix }: PROVJSONDocument) => Object.keys(prefix),
   },
   bundle: {
+    getAll: ({ bundle }: PROVJSONBundle): string[] => [
+      ...(bundle
+        ? Object.keys(bundle).map((key) => [
+          key,
+          ...queries.bundle.getAll(bundle[key]),
+        ]).flat()
+        : []),
+    ],
     hasRelation: (bundle: PROVJSONBundle) => (
       identifier: string,
     ): boolean => {
@@ -70,10 +78,13 @@ const queries = {
       : `Activity${index > 0 ? ` ${index}` : ''}`),
   },
   entity: {
-    getAll: ({ entity, bundle }: PROVJSONBundle): string[] => [
-      ...(entity ? Object.keys(entity) : []),
-      ...(bundle
-        ? Object.keys(bundle).map((key) => queries.entity.getAll(bundle[key])).flat()
+    getAll: (bundle: PROVJSONBundle): string[] => [
+      ...queries.bundle.getAll(bundle),
+      ...(bundle.entity ? Object.keys(bundle.entity) : []),
+      ...(bundle.bundle
+        ? Object
+          .values(bundle.bundle)
+          .map((nestedBundle) => queries.entity.getAll(nestedBundle)).flat()
         : []),
     ],
     generateName: (document: PROVJSONDocument) => (
