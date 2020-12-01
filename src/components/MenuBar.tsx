@@ -75,13 +75,24 @@ const MenuBar: React.FC<MenuBarProps> = ({ setSelectedNodeID }) => {
     setSelectedNodeID(`${prefix}:${name}`);
   };
 
+  const handleCreateBundle = () => {
+    const prefix = queries.prefix.getAll(document)[0];
+    const name = queries.entity.generateName(document)(prefix);
+    setDocument((prev) => mutations.bundle.create(prev)(prefix, name));
+  };
+
   const buttonClasses = { root: classes.buttonRoot, label: classes.buttonLabel };
 
   return (
-    <Box px={1} display="flex" alignItems="center" className={classes.wrapper}>
-      <Button className={classes.agentButton} classes={buttonClasses} onClick={handleCreateAgent} variant="contained" endIcon={<AddIcon />}>Agent</Button>
-      <Button className={classes.activityButton} classes={buttonClasses} onClick={handleCreateActivity} variant="contained" endIcon={<AddIcon />}>Activity</Button>
-      <Button className={classes.entityButton} classes={buttonClasses} onClick={handleCreateEntity} variant="contained" endIcon={<AddIcon />}>Entity</Button>
+    <Box px={1} display="flex" alignItems="center" justifyContent="space-between" className={classes.wrapper}>
+      <Box>
+        <Button className={classes.agentButton} classes={buttonClasses} onClick={handleCreateAgent} variant="contained" endIcon={<AddIcon />}>Agent</Button>
+        <Button className={classes.activityButton} classes={buttonClasses} onClick={handleCreateActivity} variant="contained" endIcon={<AddIcon />}>Activity</Button>
+        <Button className={classes.entityButton} classes={buttonClasses} onClick={handleCreateEntity} variant="contained" endIcon={<AddIcon />}>Entity</Button>
+      </Box>
+      <Box>
+        <Button classes={buttonClasses} onClick={handleCreateBundle} variant="contained" endIcon={<AddIcon />}>Bundle</Button>
+      </Box>
     </Box>
   );
 };
