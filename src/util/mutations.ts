@@ -83,31 +83,36 @@ const mutations = {
         [prefixName]: updatedValue,
       },
     }),
+    delete: (document: PROVJSONDocument) => (
+      prefix: string,
+    ): PROVJSONDocument => {
+      const { [prefix]: value, ...remainingNamespaces } = document.prefix;
+      return ({
+        ...document,
+        prefix: remainingNamespaces,
+      });
+    },
     updateValue: (document: PROVJSONDocument) => (
-      prefixName: string, updatedValue: string,
+      prefix: string, updatedValue: string,
     ): PROVJSONDocument => ({
       ...document,
       prefix: {
         ...document.prefix,
-        [prefixName]: updatedValue,
+        [prefix]: updatedValue,
       },
     }),
-    updateName: (document: PROVJSONDocument) => (
-      prevName: string, updatedName: string,
+    updatePrefix: (document: PROVJSONDocument) => (
+      prevPrefix: string, updatedName: string,
     ): PROVJSONDocument => {
-      const { [prevName]: prevValue, ...updatedPrefix } = document.prefix;
+      const { [prevPrefix]: prevValue, ...updatedPrefix } = document.prefix;
 
       return ({
-        ...updatePrefixesInObject(document)(prevName, updatedName),
+        ...updatePrefixesInObject(document)(prevPrefix, updatedName),
         prefix: {
           ...updatedPrefix,
           [updatedName]: prevValue,
         },
       });
-    },
-    delete: (document: PROVJSONDocument) => (name: string): PROVJSONDocument => {
-      const { [name]: value, ...prefix } = document.prefix;
-      return { ...document, prefix };
     },
   },
   bundle: {
