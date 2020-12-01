@@ -1,6 +1,9 @@
 import { PROVJSONBundle, PROVJSONDocument, relations } from './document';
 
 export const palette = {
+  danger: {
+    main: '#dc3545',
+  },
   entity: {
     light: '#fcfba9',
     main: '#fffc87',
@@ -42,5 +45,8 @@ const mapBundleToDots = (json: PROVJSONBundle): string => [
 ].join('\n');
 
 export const mapDocumentToDots = (json: PROVJSONDocument): string => [
-  'digraph  {', mapBundleToDots(json), '}',
+  'digraph  {',
+  'rankdir="BT";',
+  mapBundleToDots(json),
+  '}',
 ].join('\n');
