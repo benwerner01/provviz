@@ -73,7 +73,7 @@ const mutations = {
       ...updateIdentifiersInObject(remaining)(prevID, updatedID),
     });
   },
-  prefix: {
+  namespace: {
     create: (document: PROVJSONDocument) => (
       prefixName: string, updatedValue: string,
     ): PROVJSONDocument => ({
