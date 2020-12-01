@@ -74,6 +74,15 @@ const mutations = {
     });
   },
   prefix: {
+    create: (document: PROVJSONDocument) => (
+      prefixName: string, updatedValue: string,
+    ): PROVJSONDocument => ({
+      ...document,
+      prefix: {
+        ...document.prefix,
+        [prefixName]: updatedValue,
+      },
+    }),
     updateValue: (document: PROVJSONDocument) => (
       prefixName: string, updatedValue: string,
     ): PROVJSONDocument => ({
@@ -95,6 +104,10 @@ const mutations = {
           [updatedName]: prevValue,
         },
       });
+    },
+    delete: (document: PROVJSONDocument) => (name: string): PROVJSONDocument => {
+      const { [name]: value, ...prefix } = document.prefix;
+      return { ...document, prefix };
     },
   },
   bundle: {
