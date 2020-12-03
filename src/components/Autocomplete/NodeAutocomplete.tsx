@@ -14,7 +14,12 @@ type NodeAutocompleteProps = {
   onChange: (value: string[]) => void;
 }
 
-const filter = createFilterOptions<string | { createNode: string }>();
+type NewNode = {
+  prefix: string;
+  name: string;
+}
+
+const filter = createFilterOptions<string | NewNode>();
 
 const useAutocompleteStyles = makeStyles((theme) => ({
   root: {
@@ -37,8 +42,14 @@ const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
 
   const defaultPrefix = queries.prefix.getAll(document)[0];
 
+  const parseNewNodeFromInput = (input: string): NewNode => (
+    input.includes(':')
+      ? { prefix: input.split(':')[0], name: input.split(':').slice(1).join('') }
+      : { prefix: defaultPrefix, name: input }
+  );
+
   return (
-    <Autocomplete<string | { createNode: string; }, true, false, true>
+    <Autocomplete<string | NewNode, true, false, true>
       multiple
       value={value}
       options={options}
@@ -46,9 +57,9 @@ const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
         if (typeof item === 'string') {
           return item;
         }
-        setDocument((prevDocument) => (
-          mutations[variant].create(prevDocument)(defaultPrefix, item.createNode)));
-        return `${defaultPrefix}:${item.createNode}`;
+        const { prefix, name } = item;
+        setDocument((prevDocument) => mutations[variant].create(prevDocument)(prefix, name));
+        return `${prefix || defaultPrefix}:${name}`;
       }))}
       classes={autocompleteClasses}
       renderInput={(params) => (
@@ -61,11 +72,11 @@ const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
       )}
       filterOptions={(currentOptions, params) => [
         ...filter(currentOptions, params),
-        (params.inputValue === '' ? [] : { createNode: params.inputValue }),
+        (params.inputValue === '' ? [] : parseNewNodeFromInput(params.inputValue)),
       ].flat()}
       getOptionLabel={(option) => (typeof option === 'string'
         ? option
-        : `Create ${variant[0].toUpperCase()}${variant.slice(1)} "${defaultPrefix}:${option.createNode}"`)}
+        : `Create ${variant[0].toUpperCase()}${variant.slice(1)} "${option.prefix}:${option.name}"`)}
     />
   );
 };
