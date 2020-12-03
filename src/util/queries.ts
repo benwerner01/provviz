@@ -32,20 +32,33 @@ const queries = {
           )) !== undefined
           : false));
     },
+    hasNode: (bundle: PROVJSONBundle) => (identifier: string): boolean => (
+      queries.bundle.hasActivity(bundle)(identifier)
+      || queries.bundle.hasAgent(bundle)(identifier)
+      || queries.bundle.hasEntity(bundle)(identifier)
+      || queries.bundle.hasBundle(bundle)(identifier)
+      || (bundle.bundle !== undefined && Object.values(bundle.bundle).find(((nestedBundle) => (
+        queries.bundle.hasNode(nestedBundle)(identifier)
+      ))) !== undefined)),
     hasActivity: ({ activity, bundle }: PROVJSONBundle) => (identifier: string): boolean => (
       (activity !== undefined && Object.keys(activity).includes(identifier))
-      || (bundle !== undefined && Object.keys(bundle).find(((key) => (
-        queries.bundle.hasActivity(bundle[key])(identifier)
+      || (bundle !== undefined && Object.values(bundle).find(((nestedBundle) => (
+        queries.bundle.hasActivity(nestedBundle)(identifier)
       ))) !== undefined)),
     hasAgent: ({ agent, bundle }: PROVJSONBundle) => (identifier: string): boolean => (
       (agent !== undefined && Object.keys(agent).includes(identifier))
-      || (bundle !== undefined && Object.keys(bundle).find(((key) => (
-        queries.bundle.hasAgent(bundle[key])(identifier)
+      || (bundle !== undefined && Object.values(bundle).find(((nestedBundle) => (
+        queries.bundle.hasAgent(nestedBundle)(identifier)
       ))) !== undefined)),
     hasEntity: ({ entity, bundle }: PROVJSONBundle) => (identifier: string): boolean => (
       (entity !== undefined && Object.keys(entity).includes(identifier))
-      || (bundle !== undefined && Object.keys(bundle).find(((key) => (
-        queries.bundle.hasEntity(bundle[key])(identifier)
+      || (bundle !== undefined && Object.values(bundle).find(((nestedBundle) => (
+        queries.bundle.hasEntity(nestedBundle)(identifier)
+      ))) !== undefined)),
+    hasBundle: ({ bundle }: PROVJSONBundle) => (identifier: string): boolean => (
+      (bundle !== undefined && Object.keys(bundle).includes(identifier))
+      || (bundle !== undefined && Object.values(bundle).find(((nestedBundle) => (
+        queries.bundle.hasBundle(nestedBundle)(identifier)
       ))) !== undefined)),
   },
   node: {
@@ -60,7 +73,7 @@ const queries = {
     ],
     generateName: (document: PROVJSONDocument) => (
       prefix: string, index: number = 0,
-    ): string => (queries.bundle.hasAgent(document)(`${prefix}:Agent${index > 0 ? ` ${index}` : ''}`)
+    ): string => (queries.bundle.hasNode(document)(`${prefix}:Agent${index > 0 ? ` ${index}` : ''}`)
       ? queries.agent.generateName(document)(prefix, index + 1)
       : `Agent${index > 0 ? ` ${index}` : ''}`),
   },
@@ -73,7 +86,7 @@ const queries = {
     ],
     generateName: (document: PROVJSONDocument) => (
       prefix: string, index: number = 0,
-    ): string => (queries.bundle.hasActivity(document)(`${prefix}:Activity${index > 0 ? ` ${index}` : ''}`)
+    ): string => (queries.bundle.hasNode(document)(`${prefix}:Activity${index > 0 ? ` ${index}` : ''}`)
       ? queries.activity.generateName(document)(prefix, index + 1)
       : `Activity${index > 0 ? ` ${index}` : ''}`),
   },
@@ -89,7 +102,7 @@ const queries = {
     ],
     generateName: (document: PROVJSONDocument) => (
       prefix: string, index: number = 0,
-    ): string => (queries.bundle.hasEntity(document)(`${prefix}:Entity${index > 0 ? ` ${index}` : ''}`)
+    ): string => (queries.bundle.hasNode(document)(`${prefix}:Entity${index > 0 ? ` ${index}` : ''}`)
       ? queries.entity.generateName(document)(prefix, index + 1)
       : `Entity${index > 0 ? ` ${index}` : ''}`),
   },

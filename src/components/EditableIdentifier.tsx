@@ -68,10 +68,7 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
   }, [initialPrefix, initialName]);
 
   const prefixIsValid = prefix !== '';
-  const nameIsValid = name !== ''
-    && !queries.bundle.hasAgent(document)(`${prefix}:${name}`)
-    && !queries.bundle.hasActivity(document)(`${prefix}:${name}`)
-    && !queries.bundle.hasEntity(document)(`${prefix}:${name}`);
+  const nameIsValid = name !== '' && !queries.bundle.hasNode(document)(`${prefix}:${name}`);
 
   const debouncedUpdateIdentifier = useCallback(debounce((prevID: string, updatedID: string) => {
     setDocument((prev) => mutations.updateIdentifier(prev)(prevID, updatedID));
