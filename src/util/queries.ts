@@ -32,6 +32,11 @@ const queries = {
           )) !== undefined
           : false));
     },
+    hasLocalNode: (bundle: PROVJSONBundle) => (identifier: string): boolean => (
+      queries.bundle.hasLocalActivity(bundle)(identifier)
+      || queries.bundle.hasLocalAgent(bundle)(identifier)
+      || queries.bundle.hasLocalEntity(bundle)(identifier)
+      || queries.bundle.hasLocalBundle(bundle)(identifier)),
     hasNode: (bundle: PROVJSONBundle) => (identifier: string): boolean => (
       queries.bundle.hasActivity(bundle)(identifier)
       || queries.bundle.hasAgent(bundle)(identifier)
@@ -40,21 +45,29 @@ const queries = {
       || (bundle.bundle !== undefined && Object.values(bundle.bundle).find(((nestedBundle) => (
         queries.bundle.hasNode(nestedBundle)(identifier)
       ))) !== undefined)),
+    hasLocalActivity: ({ activity }: PROVJSONBundle) => (identifier: string): boolean => (
+      (activity !== undefined && Object.keys(activity).includes(identifier))),
     hasActivity: ({ activity, bundle }: PROVJSONBundle) => (identifier: string): boolean => (
       (activity !== undefined && Object.keys(activity).includes(identifier))
       || (bundle !== undefined && Object.values(bundle).find(((nestedBundle) => (
         queries.bundle.hasActivity(nestedBundle)(identifier)
       ))) !== undefined)),
+    hasLocalAgent: ({ agent }: PROVJSONBundle) => (identifier: string): boolean => (
+      (agent !== undefined && Object.keys(agent).includes(identifier))),
     hasAgent: ({ agent, bundle }: PROVJSONBundle) => (identifier: string): boolean => (
       (agent !== undefined && Object.keys(agent).includes(identifier))
       || (bundle !== undefined && Object.values(bundle).find(((nestedBundle) => (
         queries.bundle.hasAgent(nestedBundle)(identifier)
       ))) !== undefined)),
+    hasLocalEntity: ({ entity }: PROVJSONBundle) => (identifier: string): boolean => (
+      (entity !== undefined && Object.keys(entity).includes(identifier))),
     hasEntity: ({ entity, bundle }: PROVJSONBundle) => (identifier: string): boolean => (
       (entity !== undefined && Object.keys(entity).includes(identifier))
       || (bundle !== undefined && Object.values(bundle).find(((nestedBundle) => (
         queries.bundle.hasEntity(nestedBundle)(identifier)
       ))) !== undefined)),
+    hasLocalBundle: ({ bundle }: PROVJSONBundle) => (identifier: string): boolean => (
+      (bundle !== undefined && Object.keys(bundle).includes(identifier))),
     hasBundle: ({ bundle }: PROVJSONBundle) => (identifier: string): boolean => (
       (bundle !== undefined && Object.keys(bundle).includes(identifier))
       || (bundle !== undefined && Object.values(bundle).find(((nestedBundle) => (
