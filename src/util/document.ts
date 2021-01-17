@@ -67,6 +67,12 @@ export const relations: Relation[] = [
   },
 ];
 
+export type NodeVariant = 'activity' | 'agent' | 'entity' | 'bundle'
+
+export const tbdIsNodeVariant = (tbd: string): tbd is NodeVariant => (
+  ['activity', 'agent', 'entity', 'bundle'].includes(tbd)
+);
+
 export interface PROVJSONBundle {
   bundle?: {
     [bundleID: string]: PROVJSONBundle;
