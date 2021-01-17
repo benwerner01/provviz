@@ -3,6 +3,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
+import IconButton from '@material-ui/core/IconButton';
+import AccountTreeIcon from '@material-ui/icons/AccountTree';
 import queries from '../util/queries';
 import mutations from '../util/mutations';
 import DocumentContext from './contexts/DocumentContext';
@@ -46,11 +48,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+export type View = 'Graph' | 'Tree'
+
 type MenuBarProps = {
   setSelectedNodeID: (id: string) => void;
+  currentView: View;
+  setCurrentView: (newCurrentView: View) => void;
 }
 
-const MenuBar: React.FC<MenuBarProps> = ({ setSelectedNodeID }) => {
+const MenuBar: React.FC<MenuBarProps> = ({
+  setSelectedNodeID, currentView, setCurrentView
+}) => {
   const classes = useStyles();
   const { document, setDocument } = useContext(DocumentContext);
 
@@ -77,7 +85,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ setSelectedNodeID }) => {
 
   const handleCreateBundle = () => {
     const prefix = queries.prefix.getAll(document)[0];
-    const name = queries.entity.generateName(document)(prefix);
+    const name = queries.bundle.generateName(document)(prefix);
     setDocument((prev) => mutations.bundle.create(prev)(prefix, name));
   };
 
@@ -89,9 +97,10 @@ const MenuBar: React.FC<MenuBarProps> = ({ setSelectedNodeID }) => {
         <Button className={classes.agentButton} classes={buttonClasses} onClick={handleCreateAgent} variant="contained" endIcon={<AddIcon />}>Agent</Button>
         <Button className={classes.activityButton} classes={buttonClasses} onClick={handleCreateActivity} variant="contained" endIcon={<AddIcon />}>Activity</Button>
         <Button className={classes.entityButton} classes={buttonClasses} onClick={handleCreateEntity} variant="contained" endIcon={<AddIcon />}>Entity</Button>
+        <Button classes={buttonClasses} onClick={handleCreateBundle} variant="contained" endIcon={<AddIcon />}>Bundle</Button>
       </Box>
       <Box>
-        <Button classes={buttonClasses} onClick={handleCreateBundle} variant="contained" endIcon={<AddIcon />}>Bundle</Button>
+        <IconButton onClick={() => setCurrentView(currentView === 'Graph' ? 'Tree' : 'Graph')}><AccountTreeIcon /></IconButton>
       </Box>
     </Box>
   );

@@ -5,7 +5,8 @@ import { PROVJSONDocument, tbdIsPROVJSONDocument } from '../util/document';
 import DocumentContext from './contexts/DocumentContext';
 import Editor from './Editor';
 import D3Graphviz from './D3Graphviz';
-import MenuBar, { MENU_BAR_HEIGHT } from './MenuBar';
+import MenuBar, { MENU_BAR_HEIGHT, View } from './MenuBar';
+import TreeView from './TreeView';
 
 export type VisualiserProps = {
   document: object;
@@ -41,20 +42,36 @@ const Visualiser: React.FC<VisualiserProps> = ({
 
   const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(document);
   const [displayEditor, setDisplayEditor] = useState<boolean>(false);
+  const [currentView, setCurrentView] = useState<View>('Graph');
 
   const [selectedNodeID, setSelectedNodeID] = useState<string | undefined>();
 
   return (
     <DocumentContext.Provider value={{ document: localDocument, setDocument: setLocalDocument }}>
-      <Box className={classes.wrapper} style={{ width, height }}>
-        <MenuBar setSelectedNodeID={setSelectedNodeID} />
-        <D3Graphviz
-          selectedNodeID={selectedNodeID}
+      <Box
+        className={classes.wrapper}
+        style={{ width, height }}
+      >
+        <MenuBar
           setSelectedNodeID={setSelectedNodeID}
-          width={width}
-          wasmFolderURL={wasmFolderURL}
-          height={height - MENU_BAR_HEIGHT - TABS_HEIGHT}
+          currentView={currentView}
+          setCurrentView={setCurrentView}
         />
+        {currentView === 'Graph' && (
+          <D3Graphviz
+            selectedNodeID={selectedNodeID}
+            setSelectedNodeID={setSelectedNodeID}
+            width={width}
+            wasmFolderURL={wasmFolderURL}
+            height={height - MENU_BAR_HEIGHT - TABS_HEIGHT}
+          />
+        )}
+        {currentView === 'Tree' && (
+          <TreeView
+            width={width}
+            height={height - MENU_BAR_HEIGHT - TABS_HEIGHT}
+          />
+        )}
         <Editor
           selectedNodeID={selectedNodeID}
           setSelectedNodeID={setSelectedNodeID}

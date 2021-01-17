@@ -12,7 +12,9 @@
   "license": "MIT",
   "private": false,
   "release": {
-    "branches": ["main"]
+    "branches": [
+      "main"
+    ]
   },
   "scripts": {
     "build": "rollup -c",
@@ -32,7 +34,8 @@
     "@material-ui/lab": "^4.0.0-alpha.56",
     "d3": "5.16.0",
     "d3-graphviz": "^3.1.0",
-    "lodash.debounce": "^4.0.8"
+    "lodash.debounce": "^4.0.8",
+    "react-sortable-tree": "^2.8.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
@@ -45,6 +48,7 @@
     "@types/lodash.debounce": "^4.0.6",
     "@types/node": "^14.14.9",
     "@types/react": "^16.9.56",
+    "@types/react-sortable-tree": "^0.3.12",
     "@typescript-eslint/eslint-plugin": "^4.7.0",
     "@typescript-eslint/parser": "^4.7.0",
     "babel-loader": "^8.2.1",
