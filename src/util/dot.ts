@@ -1,4 +1,7 @@
+import { createMuiTheme } from '@material-ui/core/styles';
 import { PROVJSONBundle, PROVJSONDocument, relations } from './document';
+
+const defaultTheme = createMuiTheme();
 
 export const palette = {
   danger: {
@@ -18,6 +21,11 @@ export const palette = {
     light: '#ffdfa1',
     main: '#fed37f',
     dark: '#d6ae5c',
+  },
+  bundle: {
+    light: defaultTheme.palette.grey['100'],
+    main: defaultTheme.palette.grey['300'],
+    dark: defaultTheme.palette.grey['500'],
   },
 };
 
