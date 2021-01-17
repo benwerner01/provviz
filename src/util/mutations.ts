@@ -1,6 +1,8 @@
 import {
+  NodeVariant,
   PROVJSONBundle, PROVJSONDocument, RelationName, relations,
 } from './document';
+import queries from './queries';
 
 const maybeUpdateIdentifier = (identifier: string) => (
   prevID: string,
@@ -115,6 +117,26 @@ const mutations = {
       });
     },
   },
+  document: {
+    moveNode: (document: PROVJSONDocument) => (
+      oldBundleID: string, newBundleID: string, variant: NodeVariant, id: string,
+    ): PROVJSONDocument => {
+      const [_, value] = queries.bundle.getNode(document)(id);
+
+      const removed = mutations.bundle.find(document)(oldBundleID)(
+        (b) => mutations.bundle.removeNode(b)(variant, id),
+      );
+
+      if (removed) {
+        const added = mutations.bundle.find(removed)(newBundleID)(
+          (b) => mutations.bundle.addNode(b)(variant, id, value),
+        );
+        if (added) return { ...document, ...added };
+      }
+
+      throw new Error('');
+    },
+  },
   bundle: {
     create: (document: PROVJSONDocument) => (
       prefix: string, name: string,
@@ -127,6 +149,54 @@ const mutations = {
         },
       },
     }),
+    find: (bundle: PROVJSONBundle) => (bundleID: string) => (
+      callback: (b: PROVJSONBundle) => PROVJSONBundle,
+    ): PROVJSONBundle | undefined => {
+      if (bundleID === 'root') return callback(bundle);
+
+      const matchingNestedBundle = Object
+        .entries(bundle.bundle || {})
+        .find(([id]) => bundleID === id)?.[1];
+
+      if (matchingNestedBundle) {
+        return {
+          ...bundle,
+          bundle: {
+            ...bundle.bundle,
+            [bundleID]: callback(matchingNestedBundle),
+          },
+        };
+      }
+
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [id, nestedBundle] of Object.entries(bundle.bundle || {})) {
+        const res = mutations.bundle.find(nestedBundle)(bundleID)(callback);
+
+        if (res) {
+          return {
+            ...bundle,
+            bundle: { ...bundle.bundle, [id]: res },
+          };
+        }
+      }
+
+      return undefined;
+    },
+    addNode: (bundle: PROVJSONBundle) => (
+      variant: NodeVariant, id: string, value: any,
+    ): PROVJSONBundle => ({
+      ...bundle,
+      [variant]: {
+        ...bundle[variant],
+        [id]: value,
+      },
+    }),
+    removeNode: (bundle: PROVJSONBundle) => (
+      variant: NodeVariant, id: string,
+    ) => {
+      const { [id]: value, ...remaining } = bundle[variant] || {};
+      return { ...bundle, [variant]: remaining };
+    },
   },
   agent: {
     create: (document: PROVJSONDocument) => (
