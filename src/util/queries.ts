@@ -1,4 +1,5 @@
 import {
+  NodeVariant,
   PROVJSONBundle, PROVJSONDocument, RelationName, relations,
 } from './document';
 
@@ -15,6 +16,30 @@ const queries = {
         ]).flat()
         : []),
     ],
+    generateName: (document: PROVJSONDocument) => (
+      prefix: string, index: number = 0,
+    ): string => (queries.bundle.hasBundle(document)(`${prefix}:Bundle${index > 0 ? ` ${index}` : ''}`)
+      ? queries.bundle.generateName(document)(prefix, index + 1)
+      : `Bundle${index > 0 ? ` ${index}` : ''}`),
+    getNode: ({
+      agent, activity, entity, bundle,
+    }: PROVJSONBundle) => (identifier: string): [id: string, value: any] => {
+      const localNode = Object
+        .entries({
+          ...agent, ...activity, ...entity, ...bundle,
+        })
+        .find(([id, _]) => id === identifier);
+
+      if (localNode) return localNode;
+
+      // The bundle containing the nested node
+      const nestedNodeBundle = Object.values(bundle || {})
+        .find((nestedBundle) => queries.bundle.hasNode(nestedBundle)(identifier));
+
+      if (nestedNodeBundle) return queries.bundle.getNode(nestedNodeBundle)(identifier);
+
+      throw new Error(`Node with identifier ${identifier} not found`);
+    },
     hasRelation: (bundle: PROVJSONBundle) => (
       identifier: string,
     ): boolean => {
@@ -78,6 +103,18 @@ const queries = {
     getFullName: ({ prefix }: PROVJSONDocument) => (identifier: string) => (
       `${prefix[identifier.split(':')[0]]}${identifier.split(':')[1]}`
     ),
+    getVariant: (document: PROVJSONDocument) => (identifier: string): NodeVariant => {
+      if (queries.bundle.hasEntity(document)(identifier)) {
+        return 'entity';
+      } if (queries.bundle.hasActivity(document)(identifier)) {
+        return 'activity';
+      } if (queries.bundle.hasAgent(document)(identifier)) {
+        return 'agent';
+      } if (queries.bundle.hasBundle(document)(identifier)) {
+        return 'bundle';
+      }
+      throw new Error(`Node with identifier ${identifier} not found`);
+    },
   },
   agent: {
     getAll: ({ agent, bundle }: PROVJSONBundle): string[] => [
