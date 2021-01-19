@@ -22,9 +22,6 @@ const useStyles = makeStyles((theme) => ({
   wrapper: {
     position: 'relative',
     overflow: 'hidden',
-    borderStyle: 'solid',
-    borderColor: theme.palette.grey[300],
-    borderWidth: 1,
   },
   graphvizWrapper: {
     width: '100%',
