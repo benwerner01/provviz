@@ -163,7 +163,11 @@ const TreeView: React.FC<TreeViewProps> = ({ width, height }) => {
   };
 
   return (
-    <Box width={width} height={height}>
+    <Box
+      width={width}
+      style={{ maxHeight: height, transition: 'max-height 0.3s' }}
+      height="100%"
+    >
       <SortableTree
         treeData={treeData}
         onChange={handleChange}

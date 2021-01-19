@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import { PROVJSONDocument, tbdIsPROVJSONDocument } from '../util/document';
 import DocumentContext from './contexts/DocumentContext';
-import Editor from './Editor';
+import Editor, { EDITOR_CONTENT_HEIGHT } from './Editor';
 import D3Graphviz from './D3Graphviz';
 import MenuBar, { MENU_BAR_HEIGHT, View } from './MenuBar';
 import TreeView from './TreeView';
@@ -86,7 +86,11 @@ const Visualiser: React.FC<VisualiserProps> = ({
         {currentView === 'Tree' && (
           <TreeView
             width={width}
-            height={height - MENU_BAR_HEIGHT - TABS_HEIGHT}
+            height={(
+              height
+              - MENU_BAR_HEIGHT
+              - TABS_HEIGHT
+              - (displayEditor ? EDITOR_CONTENT_HEIGHT : 0))}
           />
         )}
         <Editor
