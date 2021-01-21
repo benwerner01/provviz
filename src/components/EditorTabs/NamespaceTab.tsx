@@ -1,6 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, {
+  useState, useEffect, useContext, useRef,
+} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
+import Collapse from '@material-ui/core/Collapse';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
@@ -25,6 +28,12 @@ const useEditableNamespaceStyles = makeStyles((theme) => ({
     '&:hover svg': {
       opacity: 1,
     },
+    '& > :not(:first-child)': {
+      marginLeft: theme.spacing(1),
+    },
+  },
+  errorText: {
+    color: palette.danger.main,
   },
   prefixTextFieldRoot: {
     width: PREFIX_INPUT_WIDTH,
@@ -33,10 +42,14 @@ const useEditableNamespaceStyles = makeStyles((theme) => ({
     width: PREFIX_VALUE_WIDTH,
   },
   iconButton: {
+    padding: 6,
     '& svg': {
       transition: theme.transitions.create('opacity'),
       opacity: 0,
       color: palette.danger.main,
+    },
+    '&:focus svg': {
+      opacity: 1,
     },
   },
 }));
@@ -58,42 +71,79 @@ const EditableNamespace: React.FC<EditableNamespaceProps> = ({
 }) => {
   const classes = useEditableNamespaceStyles();
 
-  const [prefix, setName] = useState<string>(initialNamespace.prefix);
+  const [prevPrefix, setPrevPrefix] = useState<string>(initialNamespace.prefix);
+  const [prefix, setPrefix] = useState<string>(initialNamespace.prefix);
+  const [prevValue, setPrevValue] = useState<string>(initialNamespace.value);
   const [value, setValue] = useState<string>(initialNamespace.value);
 
-  const nameIsValid = prefix !== '' && isUniquePrefix(prefix);
+  const prefixIsUnique = isUniquePrefix(prefix);
+
+  const prefixIsValid = prefix !== '' && prefixIsUnique;
   const valueIsValid = value !== '';
 
   useEffect(() => {
-    if (nameIsValid && prefix !== initialNamespace.prefix) updatePrefix(prefix);
-  }, [prefix, nameIsValid]);
+    if (prefixIsValid && prefix !== initialNamespace.prefix) {
+      updatePrefix(prefix);
+      setPrevPrefix(prefix);
+    }
+  }, [prefix, prefixIsValid]);
 
   useEffect(() => {
-    if (valueIsValid && value !== initialNamespace.value) updateValue(value);
+    if (valueIsValid && value !== initialNamespace.value) {
+      updateValue(value);
+      setPrevValue(value);
+    }
   }, [value, valueIsValid]);
 
   const handlePrefixChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-    setName(e.target.value);
+    setPrefix(e.target.value);
+  };
+
+  const handlePrefixBlur = () => {
+    if (!prefixIsValid) setPrefix(prevPrefix);
   };
 
   const handleValueChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     setValue(e.target.value);
   };
 
+  const handleValueBlur = () => {
+    if (!valueIsValid) setValue(prevValue);
+  };
+
   return (
-    <Box className={classes.wrapper} display="flex" alignItems="center">
-      <TextField
-        value={prefix}
-        onChange={handlePrefixChange}
-        classes={{ root: classes.prefixTextFieldRoot }}
-        error={!nameIsValid}
-      />
-      <TextField
-        value={value}
-        onChange={handleValueChange}
-        classes={{ root: classes.valueTextFieldRoot }}
-        error={!valueIsValid}
-      />
+    <Box className={classes.wrapper} display="flex" alignItems="flex-start">
+      <Box>
+        <TextField
+          value={prefix}
+          onChange={handlePrefixChange}
+          onBlur={handlePrefixBlur}
+          classes={{ root: classes.prefixTextFieldRoot }}
+          error={!prefixIsValid}
+        />
+        <Collapse in={!prefixIsValid}>
+          {prefix === '' && (
+            <Typography className={classes.errorText}>Prefix is required</Typography>
+          )}
+          {!prefixIsUnique && (
+            <Typography className={classes.errorText}>Prefix already exists</Typography>
+          )}
+        </Collapse>
+      </Box>
+      <Box>
+        <TextField
+          value={value}
+          onChange={handleValueChange}
+          onBlur={handleValueBlur}
+          classes={{ root: classes.valueTextFieldRoot }}
+          error={!valueIsValid}
+        />
+        <Collapse in={!valueIsValid}>
+          {value === '' && (
+            <Typography className={classes.errorText}>Value is required</Typography>
+          )}
+        </Collapse>
+      </Box>
       <IconButton onClick={onDelete} className={classes.iconButton}><DeleteIcon /></IconButton>
     </Box>
   );
@@ -101,49 +151,98 @@ const EditableNamespace: React.FC<EditableNamespaceProps> = ({
 
 type CreateNamespaceProps = {
   isUniquePrefix: (prefix: string) => boolean;
+  onCancel: () => void;
   onCreated: (namespace: Namespace) => void;
 }
 
 const CreateNamespace: React.FC<CreateNamespaceProps> = ({
-  isUniquePrefix, onCreated,
+  isUniquePrefix, onCreated, onCancel,
 }) => {
+  const prefixInputRef = useRef<HTMLInputElement>(null);
   const classes = useEditableNamespaceStyles();
 
   const [prefix, setPrefix] = useState<string>('');
+  const [changedPrefix, setChangedPrefix] = useState<boolean>(false);
   const [value, setValue] = useState<string>('');
+  const [changedValue, setChangedValue] = useState<boolean>(false);
 
-  const prefixIsValid = prefix !== '' && isUniquePrefix(prefix);
+  useEffect(() => {
+    if (prefixInputRef.current) prefixInputRef.current.focus();
+  }, [prefixInputRef]);
+
+  const prefixIsUnique = isUniquePrefix(prefix);
+
+  const prefixIsValid = prefix !== '' && prefixIsUnique;
   const valueIsValid = value !== '';
 
   const handlePrefixChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    if (!changedPrefix) setChangedPrefix(true);
     setPrefix(e.target.value);
   };
 
   const handleValueChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    if (!changedValue) setChangedValue(true);
     setValue(e.target.value);
+  };
+
+  const reset = () => {
+    setPrefix('');
+    setValue('');
+  };
+
+  const handleCancel = () => {
+    onCancel();
+    reset();
   };
 
   const handleCreate = () => {
     if (prefixIsValid && valueIsValid) {
       onCreated({ prefix, value });
+      reset();
     }
   };
 
   return (
-    <Box className={classes.wrapper} display="flex" alignItems="center">
-      <TextField
-        value={prefix}
-        onChange={handlePrefixChange}
-        classes={{ root: classes.prefixTextFieldRoot }}
-        error={!prefixIsValid}
-      />
-      <TextField
-        value={value}
-        onChange={handleValueChange}
-        classes={{ root: classes.valueTextFieldRoot }}
-        error={!valueIsValid}
-      />
-      <Button onClick={handleCreate} variant="contained">Create</Button>
+    <Box className={classes.wrapper} display="flex" alignItems="flex-start">
+      <Box>
+        <TextField
+          value={prefix}
+          onChange={handlePrefixChange}
+          classes={{ root: classes.prefixTextFieldRoot }}
+          error={!prefixIsValid && changedPrefix}
+          inputRef={prefixInputRef}
+        />
+        <Collapse in={!prefixIsValid && changedPrefix}>
+          {prefix === '' && (
+            <Typography className={classes.errorText}>Prefix is required</Typography>
+          )}
+          {!prefixIsUnique && (
+            <Typography className={classes.errorText}>Prefix already exists</Typography>
+          )}
+        </Collapse>
+      </Box>
+      <Box>
+        <TextField
+          value={value}
+          onChange={handleValueChange}
+          classes={{ root: classes.valueTextFieldRoot }}
+          error={!valueIsValid && changedValue}
+        />
+        <Collapse in={!valueIsValid && changedValue}>
+          {value === '' && (
+          <Typography className={classes.errorText}>Value is required</Typography>
+          )}
+        </Collapse>
+      </Box>
+      <Button onClick={handleCancel} variant="contained">Cancel</Button>
+      <Button
+        disabled={!prefixIsValid || !valueIsValid}
+        color="primary"
+        onClick={handleCreate}
+        variant="contained"
+      >
+        Create
+      </Button>
     </Box>
   );
 };
@@ -159,13 +258,13 @@ const mapDocumentToNamespaces = ({ prefix }: PROVJSONDocument) => Object
 const NamespaceTab: React.FC<NamespaceTabProps> = () => {
   const { document, setDocument } = useContext(DocumentContext);
 
-  const [namespaces, setNamespaces] = useState<Namespace[]>(mapDocumentToNamespaces(document));
+  const [namespaces, setPrefixspaces] = useState<Namespace[]>(mapDocumentToNamespaces(document));
   const [creating, setCreating] = useState<boolean>(false);
 
   const updatePrefix = (index: number) => (prefix: string) => {
     const prevPrefix = namespaces[index].prefix;
 
-    setNamespaces([
+    setPrefixspaces([
       ...namespaces.slice(0, index),
       { prefix, value: namespaces[index].value },
       ...namespaces.slice(index + 1),
@@ -177,7 +276,7 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
   const updateValue = (index: number) => (value: string) => {
     const { prefix } = namespaces[index];
 
-    setNamespaces([
+    setPrefixspaces([
       ...namespaces.slice(0, index),
       { prefix, value },
       ...namespaces.slice(index + 1),
@@ -189,14 +288,14 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
   const handleDelete = (index: number) => () => {
     const { prefix } = namespaces[index];
 
-    setNamespaces([...namespaces.slice(0, index), ...namespaces.slice(index + 1)]);
+    setPrefixspaces([...namespaces.slice(0, index), ...namespaces.slice(index + 1)]);
 
     setDocument((prev) => mutations.namespace.delete(prev)(prefix));
   };
 
   const handleCreated = (namespace: Namespace) => {
     setCreating(false);
-    setNamespaces([...namespaces, namespace]);
+    setPrefixspaces([...namespaces, namespace]);
     setDocument((prev) => mutations.namespace.create(prev)(namespace.prefix, namespace.value));
   };
 
@@ -208,6 +307,7 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
           <Typography variant="h5">Value</Typography>
         </Box>
         <Button
+          disabled={creating}
           onClick={() => setCreating(true)}
           variant="contained"
           color="primary"
@@ -216,6 +316,14 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
           Namespace
         </Button>
       </Box>
+      {creating && (
+        <CreateNamespace
+          onCancel={() => setCreating(false)}
+          onCreated={handleCreated}
+          isUniquePrefix={(name: string) => (
+            namespaces.find((p) => p.prefix === name) === undefined)}
+        />
+      )}
       {namespaces.map((namespace, index) => (
         <EditableNamespace
           // eslint-disable-next-line react/no-array-index-key
@@ -228,13 +336,6 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
             .find((p, i) => i !== index && p.prefix === name) === undefined}
         />
       ))}
-      {creating && (
-        <CreateNamespace
-          onCreated={handleCreated}
-          isUniquePrefix={(name: string) => namespaces
-            .find((p) => p.prefix === name) === undefined}
-        />
-      )}
     </>
   );
 };
