@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { SetStateAction, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import { PROVJSONDocument, tbdIsPROVJSONDocument } from '../util/document';
@@ -55,12 +55,17 @@ const Visualiser: React.FC<VisualiserProps> = ({
     }
   }, [controllingState, onChange]);
 
+  const contextDocument = controllingState ? localDocument : document;
+  const contextSetDocument = controllingState
+    ? setLocalDocument
+    : (updated: SetStateAction<PROVJSONDocument>) => {
+      if (typeof updated === 'function') onChange(updated(contextDocument));
+      onChange(updated);
+    };
+
   return (
     <DocumentContext.Provider
-      value={{
-        document: controllingState ? localDocument : document,
-        setDocument: controllingState ? setLocalDocument : onChange,
-      }}
+      value={{ document: contextDocument, setDocument: contextSetDocument }}
     >
       <Box
         className={classes.wrapper}
