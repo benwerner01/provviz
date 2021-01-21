@@ -264,11 +264,12 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
   const [creating, setCreating] = useState<boolean>(false);
 
   const debouncedUpdatePrefix = useCallback((index: number) => debounce((prefix: string) => {
+    const { key } = namespaces[index];
     const prevPrefix = namespaces[index].prefix;
 
     setNamespaces([
       ...namespaces.slice(0, index),
-      { key: `${index}-${prefix}`, prefix, value: namespaces[index].value },
+      { key, prefix, value: namespaces[index].value },
       ...namespaces.slice(index + 1),
     ]);
 
@@ -276,11 +277,11 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
   }, 200), [namespaces]);
 
   const debouncedUpdateValue = useCallback((index: number) => debounce((value: string) => {
-    const { prefix } = namespaces[index];
+    const { key, prefix } = namespaces[index];
 
     setNamespaces([
       ...namespaces.slice(0, index),
-      { key: `${index}-${prefix}`, prefix, value },
+      { key, prefix, value },
       ...namespaces.slice(index + 1),
     ]);
 
@@ -300,6 +301,8 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
     setNamespaces([...namespaces, { ...namespace, key: `${namespaces.length}-${namespace.prefix}` }]);
     setDocument((prev) => mutations.namespace.create(prev)(namespace.prefix, namespace.value));
   };
+
+  console.log('namespaces: ', namespaces);
 
   return (
     <>
