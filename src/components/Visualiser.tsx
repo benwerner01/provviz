@@ -46,14 +46,6 @@ const Visualiser: React.FC<VisualiserProps> = ({
   const [selectedNodeID, setSelectedNodeID] = useState<string | undefined>();
 
   useEffect(() => {
-    if (!controllingState && onChange) onChange(localDocument);
-  }, [controllingState, localDocument, onChange]);
-
-  useEffect(() => {
-    if (!controllingState) setLocalDocument(document);
-  }, [controllingState, document]);
-
-  useEffect(() => {
     if (controllingState && onChange !== null) {
       console.log('⚠️ WARNING: Visualiser component is changing from controlled state to uncontrolled state');
       setControllingState(false);
@@ -63,9 +55,20 @@ const Visualiser: React.FC<VisualiserProps> = ({
     }
   }, [controllingState, onChange]);
 
+  const contextDocument = controllingState ? localDocument : document;
+
+  const contextSetDocument = controllingState
+    ? setLocalDocument
+    : (action: SetStateAction<PROVJSONDocument>) => {
+      if (onChange) {
+        if (typeof action === 'function') onChange(action(contextDocument));
+        else onChange(action);
+      }
+    };
+
   return (
     <DocumentContext.Provider
-      value={{ document: localDocument, setDocument: setLocalDocument }}
+      value={{ document: contextDocument, setDocument: contextSetDocument }}
     >
       <Box
         className={classes.wrapper}
