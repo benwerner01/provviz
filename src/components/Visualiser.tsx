@@ -10,7 +10,7 @@ import TreeView from './TreeView';
 
 export type VisualiserProps = {
   document: object;
-  onChange: (newDocumnet: object) => void | null;
+  onChange: ((newDocumnet: object) => void) | null;
   width: number;
   height: number;
   wasmFolderURL: string;
@@ -46,6 +46,14 @@ const Visualiser: React.FC<VisualiserProps> = ({
   const [selectedNodeID, setSelectedNodeID] = useState<string | undefined>();
 
   useEffect(() => {
+    if (!controllingState && onChange) onChange(localDocument);
+  }, [controllingState, localDocument, onChange]);
+
+  useEffect(() => {
+    if (!controllingState) setLocalDocument(document);
+  }, [controllingState, document]);
+
+  useEffect(() => {
     if (controllingState && onChange !== null) {
       console.log('⚠️ WARNING: Visualiser component is changing from controlled state to uncontrolled state');
       setControllingState(false);
@@ -55,17 +63,9 @@ const Visualiser: React.FC<VisualiserProps> = ({
     }
   }, [controllingState, onChange]);
 
-  const contextDocument = controllingState ? localDocument : document;
-  const contextSetDocument = controllingState
-    ? setLocalDocument
-    : (updated: SetStateAction<PROVJSONDocument>) => {
-      if (typeof updated === 'function') onChange(updated(contextDocument));
-      else onChange(updated);
-    };
-
   return (
     <DocumentContext.Provider
-      value={{ document: contextDocument, setDocument: contextSetDocument }}
+      value={{ document: localDocument, setDocument: setLocalDocument }}
     >
       <Box
         className={classes.wrapper}
