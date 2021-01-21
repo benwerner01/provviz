@@ -1,5 +1,5 @@
 import React, {
-  useState, useEffect, useContext, useRef,
+  useState, useEffect, useContext, useRef, useCallback,
 } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
@@ -10,6 +10,7 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
+import debounce from 'lodash.debounce';
 import { PROVJSONDocument } from '../../util/document';
 import mutations from '../../util/mutations';
 import DocumentContext from '../contexts/DocumentContext';
@@ -261,7 +262,7 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
   const [namespaces, setPrefixspaces] = useState<Namespace[]>(mapDocumentToNamespaces(document));
   const [creating, setCreating] = useState<boolean>(false);
 
-  const updatePrefix = (index: number) => (prefix: string) => {
+  const debouncedUpdatePrefix = useCallback((index: number) => debounce((prefix: string) => {
     const prevPrefix = namespaces[index].prefix;
 
     setPrefixspaces([
@@ -271,9 +272,9 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
     ]);
 
     setDocument((prev) => mutations.namespace.updatePrefix(prev)(prevPrefix, prefix));
-  };
+  }, 200), [namespaces]);
 
-  const updateValue = (index: number) => (value: string) => {
+  const debouncedUpdateValue = useCallback((index: number) => debounce((value: string) => {
     const { prefix } = namespaces[index];
 
     setPrefixspaces([
@@ -283,7 +284,7 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
     ]);
 
     setDocument((prev) => mutations.namespace.updateValue(prev)(prefix, value));
-  };
+  }, 200), [namespaces]);
 
   const handleDelete = (index: number) => () => {
     const { prefix } = namespaces[index];
@@ -330,8 +331,8 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
           key={index}
           initialNamespace={namespace}
           onDelete={handleDelete(index)}
-          updatePrefix={updatePrefix(index)}
-          updateValue={updateValue(index)}
+          updatePrefix={debouncedUpdatePrefix(index)}
+          updateValue={debouncedUpdateValue(index)}
           isUniquePrefix={(name: string) => namespaces
             .find((p, i) => i !== index && p.prefix === name) === undefined}
         />
