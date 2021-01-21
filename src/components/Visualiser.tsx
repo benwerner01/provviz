@@ -60,7 +60,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
     ? setLocalDocument
     : (updated: SetStateAction<PROVJSONDocument>) => {
       if (typeof updated === 'function') onChange(updated(contextDocument));
-      onChange(updated);
+      else onChange(updated);
     };
 
   return (
