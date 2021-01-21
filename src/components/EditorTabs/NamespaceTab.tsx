@@ -20,6 +20,7 @@ const PREFIX_INPUT_WIDTH = 150;
 const PREFIX_VALUE_WIDTH = 300;
 
 type Namespace = {
+  key: string;
   prefix: string;
   value: string;
 }
@@ -153,7 +154,7 @@ const EditableNamespace: React.FC<EditableNamespaceProps> = ({
 type CreateNamespaceProps = {
   isUniquePrefix: (prefix: string) => boolean;
   onCancel: () => void;
-  onCreated: (namespace: Namespace) => void;
+  onCreated: (namespace: Omit<Namespace, 'key'>) => void;
 }
 
 const CreateNamespace: React.FC<CreateNamespaceProps> = ({
@@ -254,20 +255,20 @@ type NamespaceTabProps = {
 
 const mapDocumentToNamespaces = ({ prefix }: PROVJSONDocument) => Object
   .keys(prefix)
-  .map((key) => ({ prefix: key, value: prefix[key] }));
+  .map((key, i) => ({ key: `${i}-${key}`, prefix: key, value: prefix[key] }));
 
 const NamespaceTab: React.FC<NamespaceTabProps> = () => {
   const { document, setDocument } = useContext(DocumentContext);
 
-  const [namespaces, setPrefixspaces] = useState<Namespace[]>(mapDocumentToNamespaces(document));
+  const [namespaces, setNamespaces] = useState<Namespace[]>(mapDocumentToNamespaces(document));
   const [creating, setCreating] = useState<boolean>(false);
 
   const debouncedUpdatePrefix = useCallback((index: number) => debounce((prefix: string) => {
     const prevPrefix = namespaces[index].prefix;
 
-    setPrefixspaces([
+    setNamespaces([
       ...namespaces.slice(0, index),
-      { prefix, value: namespaces[index].value },
+      { key: `${index}-${prefix}`, prefix, value: namespaces[index].value },
       ...namespaces.slice(index + 1),
     ]);
 
@@ -277,9 +278,9 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
   const debouncedUpdateValue = useCallback((index: number) => debounce((value: string) => {
     const { prefix } = namespaces[index];
 
-    setPrefixspaces([
+    setNamespaces([
       ...namespaces.slice(0, index),
-      { prefix, value },
+      { key: `${index}-${prefix}`, prefix, value },
       ...namespaces.slice(index + 1),
     ]);
 
@@ -289,14 +290,14 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
   const handleDelete = (index: number) => () => {
     const { prefix } = namespaces[index];
 
-    setPrefixspaces([...namespaces.slice(0, index), ...namespaces.slice(index + 1)]);
+    setNamespaces([...namespaces.slice(0, index), ...namespaces.slice(index + 1)]);
 
     setDocument((prev) => mutations.namespace.delete(prev)(prefix));
   };
 
-  const handleCreated = (namespace: Namespace) => {
+  const handleCreated = (namespace: Omit<Namespace, 'key'>) => {
     setCreating(false);
-    setPrefixspaces([...namespaces, namespace]);
+    setNamespaces([...namespaces, { ...namespace, key: `${namespaces.length}-${namespace.prefix}` }]);
     setDocument((prev) => mutations.namespace.create(prev)(namespace.prefix, namespace.value));
   };
 
@@ -328,7 +329,7 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
       {namespaces.map((namespace, index) => (
         <EditableNamespace
           // eslint-disable-next-line react/no-array-index-key
-          key={index}
+          key={namespace.key}
           initialNamespace={namespace}
           onDelete={handleDelete(index)}
           updatePrefix={debouncedUpdatePrefix(index)}
