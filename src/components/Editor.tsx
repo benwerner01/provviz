@@ -1,19 +1,25 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, {
+  Dispatch,
+  SetStateAction,
+  useContext, useEffect, useRef, useState,
+} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Collapse from '@material-ui/core/Collapse';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import DragHandleIcon from '@material-ui/icons/DragHandle';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import { Fade, useTheme } from '@material-ui/core';
 import NamespaceTab from './EditorTabs/NamespaceTab';
 import DocumentContext from './contexts/DocumentContext';
 import queries from '../util/queries';
 import NodeTab from './EditorTabs/NodeTab';
 
-export const EDITOR_CONTENT_HEIGHT = 400;
+export const TABS_HEIGHT = 48;
 
 type TapType = {
   name: string;
@@ -40,7 +46,6 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'hidden',
   },
   content: {
-    height: EDITOR_CONTENT_HEIGHT - theme.spacing(4) - 2,
     overflowY: 'auto',
   },
   displayEditorIconButton: {
@@ -70,6 +75,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type EditorProps = {
+  contentHeight: number;
+  setContentHeight: Dispatch<SetStateAction<number>>;
   selectedNodeID: string | undefined;
   setSelectedNodeID: (id: string | undefined) => void;
   open: boolean;
@@ -77,13 +84,41 @@ type EditorProps = {
 }
 
 const Editor: React.FC<EditorProps> = ({
-  selectedNodeID, setSelectedNodeID, open, setOpen,
+  contentHeight, setContentHeight, selectedNodeID, setSelectedNodeID, open, setOpen,
 }) => {
   const { document } = useContext(DocumentContext);
   const classes = useStyles();
+  const theme = useTheme();
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [currentTabIndex, setCurrentTabIndex] = useState<number>(0);
   const [tabs, setTabs] = useState<TapType[]>(defaultTabs);
+
+  const [dragging, setDragging] = useState<boolean>(false);
+
+  const handleMouseUp = () => {
+    if (dragging) {
+      setDragging(false);
+    }
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (dragging && wrapperRef.current) {
+      const { clientY } = e;
+      const { top } = wrapperRef.current.getBoundingClientRect();
+
+      setContentHeight((prev) => prev + (top - clientY + TABS_HEIGHT / 2));
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, [dragging]);
 
   useEffect(() => {
     if (selectedNodeID) {
@@ -128,11 +163,15 @@ const Editor: React.FC<EditorProps> = ({
     if (selectedNodeID === prevID) setSelectedNodeID(updatedID);
   };
 
+  const handleDragHandleMouseDown = () => {
+    setDragging(true);
+  };
+
   const currentTabVariant = tabs[currentTabIndex].variant;
   const currentTabName = tabs[currentTabIndex].name;
 
   return (
-    <Box className={classes.wrapper}>
+    <div ref={wrapperRef} className={classes.wrapper}>
       <Box className={classes.headerWrapper} display="flex" justifyContent="space-between">
         <Tabs
           value={currentTabIndex}
@@ -161,6 +200,15 @@ const Editor: React.FC<EditorProps> = ({
             />
           ))}
         </Tabs>
+        <Fade in={open}>
+          <IconButton
+            onMouseDown={handleDragHandleMouseDown}
+            disableFocusRipple
+            disableRipple
+          >
+            <DragHandleIcon />
+          </IconButton>
+        </Fade>
         <IconButton
           onClick={() => setOpen(!open)}
           className={classes.displayEditorIconButton}
@@ -169,7 +217,12 @@ const Editor: React.FC<EditorProps> = ({
         </IconButton>
       </Box>
       <Collapse in={open}>
-        <Box className={classes.content} py={2} px={4}>
+        <Box
+          style={{ height: contentHeight - theme.spacing(4) - 2 }}
+          className={classes.content}
+          py={2}
+          px={4}
+        >
           {currentTabVariant === 'default'
             ? (currentTabName === 'Namespace' && <NamespaceTab />)
             : (
@@ -182,7 +235,7 @@ const Editor: React.FC<EditorProps> = ({
             )}
         </Box>
       </Collapse>
-    </Box>
+    </div>
   );
 };
 

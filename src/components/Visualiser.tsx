@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import { PROVJSONDocument, tbdIsPROVJSONDocument } from '../util/document';
 import DocumentContext from './contexts/DocumentContext';
-import Editor, { EDITOR_CONTENT_HEIGHT } from './Editor';
+import Editor, { TABS_HEIGHT } from './Editor';
 import D3Graphviz from './D3Graphviz';
 import MenuBar, { MENU_BAR_HEIGHT, View } from './MenuBar';
 import TreeView from './TreeView';
@@ -15,8 +15,6 @@ export type VisualiserProps = {
   height: number;
   wasmFolderURL: string;
 }
-
-const TABS_HEIGHT = 48;
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -42,6 +40,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
   const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(document);
   const [displayEditor, setDisplayEditor] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<View>('Graph');
+  const [editorContentHeight, setEditorContentHeight] = useState<number>(400);
 
   const [selectedNodeID, setSelectedNodeID] = useState<string | undefined>();
 
@@ -95,10 +94,12 @@ const Visualiser: React.FC<VisualiserProps> = ({
               height
               - MENU_BAR_HEIGHT
               - TABS_HEIGHT
-              - (displayEditor ? EDITOR_CONTENT_HEIGHT : 0))}
+              - (displayEditor ? editorContentHeight : 0))}
           />
         )}
         <Editor
+          contentHeight={editorContentHeight}
+          setContentHeight={setEditorContentHeight}
           selectedNodeID={selectedNodeID}
           setSelectedNodeID={setSelectedNodeID}
           open={displayEditor}
