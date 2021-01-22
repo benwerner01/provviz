@@ -253,15 +253,43 @@ type NamespaceTabProps = {
 
 }
 
+let counter = 0;
+
+const generateKey = () => {
+  counter += 1;
+  return counter.toString();
+};
+
+const sortNamespaces = (a: Namespace, b: Namespace) => (
+  a.prefix.charCodeAt(0) - b.prefix.charCodeAt(0));
+
 const mapDocumentToNamespaces = ({ prefix }: PROVJSONDocument) => Object
   .keys(prefix)
-  .map((key, i) => ({ key: `${i}-${key}`, prefix: key, value: prefix[key] }));
+  .map((key) => ({ key: generateKey(), prefix: key, value: prefix[key] }))
+  .sort(sortNamespaces);
+
+const namespaceHasChanged = (namespaces: Namespace[], document: PROVJSONDocument): boolean => (
+  namespaces.length !== Object.keys(document.prefix).length
+  || (Object.entries(document.prefix).find(([p, v]) => {
+    const namespace = namespaces.find(({ prefix }) => prefix === p);
+    if (!namespace || namespace.value !== v) return true;
+    return false;
+  }) !== undefined)
+);
 
 const NamespaceTab: React.FC<NamespaceTabProps> = () => {
   const { document, setDocument } = useContext(DocumentContext);
 
   const [namespaces, setNamespaces] = useState<Namespace[]>(mapDocumentToNamespaces(document));
   const [creating, setCreating] = useState<boolean>(false);
+
+  useEffect(() => {
+    // If any namespace has changed...
+    if (namespaceHasChanged(namespaces, document)) {
+      // ...let's update the local state of the namespaces
+      setNamespaces(mapDocumentToNamespaces(document));
+    }
+  }, [document]);
 
   const debouncedUpdatePrefix = useCallback((index: number) => debounce((prefix: string) => {
     const { key } = namespaces[index];
@@ -329,7 +357,6 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
       )}
       {namespaces.map((namespace, index) => (
         <EditableNamespace
-          // eslint-disable-next-line react/no-array-index-key
           key={namespace.key}
           initialNamespace={namespace}
           onDelete={handleDelete(index)}
