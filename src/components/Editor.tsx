@@ -77,6 +77,7 @@ const useStyles = makeStyles((theme) => ({
 
 type EditorProps = {
   displaySettings: boolean;
+  setDisplaySettings: (updated: boolean) => void;
   contentHeight: number;
   setContentHeight: Dispatch<SetStateAction<number>>;
   selectedNodeID: string | undefined;
@@ -87,6 +88,7 @@ type EditorProps = {
 
 const Editor: React.FC<EditorProps> = ({
   displaySettings,
+  setDisplaySettings,
   contentHeight,
   setContentHeight,
   selectedNodeID,
@@ -167,9 +169,12 @@ const Editor: React.FC<EditorProps> = ({
     }
   }, [displaySettings]);
 
-  const handleCloseTab = (name: string) => (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+  const handleCloseTab = (
+    variant: string, name: string,
+  ) => (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     e.stopPropagation();
     const tabIndex = tabs.findIndex((t) => t.name === name);
+    if (variant === 'default' && name === 'Settings') setDisplaySettings(false);
     if (tabIndex !== -1) {
       setTabs([...tabs.slice(0, tabIndex), ...tabs.slice(tabIndex + 1, tabs.length)]);
       if (currentTabIndex >= tabIndex) setCurrentTabIndex(currentTabIndex - 1);
@@ -218,7 +223,7 @@ const Editor: React.FC<EditorProps> = ({
                 : (
                   <Box display="flex" alignItems="center">
                     <Typography className={classes.tabLabel}>{name}</Typography>
-                    <Box display="flex" alignItems="center" onClick={handleCloseTab(name)} ml={1}><CloseIcon /></Box>
+                    <Box display="flex" alignItems="center" onClick={handleCloseTab(variant, name)} ml={1}><CloseIcon /></Box>
                   </Box>
                 )}
             />

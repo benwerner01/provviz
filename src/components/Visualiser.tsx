@@ -110,6 +110,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
           )}
           <Editor
             displaySettings={displaySettings}
+            setDisplaySettings={setDisplaySettings}
             contentHeight={editorContentHeight}
             setContentHeight={setEditorContentHeight}
             selectedNodeID={selectedNodeID}
