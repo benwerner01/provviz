@@ -8,11 +8,13 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import { ChromePicker } from 'react-color';
 
-const COLOR_BUTON_WIDTH = 100;
-const COLOR_BUTON_HEIGHT = 30;
+const WIDTH = 300;
+const HEIGHT = 30;
 
 const useStyles = makeStyles((theme) => ({
   label: {
+    color: theme.palette.grey[600],
+    fontSize: 12,
     marginRight: theme.spacing(1),
   },
   buttonWrapper: {
@@ -22,15 +24,14 @@ const useStyles = makeStyles((theme) => ({
     borderWidth: 1,
     borderRadius: 6,
     overflow: 'hidden',
-    transition: theme.transitions.create('max-width'),
+    width: WIDTH,
   },
   colorButton: {
     flexShrink: 0,
-    width: COLOR_BUTON_WIDTH,
-    height: COLOR_BUTON_HEIGHT,
+    height: HEIGHT,
     borderRadius: 0,
     opacity: 1,
-    transition: theme.transitions.create('opacity'),
+    transition: theme.transitions.create(['opacity', 'width']),
     '&:hover': {
       opacity: 0.8,
     },
@@ -41,8 +42,8 @@ const useStyles = makeStyles((theme) => ({
     borderLeftColor: theme.palette.grey[500],
     borderRadius: 0,
     padding: 0,
-    height: COLOR_BUTON_HEIGHT,
-    width: COLOR_BUTON_HEIGHT,
+    height: HEIGHT,
+    width: HEIGHT,
     transition: theme.transitions.create(['background-color', 'opacity']),
     backgroundColor: 'transparent',
     '&:hover': {
@@ -75,16 +76,18 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
   const displayClearButton = onClear !== undefined;
 
   return (
-    <Box mb={mb} display="flex" alignItems="center">
-      <Typography className={classes.label}>{`${label || 'Color'}: `}</Typography>
+    <Box mb={mb}>
+      <Typography className={classes.label}>{label || 'Color'}</Typography>
       <Box
-        style={{ maxWidth: COLOR_BUTON_WIDTH + (displayClearButton ? COLOR_BUTON_HEIGHT : 0) }}
         display="flex"
         className={classes.buttonWrapper}
       >
         <Button
+          style={{
+            width: displayClearButton ? WIDTH - HEIGHT : WIDTH,
+            backgroundColor: color,
+          }}
           className={classes.colorButton}
-          style={{ backgroundColor: color }}
           ref={buttonRef}
           onClick={() => setDisplayPicker(!displayPicker)}
         />
