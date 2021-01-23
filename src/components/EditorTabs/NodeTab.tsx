@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Divider from '@material-ui/core/Divider';
@@ -14,6 +15,12 @@ import ColorPicker from '../ColorPicker';
 import VisualisationContext from '../contexts/VisualisationContext';
 import Section from './Section';
 
+const useStyles = makeStyles((theme) => ({
+  formControlLabel: {
+    marginLeft: 0,
+  },
+}));
+
 type NodeTabProps = {
   variant: 'agent' | 'activity' | 'entity';
   id: string;
@@ -21,6 +28,7 @@ type NodeTabProps = {
 }
 
 const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
+  const classes = useStyles();
   const { document, setDocument } = useContext(DocumentContext);
   const { visualisationSettings, setVisualisationSettings } = useContext(VisualisationContext);
 
@@ -91,10 +99,22 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
     }
   };
 
-  const overridingColor = visualisationSettings.palette.overrides
-    .find(({ nodeID }) => nodeID === id)?.color;
+  const handleHiddenChange = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
+    setVisualisationSettings((prev) => ({
+      ...prev,
+      hidden: target.checked
+        ? [...prev.hidden, id]
+        : prev.hidden.filter((hiddenID) => hiddenID !== id),
+    }));
+  };
+
+  const { palette, hidden } = visualisationSettings;
+
+  const overridingColor = palette.overrides.find(({ nodeID }) => nodeID === id)?.color;
 
   const color = overridingColor || visualisationSettings.palette[variant];
+
+  const isHidden = hidden.includes(id);
 
   const collapsableSections = [
     {
@@ -131,10 +151,12 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
             onClear={overridingColor ? handleClearOverridingColor : undefined}
           />
           <FormControlLabel
+            className={classes.formControlLabel}
             labelPlacement="start"
             control={(
               <Checkbox
-                checked
+                checked={isHidden}
+                onChange={handleHiddenChange}
                 color="primary"
                 name="hide"
               />

@@ -33,24 +33,30 @@ const mapBundleToDots = (json: PROVJSONBundle, settings: VisualisationSettings):
       settings.view !== null
       && !PROVENANVE_VIEW_DEFINITIONS[settings.view].nodes.includes('agent')
     ) ? {} : json.agent || {})
+    .filter((id) => !settings.hidden.includes(id))
     .map(mapNodeToDot('agent', settings))),
   ...(Object
     .keys((
       settings.view !== null
       && !PROVENANVE_VIEW_DEFINITIONS[settings.view].nodes.includes('activity')
     ) ? {} : json.activity || {})
+    .filter((id) => !settings.hidden.includes(id))
     .map(mapNodeToDot('activity', settings))),
   ...(Object
     .keys((
       settings.view !== null
       && !PROVENANVE_VIEW_DEFINITIONS[settings.view].nodes.includes('entity')
     ) ? {} : json.entity || {})
+    .filter((id) => !settings.hidden.includes(id))
     .map(mapNodeToDot('entity', settings))),
   ...relations.map(({ name, domainKey, rangeKey }) => Object
     .values((
       settings.view !== null
       && !PROVENANVE_VIEW_DEFINITIONS[settings.view].relations.includes(name)
     ) ? {} : json[name] || {})
+    .filter((value) => (
+      !settings.hidden.includes(value[domainKey])
+      && !settings.hidden.includes(value[rangeKey])))
     .map((value) => (
       `"${value[domainKey]}" -> "${value[rangeKey]}" [label="${name}"${name === 'alternateOf' ? ' dir="both"' : ''}]`
     ))).flat(),
