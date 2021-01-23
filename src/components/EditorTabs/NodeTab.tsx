@@ -1,11 +1,6 @@
 import React, { useContext, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import Collapse from '@material-ui/core/Collapse';
-import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
 import DocumentContext from '../contexts/DocumentContext';
 import EditableIdentifier from '../EditableIdentifier';
 import NodeAutocomplete from '../Autocomplete/NodeAutocomplete';
@@ -14,22 +9,7 @@ import mutations from '../../util/mutations';
 import { RelationName, relations } from '../../util/document';
 import ColorPicker from '../ColorPicker';
 import VisualisationContext from '../contexts/VisualisationContext';
-
-const useStyles = makeStyles((theme) => ({
-  collapseHeadingWrapper: {
-    position: 'relative',
-    left: -1 * theme.spacing(2),
-  },
-  collapseIconButton: {
-    padding: theme.spacing(1),
-  },
-  collapseTypography: {
-    fontWeight: 800,
-  },
-  collapse: {
-    padding: theme.spacing(0, 0, 0, 3),
-  },
-}));
+import Section from './Section';
 
 type NodeTabProps = {
   variant: 'agent' | 'activity' | 'entity';
@@ -40,12 +20,6 @@ type NodeTabProps = {
 const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
   const { document, setDocument } = useContext(DocumentContext);
   const { visualisationSettings, setVisualisationSettings } = useContext(VisualisationContext);
-  const classes = useStyles();
-
-  const [collapsedSections, setCollapsedSections] = useState<boolean[]>([false, true, true]);
-  const [collapseDefinition, setCollapseDefinition] = useState<boolean>(false);
-  const [collapseRelationships, setCollapseRelationships] = useState<boolean>(true);
-  const [collapseVisualisation, setCollapseVisualisation] = useState<boolean>(true);
 
   const relationRangeIncludes = relations
     .filter(({ domain }) => domain === variant)
@@ -122,6 +96,7 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
   const collapsableSections = [
     {
       name: 'Definition',
+      initiallyOpen: true,
       content: (
         <>
           <EditableIdentifier initialID={id} onChange={onIDChange} />
@@ -166,26 +141,8 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
           {fullName}
         </Typography>
       </Box>
-      {collapsableSections.map(({ name, content }, i) => (
-        <React.Fragment key={name}>
-          <Divider />
-          <Box display="flex" alignItems="center" className={classes.collapseHeadingWrapper}>
-            <IconButton
-              className={classes.collapseIconButton}
-              onClick={() => setCollapsedSections([
-                ...collapsedSections.slice(0, i),
-                !collapsedSections[i],
-                ...collapsedSections.slice(i + 1),
-              ])}
-            >
-              <ArrowDropDownIcon style={{ transform: `rotate(${collapsedSections[i] ? -90 : 0}deg)` }} />
-            </IconButton>
-            <Typography className={classes.collapseTypography} variant="h5">{name}</Typography>
-          </Box>
-          <Collapse className={classes.collapse} in={!collapsedSections[i]}>
-            {content}
-          </Collapse>
-        </React.Fragment>
+      {collapsableSections.map(({ initiallyOpen, name, content }) => (
+        <Section key={name} initiallyOpen={initiallyOpen} name={name}>{content}</Section>
       ))}
     </>
   );
