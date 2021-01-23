@@ -6,6 +6,7 @@ import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
 import IconButton from '@material-ui/core/IconButton';
 import AccountTreeIcon from '@material-ui/icons/AccountTree';
+import SettingsIcon from '@material-ui/icons/Settings';
 import queries from '../util/queries';
 import mutations from '../util/mutations';
 import DocumentContext from './contexts/DocumentContext';
@@ -65,13 +66,14 @@ const useStyles = makeStyles((theme) => ({
 export type View = 'Graph' | 'Tree'
 
 type MenuBarProps = {
+  displaySettings: () => void;
   setSelectedNodeID: (id: string) => void;
   currentView: View;
   setCurrentView: (newCurrentView: View) => void;
 }
 
 const MenuBar: React.FC<MenuBarProps> = ({
-  setSelectedNodeID, currentView, setCurrentView,
+  displaySettings, setSelectedNodeID, currentView, setCurrentView,
 }) => {
   const { document, setDocument } = useContext(DocumentContext);
   const { visualisationSettings } = useContext(VisualisationContext);
@@ -121,7 +123,12 @@ const MenuBar: React.FC<MenuBarProps> = ({
         <Button className={classes.bundleButton} classes={buttonClasses} onClick={handleCreateBundle} variant="contained" endIcon={<AddIcon />}>Bundle</Button>
       </Box>
       <Box>
-        <IconButton onClick={() => setCurrentView(currentView === 'Graph' ? 'Tree' : 'Graph')}><AccountTreeIcon /></IconButton>
+        <IconButton onClick={() => setCurrentView(currentView === 'Graph' ? 'Tree' : 'Graph')}>
+          <AccountTreeIcon />
+        </IconButton>
+        <IconButton onClick={displaySettings}>
+          <SettingsIcon />
+        </IconButton>
       </Box>
     </Box>
   );

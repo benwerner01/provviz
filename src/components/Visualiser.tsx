@@ -48,6 +48,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
   const [editorContentHeight, setEditorContentHeight] = useState<number>(400);
 
   const [selectedNodeID, setSelectedNodeID] = useState<string | undefined>();
+  const [displaySettings, setDisplaySettings] = useState<boolean>(false);
 
   useEffect(() => {
     if (controllingState && onChange !== null) {
@@ -80,6 +81,10 @@ const Visualiser: React.FC<VisualiserProps> = ({
           style={{ width, height }}
         >
           <MenuBar
+            displaySettings={() => {
+              setDisplaySettings(true);
+              setDisplayEditor(true);
+            }}
             setSelectedNodeID={setSelectedNodeID}
             currentView={currentView}
             setCurrentView={setCurrentView}
@@ -104,6 +109,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
           />
           )}
           <Editor
+            displaySettings={displaySettings}
             contentHeight={editorContentHeight}
             setContentHeight={setEditorContentHeight}
             selectedNodeID={selectedNodeID}

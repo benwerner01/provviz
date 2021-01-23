@@ -18,6 +18,7 @@ import NamespaceTab from './EditorTabs/NamespaceTab';
 import DocumentContext from './contexts/DocumentContext';
 import queries from '../util/queries';
 import NodeTab from './EditorTabs/NodeTab';
+import SettingsTab from './EditorTabs/SettingsTab';
 
 export const TABS_HEIGHT = 48;
 
@@ -75,6 +76,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type EditorProps = {
+  displaySettings: boolean;
   contentHeight: number;
   setContentHeight: Dispatch<SetStateAction<number>>;
   selectedNodeID: string | undefined;
@@ -84,7 +86,13 @@ type EditorProps = {
 }
 
 const Editor: React.FC<EditorProps> = ({
-  contentHeight, setContentHeight, selectedNodeID, setSelectedNodeID, open, setOpen,
+  displaySettings,
+  contentHeight,
+  setContentHeight,
+  selectedNodeID,
+  setSelectedNodeID,
+  open,
+  setOpen,
 }) => {
   const { document } = useContext(DocumentContext);
   const classes = useStyles();
@@ -143,6 +151,22 @@ const Editor: React.FC<EditorProps> = ({
     }
   }, [selectedNodeID]);
 
+  useEffect(() => {
+    const existingSettingsTabIndex = tabs.findIndex(({ variant, name }) => variant === 'default' && name === 'Settings');
+    if (displaySettings) {
+      if (existingSettingsTabIndex < 0) {
+        setTabs((prev) => [
+          ...prev.slice(0, 1),
+          { name: 'Settings', variant: 'default' },
+          ...prev.slice(2),
+        ]);
+        setCurrentTabIndex(1);
+      } else {
+        setCurrentTabIndex(existingSettingsTabIndex);
+      }
+    }
+  }, [displaySettings]);
+
   const handleCloseTab = (name: string) => (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     e.stopPropagation();
     const tabIndex = tabs.findIndex((t) => t.name === name);
@@ -189,7 +213,7 @@ const Editor: React.FC<EditorProps> = ({
                 setOpen(true);
               }}
               key={name}
-              label={variant === 'default'
+              label={(variant === 'default' && name === 'Namespace')
                 ? name
                 : (
                   <Box display="flex" alignItems="center">
@@ -224,8 +248,12 @@ const Editor: React.FC<EditorProps> = ({
           px={4}
         >
           {currentTabVariant === 'default'
-            ? (currentTabName === 'Namespace' && <NamespaceTab />)
-            : (
+            ? (
+              <>
+                {currentTabName === 'Namespace' && <NamespaceTab />}
+                {currentTabName === 'Settings' && <SettingsTab />}
+              </>
+            ) : (
               <NodeTab
                 key={currentTabIndex}
                 variant={currentTabVariant}
