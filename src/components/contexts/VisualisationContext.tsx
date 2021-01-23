@@ -3,7 +3,7 @@ import React, { Dispatch, SetStateAction } from 'react';
 
 const defaultTheme = createMuiTheme();
 
-type VisualisationOverride = {
+type PaletteOverride = {
   nodeID: string;
   color: string;
 }
@@ -14,8 +14,8 @@ export type VisualisationSettings = {
     activity: string;
     entity: string;
     bundle: string;
+    overrides: PaletteOverride[];
   }
-  overrides: VisualisationOverride[];
 }
 
 export type VisualisationContext = {
@@ -29,8 +29,8 @@ export const defaultSettings: VisualisationSettings = {
     activity: '#9fb1fc',
     entity: '#fffc87',
     bundle: defaultTheme.palette.grey['300'],
+    overrides: [],
   },
-  overrides: [],
 };
 
 export default React.createContext<VisualisationContext>({

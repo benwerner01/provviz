@@ -119,7 +119,7 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
           setD3Edges(svg.selectAll<SVGGElement, EdgeGroupDatum>('.edge'));
         });
     }
-  }, [graphvizInstance, document]);
+  }, [graphvizInstance, visualisationSettings, document]);
 
   useEffect(() => {
     if (graphvizWrapper.current && graphvizInstance && d3Nodes && d3Edges) {
