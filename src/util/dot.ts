@@ -1,5 +1,5 @@
 import Color from 'color';
-import { VisualisationSettings } from '../components/contexts/VisualisationContext';
+import { PROVENANVE_VIEW_DEFINITIONS, VisualisationSettings } from '../components/contexts/VisualisationContext';
 import {
   PROVJSONBundle, PROVJSONDocument, relations,
 } from './document';
@@ -28,11 +28,29 @@ const mapBundleToDots = (json: PROVJSONBundle, settings: VisualisationSettings):
     mapBundleToDots(value, settings),
     '}',
   ])).flat(),
-  ...(Object.keys(json.agent || {}).map(mapNodeToDot('agent', settings))),
-  ...(Object.keys(json.activity || {}).map(mapNodeToDot('activity', settings))),
-  ...(Object.keys(json.entity || {}).map(mapNodeToDot('entity', settings))),
+  ...(Object
+    .keys((
+      settings.view !== null
+      && !PROVENANVE_VIEW_DEFINITIONS[settings.view].nodes.includes('agent')
+    ) ? {} : json.agent || {})
+    .map(mapNodeToDot('agent', settings))),
+  ...(Object
+    .keys((
+      settings.view !== null
+      && !PROVENANVE_VIEW_DEFINITIONS[settings.view].nodes.includes('activity')
+    ) ? {} : json.activity || {})
+    .map(mapNodeToDot('activity', settings))),
+  ...(Object
+    .keys((
+      settings.view !== null
+      && !PROVENANVE_VIEW_DEFINITIONS[settings.view].nodes.includes('entity')
+    ) ? {} : json.entity || {})
+    .map(mapNodeToDot('entity', settings))),
   ...relations.map(({ name, domainKey, rangeKey }) => Object
-    .values(json[name] || {})
+    .values((
+      settings.view !== null
+      && !PROVENANVE_VIEW_DEFINITIONS[settings.view].relations.includes(name)
+    ) ? {} : json[name] || {})
     .map((value) => (
       `"${value[domainKey]}" -> "${value[rangeKey]}" [label="${name}"${name === 'alternateOf' ? ' dir="both"' : ''}]`
     ))).flat(),
