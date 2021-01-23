@@ -34,21 +34,27 @@ const useStyles = makeStyles((theme) => ({
   activity: ({ activityColor }: TreeViewSylesProps) => ({
     '& .rst__rowContents': {
       backgroundColor: Color(activityColor).lighten(0.1).hex(),
+      color: Color(activityColor).isLight()
+        ? theme.palette.common.black
+        : theme.palette.common.white,
     },
   }),
   agent: ({ agentColor }: TreeViewSylesProps) => ({
     '& .rst__rowContents': {
       backgroundColor: Color(agentColor).lighten(0.1).hex(),
+      color: Color(agentColor).isLight() ? theme.palette.common.black : theme.palette.common.white,
     },
   }),
   entity: ({ entityColor }: TreeViewSylesProps) => ({
     '& .rst__rowContents': {
       backgroundColor: Color(entityColor).lighten(0.1).hex(),
+      color: Color(entityColor).isLight() ? theme.palette.common.black : theme.palette.common.white,
     },
   }),
   bundle: ({ bundleColor }: TreeViewSylesProps) => ({
     '& .rst__rowContents': {
       backgroundColor: Color(bundleColor).lighten(0.1).hex(),
+      color: Color(bundleColor).isLight() ? theme.palette.common.black : theme.palette.common.white,
     },
   }),
 }));

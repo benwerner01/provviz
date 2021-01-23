@@ -1,8 +1,25 @@
+import Color from 'color';
 import { VisualisationSettings } from '../components/contexts/VisualisationContext';
-import { PROVJSONBundle, PROVJSONDocument, relations } from './document';
+import {
+  PROVJSONBundle, PROVJSONDocument, relations,
+} from './document';
 
 const getNodeColor = (id: string, { palette }: VisualisationSettings) => palette
   .overrides.find(({ nodeID }) => nodeID === id)?.color;
+
+const NODE_SHAPE = {
+  agent: 'house',
+  activity: 'box',
+  entity: 'oval',
+};
+
+const mapNodeToDot = (variant: 'agent' | 'activity' | 'entity', settings: VisualisationSettings) => (id: string) => {
+  const shape = NODE_SHAPE[variant];
+  const fillcolor = getNodeColor(id, settings) || settings.palette[variant];
+  const fontcolor = Color(fillcolor).isLight() ? '#000000' : '#FFFFFF';
+
+  return `"${id}" [shape="${shape}" label="${id}" style="filled" fillcolor="${fillcolor}" fontcolor="${fontcolor}"]`;
+};
 
 const mapBundleToDots = (json: PROVJSONBundle, settings: VisualisationSettings): string => [
   ...(Object.entries(json.bundle || {}).map(([bundleID, value]) => [
@@ -11,15 +28,9 @@ const mapBundleToDots = (json: PROVJSONBundle, settings: VisualisationSettings):
     mapBundleToDots(value, settings),
     '}',
   ])).flat(),
-  ...(Object.entries(json.agent || {}).map(([agentID, _], i) => (
-    `"${agentID}" [shape="house" label="${agentID}" style="filled" fillcolor="${getNodeColor(agentID, settings) || settings.palette.agent}"]`
-  ))),
-  ...(Object.entries(json.activity || {}).map(([acitivtyID, _], i) => (
-    `"${acitivtyID}" [shape="box" label="${acitivtyID}" style="filled" fillcolor="${getNodeColor(acitivtyID, settings) || settings.palette.activity}"]`
-  ))),
-  ...(Object.entries(json.entity || {}).map(([entityID, _]) => (
-    `"${entityID}" [shape="oval" label="${entityID}" style="filled" fillcolor="${getNodeColor(entityID, settings) || settings.palette.entity}"]`
-  ))),
+  ...(Object.keys(json.agent || {}).map(mapNodeToDot('agent', settings))),
+  ...(Object.keys(json.activity || {}).map(mapNodeToDot('activity', settings))),
+  ...(Object.keys(json.entity || {}).map(mapNodeToDot('entity', settings))),
   ...relations.map(({ name, domainKey, rangeKey }) => Object
     .values(json[name] || {})
     .map((value) => (

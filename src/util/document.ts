@@ -69,8 +69,10 @@ export const relations: Relation[] = [
 
 export type NodeVariant = 'activity' | 'agent' | 'entity' | 'bundle'
 
+export const NODE_VARIANTS: NodeVariant[] = ['activity', 'agent', 'entity', 'bundle'];
+
 export const tbdIsNodeVariant = (tbd: string): tbd is NodeVariant => (
-  ['activity', 'agent', 'entity', 'bundle'].includes(tbd)
+  NODE_VARIANTS.includes(tbd as NodeVariant)
 );
 
 export interface PROVJSONBundle {

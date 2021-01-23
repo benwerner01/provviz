@@ -1,6 +1,7 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
+import Divider from '@material-ui/core/Divider';
 import DocumentContext from '../contexts/DocumentContext';
 import EditableIdentifier from '../EditableIdentifier';
 import NodeAutocomplete from '../Autocomplete/NodeAutocomplete';
@@ -141,6 +142,7 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
           {fullName}
         </Typography>
       </Box>
+      <Divider />
       {collapsableSections.map(({ initiallyOpen, name, content }) => (
         <Section key={name} initiallyOpen={initiallyOpen} name={name}>{content}</Section>
       ))}

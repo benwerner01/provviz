@@ -160,7 +160,7 @@ const Editor: React.FC<EditorProps> = ({
         setTabs((prev) => [
           ...prev.slice(0, 1),
           { name: 'Settings', variant: 'default' },
-          ...prev.slice(2),
+          ...prev.slice(1),
         ]);
         setCurrentTabIndex(1);
       } else {

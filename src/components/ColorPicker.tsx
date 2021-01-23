@@ -56,10 +56,11 @@ type ColorPickerProps = {
   initialColor: string;
   onChange: (updatedColor: string) => void;
   onClear?: () => void;
+  mb?: number;
 }
 
 const ColorPicker: React.FC<ColorPickerProps> = ({
-  label, initialColor, onChange, onClear,
+  mb, label, initialColor, onChange, onClear,
 }) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const classes = useStyles();
@@ -74,7 +75,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
   const displayClearButton = onClear !== undefined;
 
   return (
-    <Box display="flex" alignItems="center">
+    <Box mb={mb} display="flex" alignItems="center">
       <Typography className={classes.label}>{`${label || 'Color'}: `}</Typography>
       <Box
         style={{ maxWidth: COLOR_BUTON_WIDTH + (displayClearButton ? COLOR_BUTON_HEIGHT : 0) }}

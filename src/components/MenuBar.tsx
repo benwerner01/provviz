@@ -39,24 +39,28 @@ const useStyles = makeStyles((theme) => ({
   },
   agentButton: ({ agentColor }: MenuBarStyleProps) => ({
     backgroundColor: agentColor,
+    color: Color(agentColor).isLight() ? theme.palette.common.black : theme.palette.common.white,
     '&:hover': {
       backgroundColor: Color(agentColor).lighten(0.1).hex(),
     },
   }),
   activityButton: ({ activityColor }: MenuBarStyleProps) => ({
     backgroundColor: activityColor,
+    color: Color(activityColor).isLight() ? theme.palette.common.black : theme.palette.common.white,
     '&:hover': {
       backgroundColor: Color(activityColor).lighten(0.1).hex(),
     },
   }),
   entityButton: ({ entityColor }: MenuBarStyleProps) => ({
     backgroundColor: entityColor,
+    color: Color(entityColor).isLight() ? theme.palette.common.black : theme.palette.common.white,
     '&:hover': {
       backgroundColor: Color(entityColor).lighten(0.1).hex(),
     },
   }),
   bundleButton: ({ bundleColor }: MenuBarStyleProps) => ({
     backgroundColor: bundleColor,
+    color: Color(bundleColor).isLight() ? theme.palette.common.black : theme.palette.common.white,
     '&:hover': {
       backgroundColor: Color(bundleColor).lighten(0.1).hex(),
     },

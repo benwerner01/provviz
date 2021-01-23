@@ -34,7 +34,6 @@ const Section: React.FC<SectionProps> = ({ initiallyOpen, name, children }) => {
 
   return (
     <>
-      <Divider />
       <Box display="flex" alignItems="center" className={classes.headingWrapper}>
         <IconButton
           className={classes.headingIconButton}
@@ -47,6 +46,7 @@ const Section: React.FC<SectionProps> = ({ initiallyOpen, name, children }) => {
       <Collapse className={classes.collapse} in={open}>
         {children}
       </Collapse>
+      <Divider />
     </>
   );
 };
