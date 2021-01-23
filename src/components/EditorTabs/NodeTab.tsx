@@ -2,6 +2,8 @@ import React, { useContext } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Divider from '@material-ui/core/Divider';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import DocumentContext from '../contexts/DocumentContext';
 import EditableIdentifier from '../EditableIdentifier';
 import NodeAutocomplete from '../Autocomplete/NodeAutocomplete';
@@ -122,10 +124,22 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
       content: (
         <>
           <ColorPicker
+            mb={1}
             label="Override Color"
             initialColor={color}
             onChange={handleColorChange}
             onClear={overridingColor ? handleClearOverridingColor : undefined}
+          />
+          <FormControlLabel
+            labelPlacement="start"
+            control={(
+              <Checkbox
+                checked
+                color="primary"
+                name="hide"
+              />
+            )}
+            label="Hide"
           />
         </>
       ),

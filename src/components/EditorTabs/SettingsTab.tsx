@@ -8,6 +8,7 @@ import Section from './Section';
 import ColorPicker from '../ColorPicker';
 import VisualisationContext, { defaultSettings, ProvenanceView, PROVENANCE_VIEW_NAMES } from '../contexts/VisualisationContext';
 import { NodeVariant, NODE_VARIANTS } from '../../util/document';
+import Namespace from '../Namespace';
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
@@ -49,6 +50,7 @@ const SettingsTab: React.FC<SettingsTabProps> = () => {
 
   return (
     <>
+      <Section name="Namespace"><Namespace /></Section>
       <Section name="Visualisation">
         <FormControl className={classes.formControl}>
           <InputLabel id="provenance-view-select-label">Provenance View</InputLabel>

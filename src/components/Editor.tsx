@@ -14,20 +14,19 @@ import Typography from '@material-ui/core/Typography';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import { Fade, useTheme } from '@material-ui/core';
-import NamespaceTab from './EditorTabs/NamespaceTab';
 import DocumentContext from './contexts/DocumentContext';
 import queries from '../util/queries';
 import NodeTab from './EditorTabs/NodeTab';
 import SettingsTab from './EditorTabs/SettingsTab';
 
-export const TABS_HEIGHT = 48;
+export const TABS_HEIGHT = 48 + 1;
 
 type TapType = {
   name: string;
   variant: 'default' | 'agent' | 'entity' | 'activity';
 }
 
-const defaultTabs: TapType[] = [{ name: 'Namespace', variant: 'default' }];
+const defaultTabs: TapType[] = [];
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -39,6 +38,7 @@ const useStyles = makeStyles((theme) => ({
     borderTopColor: theme.palette.grey[300],
     borderTopWidth: 1,
     backgroundColor: theme.palette.common.white,
+    transition: theme.transitions.create('bottom'),
   },
   graphvizWrapper: {
     width: '100%',
@@ -101,7 +101,7 @@ const Editor: React.FC<EditorProps> = ({
   const theme = useTheme();
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const [currentTabIndex, setCurrentTabIndex] = useState<number>(0);
+  const [currentTabIndex, setCurrentTabIndex] = useState<number>(-1);
   const [tabs, setTabs] = useState<TapType[]>(defaultTabs);
 
   const [dragging, setDragging] = useState<boolean>(false);
@@ -157,12 +157,8 @@ const Editor: React.FC<EditorProps> = ({
     const existingSettingsTabIndex = tabs.findIndex(({ variant, name }) => variant === 'default' && name === 'Settings');
     if (displaySettings) {
       if (existingSettingsTabIndex < 0) {
-        setTabs((prev) => [
-          ...prev.slice(0, 1),
-          { name: 'Settings', variant: 'default' },
-          ...prev.slice(1),
-        ]);
-        setCurrentTabIndex(1);
+        setTabs((prev) => [{ name: 'Settings', variant: 'default' }, ...prev]);
+        setCurrentTabIndex(0);
       } else {
         setCurrentTabIndex(existingSettingsTabIndex);
       }
@@ -175,9 +171,14 @@ const Editor: React.FC<EditorProps> = ({
     e.stopPropagation();
     const tabIndex = tabs.findIndex((t) => t.name === name);
     if (variant === 'default' && name === 'Settings') setDisplaySettings(false);
-    if (tabIndex !== -1) {
-      setTabs([...tabs.slice(0, tabIndex), ...tabs.slice(tabIndex + 1, tabs.length)]);
-      if (currentTabIndex >= tabIndex) setCurrentTabIndex(currentTabIndex - 1);
+    if (tabIndex >= 0) {
+      const updatedTabs = [...tabs.slice(0, tabIndex), ...tabs.slice(tabIndex + 1, tabs.length)];
+      setTabs(updatedTabs);
+      if (currentTabIndex > tabIndex) setCurrentTabIndex(currentTabIndex - 1);
+      if (updatedTabs.length === 0) {
+        setCurrentTabIndex(-1);
+        setOpen(false);
+      }
     }
   };
 
@@ -196,11 +197,17 @@ const Editor: React.FC<EditorProps> = ({
     setDragging(true);
   };
 
-  const currentTabVariant = tabs[currentTabIndex].variant;
-  const currentTabName = tabs[currentTabIndex].name;
+  const currentTabVariant = currentTabIndex < 0 ? undefined : tabs[currentTabIndex].variant;
+  const currentTabName = currentTabIndex < 0 ? undefined : tabs[currentTabIndex].name;
 
   return (
-    <div ref={wrapperRef} className={classes.wrapper}>
+    <div
+      style={{
+        bottom: tabs.length === 0 ? -1 * TABS_HEIGHT : 0,
+      }}
+      ref={wrapperRef}
+      className={classes.wrapper}
+    >
       <Box className={classes.headerWrapper} display="flex" justifyContent="space-between">
         <Tabs
           value={currentTabIndex}
@@ -239,7 +246,7 @@ const Editor: React.FC<EditorProps> = ({
           </IconButton>
         </Fade>
         <IconButton
-          onClick={() => setOpen(!open)}
+          onClick={() => tabs.length > 0 && setOpen(!open)}
           className={classes.displayEditorIconButton}
         >
           <ExpandLessIcon style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }} />
@@ -252,10 +259,9 @@ const Editor: React.FC<EditorProps> = ({
           py={2}
           px={4}
         >
-          {currentTabVariant === 'default'
+          {(currentTabName && currentTabVariant) && (currentTabVariant === 'default'
             ? (
               <>
-                {currentTabName === 'Namespace' && <NamespaceTab />}
                 {currentTabName === 'Settings' && <SettingsTab />}
               </>
             ) : (
@@ -265,7 +271,7 @@ const Editor: React.FC<EditorProps> = ({
                 id={tabs[currentTabIndex].name}
                 onIDChange={handleTabIDChange(currentTabIndex)}
               />
-            )}
+            ))}
         </Box>
       </Collapse>
     </div>

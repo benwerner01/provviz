@@ -11,10 +11,10 @@ import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import debounce from 'lodash.debounce';
-import { PROVJSONDocument } from '../../util/document';
-import mutations from '../../util/mutations';
-import DocumentContext from '../contexts/DocumentContext';
-import { palette } from '../../util/theme';
+import { PROVJSONDocument } from '../util/document';
+import mutations from '../util/mutations';
+import DocumentContext from './contexts/DocumentContext';
+import { palette } from '../util/theme';
 
 const PREFIX_INPUT_WIDTH = 150;
 const PREFIX_VALUE_WIDTH = 300;
@@ -249,7 +249,7 @@ const CreateNamespace: React.FC<CreateNamespaceProps> = ({
   );
 };
 
-type NamespaceTabProps = {
+type NamespaceProps = {
 
 }
 
@@ -277,7 +277,7 @@ const namespaceHasChanged = (namespaces: Namespace[], document: PROVJSONDocument
   }) !== undefined)
 );
 
-const NamespaceTab: React.FC<NamespaceTabProps> = () => {
+const NamespaceComponent: React.FC<NamespaceProps> = () => {
   const { document, setDocument } = useContext(DocumentContext);
 
   const [namespaces, setNamespaces] = useState<Namespace[]>(mapDocumentToNamespaces(document));
@@ -370,4 +370,4 @@ const NamespaceTab: React.FC<NamespaceTabProps> = () => {
   );
 };
 
-export default NamespaceTab;
+export default NamespaceComponent;
