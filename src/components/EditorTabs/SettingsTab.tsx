@@ -69,6 +69,7 @@ const SettingsTab: React.FC<SettingsTabProps> = () => {
         {NODE_VARIANTS.map((variant) => (
           <ColorPicker
             mb={1}
+            key={variant}
             label={`Default ${variant[0].toUpperCase()}${variant.slice(1)} Color`}
             initialColor={palette[variant]}
             onChange={handleColorChange(variant)}

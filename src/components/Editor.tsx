@@ -82,6 +82,8 @@ type EditorProps = {
   setContentHeight: Dispatch<SetStateAction<number>>;
   selectedNodeID: string | undefined;
   setSelectedNodeID: (id: string | undefined) => void;
+  display: boolean;
+  setDisplay: (display: boolean) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
 }
@@ -95,6 +97,8 @@ const Editor: React.FC<EditorProps> = ({
   setSelectedNodeID,
   open,
   setOpen,
+  display,
+  setDisplay,
 }) => {
   const { document } = useContext(DocumentContext);
   const classes = useStyles();
@@ -129,6 +133,11 @@ const Editor: React.FC<EditorProps> = ({
       window.removeEventListener('mousemove', handleMouseMove);
     };
   }, [dragging]);
+
+  useEffect(() => {
+    if (tabs.length === 0) setDisplay(false);
+    else setDisplay(true);
+  }, [tabs]);
 
   useEffect(() => {
     if (selectedNodeID) {
@@ -174,7 +183,11 @@ const Editor: React.FC<EditorProps> = ({
     if (tabIndex >= 0) {
       const updatedTabs = [...tabs.slice(0, tabIndex), ...tabs.slice(tabIndex + 1, tabs.length)];
       setTabs(updatedTabs);
-      if (currentTabIndex > tabIndex) setCurrentTabIndex(currentTabIndex - 1);
+      if (
+        currentTabIndex >= tabIndex
+        && currentTabIndex !== 0) {
+        setCurrentTabIndex(currentTabIndex - 1);
+      }
       if (updatedTabs.length === 0) {
         setCurrentTabIndex(-1);
         setOpen(false);
@@ -203,7 +216,7 @@ const Editor: React.FC<EditorProps> = ({
   return (
     <div
       style={{
-        bottom: tabs.length === 0 ? -1 * TABS_HEIGHT : 0,
+        bottom: display ? 0 : -1 * TABS_HEIGHT,
       }}
       ref={wrapperRef}
       className={classes.wrapper}

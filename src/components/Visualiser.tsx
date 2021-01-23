@@ -44,6 +44,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
 
   const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(document);
   const [displayEditor, setDisplayEditor] = useState<boolean>(false);
+  const [displayEditorContent, setDisplayEditorContent] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<View>('Graph');
   const [editorContentHeight, setEditorContentHeight] = useState<number>(400);
 
@@ -83,7 +84,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
           <MenuBar
             displaySettings={() => {
               setDisplaySettings(true);
-              setDisplayEditor(true);
+              setDisplayEditorContent(true);
             }}
             setSelectedNodeID={setSelectedNodeID}
             currentView={currentView}
@@ -95,18 +96,21 @@ const Visualiser: React.FC<VisualiserProps> = ({
             setSelectedNodeID={setSelectedNodeID}
             width={width}
             wasmFolderURL={wasmFolderURL}
-            height={height - MENU_BAR_HEIGHT - TABS_HEIGHT}
-          />
-          )}
-          {currentView === 'Tree' && (
-          <TreeView
-            width={width}
             height={(
               height
               - MENU_BAR_HEIGHT
-              - TABS_HEIGHT
-              - (displayEditor ? editorContentHeight : 0))}
+              - (displayEditor ? TABS_HEIGHT : 0))}
           />
+          )}
+          {currentView === 'Tree' && (
+            <TreeView
+              width={width}
+              height={(
+                height
+                - MENU_BAR_HEIGHT
+                - (displayEditor ? TABS_HEIGHT : 0)
+                - (displayEditorContent ? editorContentHeight : 0))}
+            />
           )}
           <Editor
             displaySettings={displaySettings}
@@ -115,8 +119,10 @@ const Visualiser: React.FC<VisualiserProps> = ({
             setContentHeight={setEditorContentHeight}
             selectedNodeID={selectedNodeID}
             setSelectedNodeID={setSelectedNodeID}
-            open={displayEditor}
-            setOpen={setDisplayEditor}
+            display={displayEditor}
+            setDisplay={setDisplayEditor}
+            open={displayEditorContent}
+            setOpen={setDisplayEditorContent}
           />
         </Box>
       </VisualisationContext.Provider>
