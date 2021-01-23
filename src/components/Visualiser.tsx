@@ -7,6 +7,7 @@ import Editor, { TABS_HEIGHT } from './Editor';
 import D3Graphviz from './D3Graphviz';
 import MenuBar, { MENU_BAR_HEIGHT, View } from './MenuBar';
 import TreeView from './TreeView';
+import VisualisationContext, { VisualisationSettings, defaultSettings } from './contexts/VisualisationContext';
 
 export type VisualiserProps = {
   document: object;
@@ -36,6 +37,10 @@ const Visualiser: React.FC<VisualiserProps> = ({
   const classes = useStyles();
 
   const [controllingState, setControllingState] = useState(onChange === null);
+
+  const [
+    visualisationSettings,
+    setVisualisationSettings] = useState<VisualisationSettings>(defaultSettings);
 
   const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(document);
   const [displayEditor, setDisplayEditor] = useState<boolean>(false);
@@ -69,16 +74,17 @@ const Visualiser: React.FC<VisualiserProps> = ({
     <DocumentContext.Provider
       value={{ document: contextDocument, setDocument: contextSetDocument }}
     >
-      <Box
-        className={classes.wrapper}
-        style={{ width, height }}
-      >
-        <MenuBar
-          setSelectedNodeID={setSelectedNodeID}
-          currentView={currentView}
-          setCurrentView={setCurrentView}
-        />
-        {currentView === 'Graph' && (
+      <VisualisationContext.Provider value={{ visualisationSettings, setVisualisationSettings }}>
+        <Box
+          className={classes.wrapper}
+          style={{ width, height }}
+        >
+          <MenuBar
+            setSelectedNodeID={setSelectedNodeID}
+            currentView={currentView}
+            setCurrentView={setCurrentView}
+          />
+          {currentView === 'Graph' && (
           <D3Graphviz
             selectedNodeID={selectedNodeID}
             setSelectedNodeID={setSelectedNodeID}
@@ -86,8 +92,8 @@ const Visualiser: React.FC<VisualiserProps> = ({
             wasmFolderURL={wasmFolderURL}
             height={height - MENU_BAR_HEIGHT - TABS_HEIGHT}
           />
-        )}
-        {currentView === 'Tree' && (
+          )}
+          {currentView === 'Tree' && (
           <TreeView
             width={width}
             height={(
@@ -96,16 +102,17 @@ const Visualiser: React.FC<VisualiserProps> = ({
               - TABS_HEIGHT
               - (displayEditor ? editorContentHeight : 0))}
           />
-        )}
-        <Editor
-          contentHeight={editorContentHeight}
-          setContentHeight={setEditorContentHeight}
-          selectedNodeID={selectedNodeID}
-          setSelectedNodeID={setSelectedNodeID}
-          open={displayEditor}
-          setOpen={setDisplayEditor}
-        />
-      </Box>
+          )}
+          <Editor
+            contentHeight={editorContentHeight}
+            setContentHeight={setEditorContentHeight}
+            selectedNodeID={selectedNodeID}
+            setSelectedNodeID={setSelectedNodeID}
+            open={displayEditor}
+            setOpen={setDisplayEditor}
+          />
+        </Box>
+      </VisualisationContext.Provider>
     </DocumentContext.Provider>
   );
 };
