@@ -7,6 +7,7 @@ import { Graphviz, graphviz } from 'd3-graphviz';
 import { makeStyles } from '@material-ui/core/styles';
 import { mapDocumentToDots } from '../util/dot';
 import DocumentContext from './contexts/DocumentContext';
+import VisualisationContext from './contexts/VisualisationContext';
 
 interface Datum {
   attributes: {
@@ -68,6 +69,7 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
   width, height, wasmFolderURL, selectedNodeID, setSelectedNodeID,
 }) => {
   const { document } = useContext(DocumentContext);
+  const { visualisationSettings } = useContext(VisualisationContext);
   const classes = useStyles();
   const graphvizWrapper = useRef<HTMLDivElement>(null);
 
@@ -109,7 +111,7 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
   useEffect(() => {
     if (graphvizInstance) {
       graphvizInstance
-        .renderDot(mapDocumentToDots(document))
+        .renderDot(mapDocumentToDots(document, visualisationSettings))
         .on('end', () => {
           const svg = select(graphvizWrapper.current).select<SVGSVGElement>('svg');
 

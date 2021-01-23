@@ -14,7 +14,7 @@ import debounce from 'lodash.debounce';
 import { PROVJSONDocument } from '../../util/document';
 import mutations from '../../util/mutations';
 import DocumentContext from '../contexts/DocumentContext';
-import { palette } from '../../util/dot';
+import { palette } from '../../util/theme';
 
 const PREFIX_INPUT_WIDTH = 150;
 const PREFIX_VALUE_WIDTH = 300;

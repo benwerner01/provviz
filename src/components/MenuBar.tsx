@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import Color from 'color';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
@@ -8,9 +9,16 @@ import AccountTreeIcon from '@material-ui/icons/AccountTree';
 import queries from '../util/queries';
 import mutations from '../util/mutations';
 import DocumentContext from './contexts/DocumentContext';
-import { palette } from '../util/dot';
+import VisualisationContext from './contexts/VisualisationContext';
 
 export const MENU_BAR_HEIGHT = 48;
+
+type MenuBarStyleProps = {
+  agentColor: string;
+  activityColor: string;
+  entityColor: string;
+  bundleColor: string;
+}
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -28,24 +36,30 @@ const useStyles = makeStyles((theme) => ({
   buttonLabel: {
     textTransform: 'none',
   },
-  agentButton: {
-    backgroundColor: palette.agent.main,
+  agentButton: ({ agentColor }: MenuBarStyleProps) => ({
+    backgroundColor: agentColor,
     '&:hover': {
-      backgroundColor: palette.agent.light,
+      backgroundColor: Color(agentColor).lighten(0.1).hex(),
     },
-  },
-  activityButton: {
-    backgroundColor: palette.activity.main,
+  }),
+  activityButton: ({ activityColor }: MenuBarStyleProps) => ({
+    backgroundColor: activityColor,
     '&:hover': {
-      backgroundColor: palette.activity.light,
+      backgroundColor: Color(activityColor).lighten(0.1).hex(),
     },
-  },
-  entityButton: {
-    backgroundColor: palette.entity.main,
+  }),
+  entityButton: ({ entityColor }: MenuBarStyleProps) => ({
+    backgroundColor: entityColor,
     '&:hover': {
-      backgroundColor: palette.entity.light,
+      backgroundColor: Color(entityColor).lighten(0.1).hex(),
     },
-  },
+  }),
+  bundleButton: ({ bundleColor }: MenuBarStyleProps) => ({
+    backgroundColor: bundleColor,
+    '&:hover': {
+      backgroundColor: Color(bundleColor).lighten(0.1).hex(),
+    },
+  }),
 }));
 
 export type View = 'Graph' | 'Tree'
@@ -57,10 +71,17 @@ type MenuBarProps = {
 }
 
 const MenuBar: React.FC<MenuBarProps> = ({
-  setSelectedNodeID, currentView, setCurrentView
+  setSelectedNodeID, currentView, setCurrentView,
 }) => {
-  const classes = useStyles();
   const { document, setDocument } = useContext(DocumentContext);
+  const { visualisationSettings } = useContext(VisualisationContext);
+
+  const {
+    agent, activity, entity, bundle,
+  } = visualisationSettings.palette;
+  const classes = useStyles({
+    agentColor: agent, activityColor: activity, entityColor: entity, bundleColor: bundle,
+  });
 
   const handleCreateAgent = () => {
     const prefix = queries.prefix.getAll(document)[0];
@@ -97,7 +118,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
         <Button className={classes.agentButton} classes={buttonClasses} onClick={handleCreateAgent} variant="contained" endIcon={<AddIcon />}>Agent</Button>
         <Button className={classes.activityButton} classes={buttonClasses} onClick={handleCreateActivity} variant="contained" endIcon={<AddIcon />}>Activity</Button>
         <Button className={classes.entityButton} classes={buttonClasses} onClick={handleCreateEntity} variant="contained" endIcon={<AddIcon />}>Entity</Button>
-        <Button classes={buttonClasses} onClick={handleCreateBundle} variant="contained" endIcon={<AddIcon />}>Bundle</Button>
+        <Button className={classes.bundleButton} classes={buttonClasses} onClick={handleCreateBundle} variant="contained" endIcon={<AddIcon />}>Bundle</Button>
       </Box>
       <Box>
         <IconButton onClick={() => setCurrentView(currentView === 'Graph' ? 'Tree' : 'Graph')}><AccountTreeIcon /></IconButton>

@@ -4,15 +4,23 @@ import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import 'react-sortable-tree/style.css';
+import Color from 'color';
 import DocumentContext from './contexts/DocumentContext';
 import { PROVJSONBundle, tbdIsNodeVariant } from '../util/document';
-import { palette } from '../util/dot';
 import queries from '../util/queries';
 import mutations from '../util/mutations';
+import VisualisationContext from './contexts/VisualisationContext';
 
 type TreeViewProps = {
   width: number;
   height: number;
+}
+
+type TreeViewSylesProps = {
+  agentColor: string;
+  activityColor: string;
+  entityColor: string;
+  bundleColor: string;
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -23,26 +31,26 @@ const useStyles = makeStyles((theme) => ({
       },
     },
   },
-  activity: {
+  activity: ({ activityColor }: TreeViewSylesProps) => ({
     '& .rst__rowContents': {
-      backgroundColor: palette.activity.light,
+      backgroundColor: Color(activityColor).lighten(0.1).hex(),
     },
-  },
-  agent: {
+  }),
+  agent: ({ agentColor }: TreeViewSylesProps) => ({
     '& .rst__rowContents': {
-      backgroundColor: palette.agent.light,
+      backgroundColor: Color(agentColor).lighten(0.1).hex(),
     },
-  },
-  entity: {
+  }),
+  entity: ({ entityColor }: TreeViewSylesProps) => ({
     '& .rst__rowContents': {
-      backgroundColor: palette.entity.light,
+      backgroundColor: Color(entityColor).lighten(0.1).hex(),
     },
-  },
-  bundle: {
+  }),
+  bundle: ({ bundleColor }: TreeViewSylesProps) => ({
     '& .rst__rowContents': {
-      backgroundColor: palette.bundle.light,
+      backgroundColor: Color(bundleColor).lighten(0.1).hex(),
     },
-  },
+  }),
 }));
 
 // Whether or not a bundle is expanded in the Tree Data
@@ -130,7 +138,15 @@ const getRemovedFromBundle = (
 
 const TreeView: React.FC<TreeViewProps> = ({ width, height }) => {
   const { document, setDocument } = useContext(DocumentContext);
-  const classes = useStyles();
+  const { visualisationSettings } = useContext(VisualisationContext);
+
+  const {
+    agent, activity, entity, bundle,
+  } = visualisationSettings.palette;
+
+  const classes = useStyles({
+    agentColor: agent, activityColor: activity, entityColor: entity, bundleColor: bundle,
+  });
 
   const [treeData, setTreeData] = useState<TreeItem[]>(mapBundleToTreeData(document));
 

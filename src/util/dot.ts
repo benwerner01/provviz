@@ -1,49 +1,21 @@
-import { createMuiTheme } from '@material-ui/core/styles';
+import { VisualisationSettings } from '../components/contexts/VisualisationContext';
 import { PROVJSONBundle, PROVJSONDocument, relations } from './document';
 
-const defaultTheme = createMuiTheme();
-
-export const palette = {
-  danger: {
-    main: '#dc3545',
-  },
-  entity: {
-    light: '#fcfba9',
-    main: '#fffc87',
-    dark: '#e3e15d',
-  },
-  activity: {
-    light: '#bbc8fc',
-    main: '#9fb1fc',
-    dark: '#7a8bcc',
-  },
-  agent: {
-    light: '#ffdfa1',
-    main: '#fed37f',
-    dark: '#d6ae5c',
-  },
-  bundle: {
-    light: defaultTheme.palette.grey['100'],
-    main: defaultTheme.palette.grey['300'],
-    dark: defaultTheme.palette.grey['500'],
-  },
-};
-
-const mapBundleToDots = (json: PROVJSONBundle): string => [
+const mapBundleToDots = (json: PROVJSONBundle, settings: VisualisationSettings): string => [
   ...(Object.entries(json.bundle || {}).map(([bundleID, value]) => [
     `subgraph "cluster_${bundleID}" {`,
     `label="${bundleID}";`,
-    mapBundleToDots(value),
+    mapBundleToDots(value, settings),
     '}',
   ])).flat(),
   ...(Object.entries(json.agent || {}).map(([agentID, _], i) => (
-    `"${agentID}" [shape="house" label="${agentID}" style="filled" fillcolor="${palette.agent.main}"]`
+    `"${agentID}" [shape="house" label="${agentID}" style="filled" fillcolor="${settings.palette.agent}"]`
   ))),
   ...(Object.entries(json.activity || {}).map(([acitivtyID, _], i) => (
-    `"${acitivtyID}" [shape="box" label="${acitivtyID}" style="filled" fillcolor="${palette.activity.main}"]`
+    `"${acitivtyID}" [shape="box" label="${acitivtyID}" style="filled" fillcolor="${settings.palette.activity}"]`
   ))),
   ...(Object.entries(json.entity || {}).map(([entityID, _]) => (
-    `"${entityID}" [shape="oval" label="${entityID}" style="filled" fillcolor="${palette.entity.main}"]`
+    `"${entityID}" [shape="oval" label="${entityID}" style="filled" fillcolor="${settings.palette.entity}"]`
   ))),
   ...relations.map(({ name, domainKey, rangeKey }) => Object
     .values(json[name] || {})
@@ -52,9 +24,12 @@ const mapBundleToDots = (json: PROVJSONBundle): string => [
     ))).flat(),
 ].join('\n');
 
-export const mapDocumentToDots = (json: PROVJSONDocument): string => [
+export const mapDocumentToDots = (
+  json: PROVJSONDocument,
+  settings: VisualisationSettings,
+): string => [
   'digraph  {',
   'rankdir="BT";',
-  mapBundleToDots(json),
+  mapBundleToDots(json, settings),
   '}',
 ].join('\n');

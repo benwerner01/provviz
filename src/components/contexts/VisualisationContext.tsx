@@ -1,7 +1,21 @@
+import { createMuiTheme } from '@material-ui/core/styles';
 import React, { Dispatch, SetStateAction } from 'react';
 
-export type VisualisationSettings = {
+const defaultTheme = createMuiTheme();
 
+type VisualisationOverride = {
+  nodeID: string;
+  color: string;
+}
+
+export type VisualisationSettings = {
+  palette: {
+    agent: string;
+    activity: string;
+    entity: string;
+    bundle: string;
+  }
+  overrides: VisualisationOverride[];
 }
 
 export type VisualisationContext = {
@@ -10,10 +24,18 @@ export type VisualisationContext = {
 }
 
 export const defaultSettings: VisualisationSettings = {
-
+  palette: {
+    agent: '#fed37f',
+    activity: '#9fb1fc',
+    entity: '#fffc87',
+    bundle: defaultTheme.palette.grey['300'],
+  },
+  overrides: [],
 };
 
 export default React.createContext<VisualisationContext>({
   visualisationSettings: defaultSettings,
-  setVisualisationSettings: (dispatch: VisualisationSettings) => undefined,
+  setVisualisationSettings: (
+    dispatch: VisualisationSettings | ((action: VisualisationSettings) => VisualisationSettings),
+  ) => undefined,
 });
