@@ -13,6 +13,7 @@ import NodeAutocomplete from '../Autocomplete/NodeAutocomplete';
 import queries from '../../util/queries';
 import mutations from '../../util/mutations';
 import {
+  NodeVariant,
   PROPERTY_DEFINITIONS, PROVPropertyDefinition, RelationName, relations,
 } from '../../util/document';
 import ColorPicker from '../ColorPicker';
@@ -62,7 +63,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type NodeTabProps = {
-  variant: 'agent' | 'activity' | 'entity';
+  variant: NodeVariant;
   id: string;
   onIDChange?: (id: string) => void;
 }
