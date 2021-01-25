@@ -1,6 +1,10 @@
 import {
   NodeVariant,
-  PROVJSONBundle, PROVJSONDocument, RelationName, relations,
+  PROVJSONBundle,
+  PROVJSONDocument,
+  PROVProperty,
+  RelationName,
+  relations,
 } from './document';
 import queries from './queries';
 
@@ -196,6 +200,31 @@ const mutations = {
     ) => {
       const { [id]: value, ...remaining } = bundle[variant] || {};
       return { ...bundle, [variant]: remaining };
+    },
+    setProperty: (bundle: PROVJSONBundle) => (
+      id: string, property: PROVProperty, value: any,
+    ): PROVJSONBundle => {
+      const { domain, key } = property;
+
+      return Object.keys(bundle[domain] || {}).includes(id)
+        ? ({
+          ...bundle,
+          [domain]: {
+            ...bundle[domain],
+            [id]: {
+              ...bundle[domain]?.[id],
+              [key]: value,
+            },
+          },
+        }) : ({
+          ...bundle,
+          bundle: bundle.bundle
+            ? Object.keys(bundle.bundle).reduce((prev, bundleKey) => ({
+              ...prev,
+              [bundleKey]: mutations.bundle.setProperty(prev[bundleKey])(id, property, value),
+            }), bundle.bundle)
+            : bundle.bundle,
+        });
     },
   },
   agent: {
