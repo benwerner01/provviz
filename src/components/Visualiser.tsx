@@ -1,6 +1,7 @@
 import React, { SetStateAction, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
+import download from 'downloadjs';
 import { PROVJSONDocument, tbdIsPROVJSONDocument } from '../util/document';
 import DocumentContext from './contexts/DocumentContext';
 import Editor, { TABS_HEIGHT } from './Editor';
@@ -35,6 +36,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
 }) => {
   if (!tbdIsPROVJSONDocument(document)) throw new Error('Could not parse PROV JSON Document');
   const classes = useStyles();
+  const [svgElement, setSVGElement] = useState<SVGSVGElement | undefined>();
 
   const [controllingState, setControllingState] = useState(onChange === null);
 
@@ -72,6 +74,13 @@ const Visualiser: React.FC<VisualiserProps> = ({
       }
     };
 
+  const downloadVisualisation = () => {
+    if (svgElement) {
+      const serializedSVG = (new XMLSerializer()).serializeToString(svgElement);
+      download(new Blob([serializedSVG]), 'Visualisation.svg', 'image/svg');
+    }
+  };
+
   return (
     <DocumentContext.Provider
       value={{ document: contextDocument, setDocument: contextSetDocument }}
@@ -89,6 +98,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
             setSelectedNodeID={setSelectedNodeID}
             currentView={currentView}
             setCurrentView={setCurrentView}
+            downloadVisualisation={downloadVisualisation}
           />
           {currentView === 'Graph' && (
           <D3Graphviz
@@ -96,6 +106,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
             setSelectedNodeID={setSelectedNodeID}
             width={width}
             wasmFolderURL={wasmFolderURL}
+            setSVGElement={setSVGElement}
             height={(
               height
               - MENU_BAR_HEIGHT

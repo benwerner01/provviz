@@ -69,10 +69,11 @@ type GraphvizProps = {
   wasmFolderURL: string;
   selectedNodeID: string | undefined;
   setSelectedNodeID: (id: string | undefined) => void;
+  setSVGElement: (svg: SVGSVGElement) => void;
 }
 
 const D3Graphviz: React.FC<GraphvizProps> = ({
-  width, height, wasmFolderURL, selectedNodeID, setSelectedNodeID,
+  width, height, wasmFolderURL, selectedNodeID, setSelectedNodeID, setSVGElement,
 }) => {
   const { document } = useContext(DocumentContext);
   const { visualisationSettings } = useContext(VisualisationContext);
@@ -132,6 +133,10 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
             .selectAll<SVGGElement, ClusterGroupDatum>('.cluster')
             .filter(({ key }) => queries.bundle.hasNode(document)(key.slice(8))));
           setD3Edges(svg.selectAll<SVGGElement, EdgeGroupDatum>('.edge'));
+
+          const svgElement = svg.node();
+
+          if (svgElement) setSVGElement(svgElement);
         });
     }
   }, [graphvizInstance, visualisationSettings, document]);
