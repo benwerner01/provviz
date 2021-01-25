@@ -13,29 +13,29 @@ const NODE_SHAPE = {
   entity: 'oval',
 };
 
-const renderPropertyValue = (value: any) => (typeof value === 'object' ? value.$ : value);
+const renderAttributeValue = (value: any) => (typeof value === 'object' ? value.$ : value);
 
 const mapNodeToDot = (variant: 'agent' | 'activity' | 'entity', settings: VisualisationSettings) => (
-  node: [string, { [propertyKey: string]: any; }],
+  node: [string, { [attributeKey: string]: any; }],
 ) => {
   const id = node[0];
   const shape = NODE_SHAPE[variant];
   const fillcolor = getNodeColor(id, settings) || settings.palette[variant];
   const fontcolor = Color(fillcolor).isLight() ? '#000000' : '#FFFFFF';
 
-  const properties = Object.entries(node[1] || {});
+  const attributes = Object.entries(node[1] || {});
 
   return [
     `"${id}" [shape="${shape}" label="${id}" style="filled" fillcolor="${fillcolor}" fontcolor="${fontcolor}"]`,
     (
-      properties.length > 0
-      && !settings.hideAllNodeProperties
-      && !settings.hideAllPropertiesForNode.includes(id)
+      attributes.length > 0
+      && !settings.hideAllNodeAttributes
+      && !settings.hideAllAttributesForNode.includes(id)
     ) ? [
-        `"${id}_properties" [shape="note" label="${properties
-          .filter(([propertyID]) => !settings.hidden.includes(`${id}_${propertyID}`))
-          .map(([propertyID, value]) => `${propertyID}=${renderPropertyValue(value)}`).join('\n')}"]`,
-        `"${id}" -> "${id}_properties" [style="dotted" dir="none"]`,
+        `"${id}_attributes" [shape="note" label="${attributes
+          .filter(([attributeID]) => !settings.hidden.includes(`${id}_${attributeID}`))
+          .map(([attributeID, value]) => `${attributeID}=${renderAttributeValue(value)}`).join('\n')}"]`,
+        `"${id}" -> "${id}_attributes" [style="dotted" dir="none"]`,
       ] : [],
   ].flat().join('\n');
 };

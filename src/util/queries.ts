@@ -2,7 +2,7 @@ import {
   NodeVariant,
   PROVJSONBundle,
   PROVJSONDocument,
-  PROVPropertyDefinition,
+  PROVAttributeDefinition,
   RelationName,
   relations,
 } from './document';
@@ -44,17 +44,17 @@ const queries = {
 
       throw new Error(`Node with identifier ${identifier} not found`);
     },
-    getPropertyValue: (bundle: PROVJSONBundle) => (
-      property: PROVPropertyDefinition, id: string,
+    getAttributeValue: (bundle: PROVJSONBundle) => (
+      attribute: PROVAttributeDefinition, id: string,
     ): any | null => {
-      const { domain, key } = property;
+      const { domain, key } = attribute;
       if (Object.keys(bundle[domain] || {}).includes(id)) {
         return bundle[domain]?.[id][key];
       }
       if (bundle.bundle) {
         // eslint-disable-next-line no-restricted-syntax
         for (const value of Object.values(bundle.bundle)) {
-          const result = queries.bundle.getPropertyValue(value)(property, id);
+          const result = queries.bundle.getAttributeValue(value)(attribute, id);
           if (result !== null) return result;
         }
       }

@@ -79,11 +79,11 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
         ...prev, hidden: [...prev.hidden.filter((id) => id !== prevID), updatedID],
       }));
     }
-    if (visualisationSettings.hideAllPropertiesForNode.includes(prevID)) {
+    if (visualisationSettings.hideAllAttributesForNode.includes(prevID)) {
       setVisualisationSettings((prev) => ({
         ...prev,
-        hideAllPropertiesForNode: [
-          ...prev.hideAllPropertiesForNode.filter((id) => id !== prevID),
+        hideAllAttributesForNode: [
+          ...prev.hideAllAttributesForNode.filter((id) => id !== prevID),
           updatedID,
         ],
       }));

@@ -75,16 +75,16 @@ export const tbdIsNodeVariant = (tbd: string): tbd is NodeVariant => (
   NODE_VARIANTS.includes(tbd as NodeVariant)
 );
 
-export type PROVPropertyRange = 'DateTime'
+export type PROVAttributeRange = 'DateTime'
 
-export type PROVPropertyDefinition = {
+export type PROVAttributeDefinition = {
   name: string;
   key: string;
   domain: NodeVariant;
-  range: PROVPropertyRange
+  range: PROVAttributeRange
 }
 
-export const PROPERTY_DEFINITIONS: PROVPropertyDefinition[] = [
+export const ATTRIBUTE_DEFINITIONS: PROVAttributeDefinition[] = [
   {
     name: 'Started At Time',
     key: 'prov:startedAtTime',
@@ -105,7 +105,7 @@ export interface PROVJSONBundle {
   }
   agent?: {
     [agentID: string]: {
-      [propertyKey: string]: any;
+      [attributeKey: string]: any;
     }
   }
   actedOnBehalfOf?: {
@@ -126,7 +126,7 @@ export interface PROVJSONBundle {
     [acitivtyID: string]: {
       'prov:activity'?: string;
       'prov:plan'?: string;
-      [propertyKey: string]: any;
+      [attributeKey: string]: any;
     }
   }
   wasInformedBy?: {
@@ -151,7 +151,7 @@ export interface PROVJSONBundle {
   }
   entity?: {
     [entityID: string]: {
-      [propertyKey: string]: any;
+      [attributeKey: string]: any;
     }
   }
   wasGeneratedBy?: {

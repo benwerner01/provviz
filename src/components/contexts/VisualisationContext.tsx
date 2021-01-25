@@ -47,8 +47,8 @@ export type VisualisationSettings = {
     overrides: PaletteOverride[];
   }
   hidden: string[];
-  hideAllNodeProperties: boolean;
-  hideAllPropertiesForNode: string[];
+  hideAllNodeAttributes: boolean;
+  hideAllAttributesForNode: string[];
   view: ProvenanceView | null;
 }
 
@@ -66,8 +66,8 @@ export const defaultSettings: VisualisationSettings = {
     overrides: [],
   },
   hidden: [],
-  hideAllNodeProperties: false,
-  hideAllPropertiesForNode: [],
+  hideAllNodeAttributes: false,
+  hideAllAttributesForNode: [],
   view: null,
 };
 

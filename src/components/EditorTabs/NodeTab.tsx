@@ -14,7 +14,7 @@ import queries from '../../util/queries';
 import mutations from '../../util/mutations';
 import {
   NodeVariant,
-  PROPERTY_DEFINITIONS, PROVJSONDocument, PROVPropertyDefinition, RelationName, relations,
+  ATTRIBUTE_DEFINITIONS, PROVJSONDocument, PROVAttributeDefinition, RelationName, relations,
 } from '../../util/document';
 import ColorPicker from '../ColorPicker';
 import VisualisationContext from '../contexts/VisualisationContext';
@@ -27,26 +27,26 @@ const useDateTimeStyles = makeStyles((theme) => ({
   },
 }));
 
-type DateTimePropertyProps = {
+type DateTimeAttributeProps = {
   domainID: string;
-  property: PROVPropertyDefinition;
+  attribute: PROVAttributeDefinition;
 }
 
-const DateTimeProperty: React.FC<DateTimePropertyProps> = ({
-  domainID, property,
+const DateTimeAttribute: React.FC<DateTimeAttributeProps> = ({
+  domainID, attribute,
 }) => {
   const classes = useDateTimeStyles();
   const { document, setDocument } = useContext(DocumentContext);
 
   return (
     <TextField
-      label={property.name}
+      label={attribute.name}
       type="datetime-local"
       classes={classes}
-      value={queries.bundle.getPropertyValue(document)(property, domainID)}
+      value={queries.bundle.getAttributeValue(document)(attribute, domainID)}
       onChange={(e) => setDocument((prev) => ({
         ...prev,
-        ...mutations.bundle.setProperty(document)(domainID, property, e.target.value),
+        ...mutations.bundle.setAttribute(document)(domainID, attribute, e.target.value),
       }))}
       InputLabelProps={{ shrink: true }}
     />
@@ -155,7 +155,7 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
     }));
   };
 
-  const { palette, hidden, hideAllPropertiesForNode } = visualisationSettings;
+  const { palette, hidden, hideAllAttributesForNode } = visualisationSettings;
 
   const overridingColor = palette.overrides.find(({ nodeID }) => nodeID === id)?.color;
 
@@ -163,7 +163,7 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
 
   const isHidden = hidden.includes(id);
 
-  const allPropertiesAreHidden = hideAllPropertiesForNode.includes(id);
+  const allAttributesAreHidden = hideAllAttributesForNode.includes(id);
 
   const collapsableSections = [
     {
@@ -172,11 +172,11 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
       content: (
         <>
           <EditableIdentifier initialID={id} onChange={onIDChange} />
-          {PROPERTY_DEFINITIONS
+          {ATTRIBUTE_DEFINITIONS
             .filter(({ domain }) => domain === variant)
             .map((p) => (
               <React.Fragment key={p.name}>
-                {p.range === 'DateTime' && <DateTimeProperty property={p} domainID={id} />}
+                {p.range === 'DateTime' && <DateTimeAttribute attribute={p} domainID={id} />}
               </React.Fragment>
             ))}
         </>
@@ -227,18 +227,18 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
               labelPlacement="start"
               control={(
                 <Checkbox
-                  checked={allPropertiesAreHidden}
+                  checked={allAttributesAreHidden}
                   onChange={({ target }) => setVisualisationSettings((prev) => ({
                     ...prev,
-                    hideAllPropertiesForNode: target.checked
-                      ? [...prev.hideAllPropertiesForNode, id]
-                      : prev.hideAllPropertiesForNode.filter((hiddenID) => hiddenID !== id),
+                    hideAllAttributesForNode: target.checked
+                      ? [...prev.hideAllAttributesForNode, id]
+                      : prev.hideAllAttributesForNode.filter((hiddenID) => hiddenID !== id),
                   }))}
                   color="primary"
                   name="hide"
                 />
             )}
-              label="Hide All Properties"
+              label="Hide All Attributes"
             />
           </FormControl>
         </>

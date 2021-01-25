@@ -92,15 +92,15 @@ const SettingsTab: React.FC<SettingsTabProps> = () => {
             labelPlacement="start"
             control={(
               <Checkbox
-                checked={visualisationSettings.hideAllNodeProperties}
+                checked={visualisationSettings.hideAllNodeAttributes}
                 onChange={({ target }) => setVisualisationSettings((prev) => ({
-                  ...prev, hideAllNodeProperties: target.checked,
+                  ...prev, hideAllNodeAttributes: target.checked,
                 }))}
                 color="primary"
                 name="hide"
               />
             )}
-            label="Hide All Properties"
+            label="Hide All Attributes"
           />
         </FormControl>
       </Section>

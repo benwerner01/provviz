@@ -2,7 +2,7 @@ import {
   NodeVariant,
   PROVJSONBundle,
   PROVJSONDocument,
-  PROVPropertyDefinition,
+  PROVAttributeDefinition,
   RelationName,
   relations,
 } from './document';
@@ -201,10 +201,10 @@ const mutations = {
       const { [id]: value, ...remaining } = bundle[variant] || {};
       return { ...bundle, [variant]: remaining };
     },
-    setProperty: (bundle: PROVJSONBundle) => (
-      id: string, property: PROVPropertyDefinition, value: any,
+    setAttribute: (bundle: PROVJSONBundle) => (
+      id: string, attribute: PROVAttributeDefinition, value: any,
     ): PROVJSONBundle => {
-      const { domain, key } = property;
+      const { domain, key } = attribute;
 
       return Object.keys(bundle[domain] || {}).includes(id)
         ? ({
@@ -221,7 +221,7 @@ const mutations = {
           bundle: bundle.bundle
             ? Object.keys(bundle.bundle).reduce((prev, bundleKey) => ({
               ...prev,
-              [bundleKey]: mutations.bundle.setProperty(prev[bundleKey])(id, property, value),
+              [bundleKey]: mutations.bundle.setAttribute(prev[bundleKey])(id, attribute, value),
             }), bundle.bundle)
             : bundle.bundle,
         });
