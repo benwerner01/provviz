@@ -5,13 +5,14 @@ import TextField from '@material-ui/core/TextField';
 import DocumentContext from '../contexts/DocumentContext';
 import queries from '../../util/queries';
 import mutations from '../../util/mutations';
+import { PROVJSONDocument } from '../../util/document';
 
 type NodeAutocompleteProps = {
   label: string;
   value: string[];
   exclude?: string[];
   variant: 'agent' | 'activity' | 'entity';
-  onChange: (value: string[]) => void;
+  onChange: (updatedDocument: PROVJSONDocument, value: string[]) => void;
 }
 
 type NewNode = {
@@ -53,14 +54,18 @@ const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
       multiple
       value={value}
       options={options}
-      onChange={(_, updated) => onChange(updated.map((item) => {
-        if (typeof item === 'string') {
-          return item;
-        }
-        const { prefix, name } = item;
-        setDocument((prevDocument) => mutations[variant].create(prevDocument)(prefix, name));
-        return `${prefix || defaultPrefix}:${name}`;
-      }))}
+      onChange={(_, updated) => {
+        let updatedDocument = { ...document };
+        const values = updated.map((item) => {
+          if (typeof item === 'string') {
+            return item;
+          }
+          const { prefix, name } = item;
+          updatedDocument = mutations[variant].create(updatedDocument)(prefix, name);
+          return `${prefix || defaultPrefix}:${name}`;
+        });
+        onChange(updatedDocument, values);
+      }}
       classes={autocompleteClasses}
       renderInput={(params) => (
         <TextField

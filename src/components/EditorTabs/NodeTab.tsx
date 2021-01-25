@@ -14,7 +14,7 @@ import queries from '../../util/queries';
 import mutations from '../../util/mutations';
 import {
   NodeVariant,
-  PROPERTY_DEFINITIONS, PROVPropertyDefinition, RelationName, relations,
+  PROPERTY_DEFINITIONS, PROVJSONDocument, PROVPropertyDefinition, RelationName, relations,
 } from '../../util/document';
 import ColorPicker from '../ColorPicker';
 import VisualisationContext from '../contexts/VisualisationContext';
@@ -80,25 +80,31 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
       [name]: queries.relation.getRangeWithDomain(document)(name, id),
     }), {} as { [key: string]: string[] });
 
-  const handleRelationRangeChange = (relationName: RelationName) => (rangeIDs: string[]) => {
+  const handleRelationRangeChange = (relationName: RelationName) => (
+    updatedDocument: PROVJSONDocument, rangeIDs: string[],
+  ) => {
     const rangeIncludes = relationRangeIncludes[relationName];
     const add = rangeIDs.filter((rangeID) => !rangeIncludes.includes(rangeID));
     const remove = rangeIncludes.filter((rangeID) => !rangeIDs.includes(rangeID));
 
     add.forEach((activityID) => {
       const relationID = queries.relation.generateID(document);
-      setDocument((prevDocument) => (
-        mutations.relation.create(prevDocument)(relationName, relationID, id, activityID)));
+      // eslint-disable-next-line no-param-reassign
+      updatedDocument = mutations.relation.create(updatedDocument)(
+        relationName, relationID, id, activityID,
+      );
     });
     remove.forEach((activityID) => {
       const relationID = queries.relation.getID(document)(relationName, id, activityID);
       if (!relationID) throw new Error('Could not find relationID');
-
-      setDocument((prevDocument) => ({
-        ...prevDocument,
-        ...mutations.relation.delete(prevDocument)(relationName, relationID),
-      }));
+      // eslint-disable-next-line no-param-reassign
+      updatedDocument = {
+        ...updatedDocument,
+        ...mutations.relation.delete(updatedDocument)(relationName, relationID),
+      };
     });
+
+    setDocument(updatedDocument);
   };
 
   const fullName = queries.node.getFullName(document)(id);
