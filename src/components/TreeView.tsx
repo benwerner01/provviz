@@ -14,6 +14,8 @@ import VisualisationContext from './contexts/VisualisationContext';
 type TreeViewProps = {
   width: number;
   height: number;
+  selectedNodeID: string | undefined;
+  setSelectedNodeID: (id: string | undefined) => void;
 }
 
 type TreeViewSylesProps = {
@@ -29,6 +31,11 @@ const useStyles = makeStyles((theme) => ({
       '&:hover': {
         cursor: 'pointer',
       },
+    },
+  },
+  selectedNode: {
+    '& .rst__moveHandle': {
+      backgroundColor: 'red',
     },
   },
   activity: ({ activityColor }: TreeViewSylesProps) => ({
@@ -142,7 +149,9 @@ const getRemovedFromBundle = (
     })),
 ].flat();
 
-const TreeView: React.FC<TreeViewProps> = ({ width, height }) => {
+const TreeView: React.FC<TreeViewProps> = ({
+  width, height, selectedNodeID, setSelectedNodeID,
+}) => {
   const { document, setDocument } = useContext(DocumentContext);
   const { visualisationSettings } = useContext(VisualisationContext);
 
@@ -198,7 +207,9 @@ const TreeView: React.FC<TreeViewProps> = ({ width, height }) => {
           className: [
             classes.node,
             tbdIsNodeVariant(node.variant) ? classes[node.variant] : [],
+            selectedNodeID === node.key ? classes.selectedNode : [],
           ].flat().join(' '),
+          onClick: () => setSelectedNodeID(node.key),
         })}
       />
     </Box>

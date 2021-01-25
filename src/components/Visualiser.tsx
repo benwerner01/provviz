@@ -110,6 +110,8 @@ const Visualiser: React.FC<VisualiserProps> = ({
                 - MENU_BAR_HEIGHT
                 - (displayEditor ? TABS_HEIGHT : 0)
                 - (displayEditorContent ? editorContentHeight : 0))}
+              selectedNodeID={selectedNodeID}
+              setSelectedNodeID={setSelectedNodeID}
             />
           )}
           <Editor
