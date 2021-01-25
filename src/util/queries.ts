@@ -1,6 +1,10 @@
 import {
   NodeVariant,
-  PROVJSONBundle, PROVJSONDocument, RelationName, relations,
+  PROVJSONBundle,
+  PROVJSONDocument,
+  PROVProperty,
+  RelationName,
+  relations,
 } from './document';
 
 const queries = {
@@ -39,6 +43,22 @@ const queries = {
       if (nestedNodeBundle) return queries.bundle.getNode(nestedNodeBundle)(identifier);
 
       throw new Error(`Node with identifier ${identifier} not found`);
+    },
+    getPropertyValue: (bundle: PROVJSONBundle) => (
+      property: PROVProperty, id: string,
+    ): any | null => {
+      const { domain, key } = property;
+      if (Object.keys(bundle[domain] || {}).includes(id)) {
+        return bundle[domain]?.[id][key];
+      }
+      if (bundle.bundle) {
+        // eslint-disable-next-line no-restricted-syntax
+        for (const value of Object.values(bundle.bundle)) {
+          const result = queries.bundle.getPropertyValue(value)(property, id);
+          if (result !== null) return result;
+        }
+      }
+      return null;
     },
     hasRelation: (bundle: PROVJSONBundle) => (
       identifier: string,
