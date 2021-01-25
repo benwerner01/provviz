@@ -41,12 +41,15 @@ const mapNodeToDot = (variant: 'agent' | 'activity' | 'entity', settings: Visual
 };
 
 const mapBundleToDots = (json: PROVJSONBundle, settings: VisualisationSettings): string => [
-  ...(Object.entries(json.bundle || {}).map(([bundleID, value]) => [
-    `subgraph "cluster_${bundleID}" {`,
-    `label="${bundleID}";`,
-    mapBundleToDots(value, settings),
-    '}',
-  ])).flat(),
+  ...(Object
+    .entries(json.bundle || {})
+    .filter(([id]) => !settings.hidden.includes(id))
+    .map(([bundleID, value]) => [
+      `subgraph "cluster_${bundleID}" {`,
+      `label="${bundleID}";`,
+      mapBundleToDots(value, settings),
+      '}',
+    ])).flat(),
   ...(Object
     .entries((
       settings.view !== null

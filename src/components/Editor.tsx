@@ -18,12 +18,13 @@ import DocumentContext from './contexts/DocumentContext';
 import queries from '../util/queries';
 import NodeTab from './EditorTabs/NodeTab';
 import SettingsTab from './EditorTabs/SettingsTab';
+import { NodeVariant } from '../util/document';
 
 export const TABS_HEIGHT = 48 + 1;
 
 type TapType = {
   name: string;
-  variant: 'default' | 'agent' | 'entity' | 'activity';
+  variant: 'default' | NodeVariant;
 }
 
 const defaultTabs: TapType[] = [];
@@ -144,13 +145,14 @@ const Editor: React.FC<EditorProps> = ({
       const existingTabIndex = tabs.findIndex(({ name }) => name === selectedNodeID);
 
       if (existingTabIndex < 0) {
-        const variant: 'entity' | 'activity' | 'agent' | undefined = queries.bundle.hasEntity(document)(selectedNodeID)
+        const variant: NodeVariant | undefined = queries.bundle.hasEntity(document)(selectedNodeID)
           ? 'entity'
           : queries.bundle.hasActivity(document)(selectedNodeID)
             ? 'activity'
             : queries.bundle.hasAgent(document)(selectedNodeID)
               ? 'agent'
-              : undefined;
+              : queries.bundle.hasBundle(document)(selectedNodeID)
+                ? 'bundle' : undefined;
 
         if (!variant) throw new Error(`Could not find variant of selected node with identifier ${selectedNodeID}`);
         const updatedTabs = [...tabs, { name: selectedNodeID, variant }];
