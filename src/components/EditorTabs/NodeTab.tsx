@@ -6,6 +6,7 @@ import Divider from '@material-ui/core/Divider';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import TextField from '@material-ui/core/TextField';
+import FormControl from '@material-ui/core/FormControl';
 import DocumentContext from '../contexts/DocumentContext';
 import EditableIdentifier from '../EditableIdentifier';
 import NodeAutocomplete from '../Autocomplete/NodeAutocomplete';
@@ -52,6 +53,9 @@ const DateTimeProperty: React.FC<DateTimePropertyProps> = ({
 };
 
 const useStyles = makeStyles((theme) => ({
+  formControl: {
+    display: 'block',
+  },
   formControlLabel: {
     marginLeft: 0,
   },
@@ -144,13 +148,15 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
     }));
   };
 
-  const { palette, hidden } = visualisationSettings;
+  const { palette, hidden, hideAllPropertiesForNode } = visualisationSettings;
 
   const overridingColor = palette.overrides.find(({ nodeID }) => nodeID === id)?.color;
 
   const color = overridingColor || visualisationSettings.palette[variant];
 
   const isHidden = hidden.includes(id);
+
+  const allPropertiesAreHidden = hideAllPropertiesForNode.includes(id);
 
   const collapsableSections = [
     {
@@ -193,19 +199,41 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
             onChange={handleColorChange}
             onClear={overridingColor ? handleClearOverridingColor : undefined}
           />
-          <FormControlLabel
-            className={classes.formControlLabel}
-            labelPlacement="start"
-            control={(
-              <Checkbox
-                checked={isHidden}
-                onChange={handleHiddenChange}
-                color="primary"
-                name="hide"
-              />
+          <FormControl className={classes.formControl}>
+            <FormControlLabel
+              className={classes.formControlLabel}
+              labelPlacement="start"
+              control={(
+                <Checkbox
+                  checked={isHidden}
+                  onChange={handleHiddenChange}
+                  color="primary"
+                  name="hide"
+                />
             )}
-            label="Hide"
-          />
+              label="Hide"
+            />
+          </FormControl>
+          <FormControl className={classes.formControl}>
+            <FormControlLabel
+              className={classes.formControlLabel}
+              labelPlacement="start"
+              control={(
+                <Checkbox
+                  checked={allPropertiesAreHidden}
+                  onChange={({ target }) => setVisualisationSettings((prev) => ({
+                    ...prev,
+                    hideAllPropertiesForNode: target.checked
+                      ? [...prev.hideAllPropertiesForNode, id]
+                      : prev.hideAllPropertiesForNode.filter((hiddenID) => hiddenID !== id),
+                  }))}
+                  color="primary"
+                  name="hide"
+                />
+            )}
+              label="Hide All Properties"
+            />
+          </FormControl>
         </>
       ),
     },

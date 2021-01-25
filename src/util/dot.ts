@@ -27,8 +27,11 @@ const mapNodeToDot = (variant: 'agent' | 'activity' | 'entity', settings: Visual
 
   return [
     `"${id}" [shape="${shape}" label="${id}" style="filled" fillcolor="${fillcolor}" fontcolor="${fontcolor}"]`,
-    properties.length > 0 && !settings.hideNodeProperties && !settings.hidden.includes(`${id}_properties`)
-      ? [
+    (
+      properties.length > 0
+      && !settings.hideAllNodeProperties
+      && !settings.hideAllPropertiesForNode.includes(id)
+    ) ? [
         `"${id}_properties" [shape="note" label="${properties
           .filter(([propertyID]) => !settings.hidden.includes(`${id}_${propertyID}`))
           .map(([propertyID, value]) => `${propertyID}=${renderPropertyValue(value)}`).join('\n')}"]`,

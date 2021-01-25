@@ -17,6 +17,9 @@ const useStyles = makeStyles((theme) => ({
     width: 300,
     marginBottom: theme.spacing(1),
   },
+  formControlCheckbox: {
+    display: 'block',
+  },
   formControlLabel: {
     marginLeft: 0,
   },
@@ -83,22 +86,23 @@ const SettingsTab: React.FC<SettingsTabProps> = () => {
               : handleColorClear(variant)}
           />
         ))}
-        <FormControlLabel
-          className={classes.formControlLabel}
-          labelPlacement="start"
-          control={(
-            <Checkbox
-              checked={visualisationSettings.hideNodeProperties}
-              onChange={({ target }) => setVisualisationSettings((prev) => ({
-                ...prev,
-                hideNodeProperties: target.checked,
-              }))}
-              color="primary"
-              name="hide"
-            />
+        <FormControl className={classes.formControlCheckbox}>
+          <FormControlLabel
+            className={classes.formControlLabel}
+            labelPlacement="start"
+            control={(
+              <Checkbox
+                checked={visualisationSettings.hideAllNodeProperties}
+                onChange={({ target }) => setVisualisationSettings((prev) => ({
+                  ...prev, hideAllNodeProperties: target.checked,
+                }))}
+                color="primary"
+                name="hide"
+              />
             )}
-          label="Hide All Properties"
-        />
+            label="Hide All Properties"
+          />
+        </FormControl>
       </Section>
     </>
   );
