@@ -8,6 +8,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { mapDocumentToDots } from '../util/dot';
 import DocumentContext from './contexts/DocumentContext';
 import VisualisationContext from './contexts/VisualisationContext';
+import queries from '../util/queries';
 
 interface Datum {
   attributes: {
@@ -115,7 +116,9 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
         .on('end', () => {
           const svg = select(graphvizWrapper.current).select<SVGSVGElement>('svg');
 
-          setD3Nodes(svg.selectAll<SVGGElement, NodeGroupDatum>('.node'));
+          setD3Nodes(svg
+            .selectAll<SVGGElement, NodeGroupDatum>('.node')
+            .filter(({ key }) => queries.bundle.hasNode(document)(key)));
           setD3Edges(svg.selectAll<SVGGElement, EdgeGroupDatum>('.edge'));
         });
     }
