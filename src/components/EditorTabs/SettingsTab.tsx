@@ -4,6 +4,8 @@ import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import Section from './Section';
 import ColorPicker from '../ColorPicker';
 import VisualisationContext, { defaultSettings, ProvenanceView, PROVENANCE_VIEW_NAMES } from '../contexts/VisualisationContext';
@@ -14,6 +16,9 @@ const useStyles = makeStyles((theme) => ({
   formControl: {
     width: 300,
     marginBottom: theme.spacing(1),
+  },
+  formControlLabel: {
+    marginLeft: 0,
   },
 }));
 
@@ -78,6 +83,22 @@ const SettingsTab: React.FC<SettingsTabProps> = () => {
               : handleColorClear(variant)}
           />
         ))}
+        <FormControlLabel
+          className={classes.formControlLabel}
+          labelPlacement="start"
+          control={(
+            <Checkbox
+              checked={visualisationSettings.hideNodeProperties}
+              onChange={({ target }) => setVisualisationSettings((prev) => ({
+                ...prev,
+                hideNodeProperties: target.checked,
+              }))}
+              color="primary"
+              name="hide"
+            />
+            )}
+          label="Hide All Properties"
+        />
       </Section>
     </>
   );

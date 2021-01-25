@@ -12,7 +12,7 @@ import NodeAutocomplete from '../Autocomplete/NodeAutocomplete';
 import queries from '../../util/queries';
 import mutations from '../../util/mutations';
 import {
-  properties, PROVProperty, RelationName, relations,
+  PROPERTY_DEFINITIONS, PROVPropertyDefinition, RelationName, relations,
 } from '../../util/document';
 import ColorPicker from '../ColorPicker';
 import VisualisationContext from '../contexts/VisualisationContext';
@@ -27,7 +27,7 @@ const useDateTimeStyles = makeStyles((theme) => ({
 
 type DateTimePropertyProps = {
   domainID: string;
-  property: PROVProperty;
+  property: PROVPropertyDefinition;
 }
 
 const DateTimeProperty: React.FC<DateTimePropertyProps> = ({
@@ -159,7 +159,7 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
       content: (
         <>
           <EditableIdentifier initialID={id} onChange={onIDChange} />
-          {properties
+          {PROPERTY_DEFINITIONS
             .filter(({ domain }) => domain === variant)
             .map((p) => (
               <React.Fragment key={p.name}>

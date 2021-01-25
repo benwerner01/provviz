@@ -2,7 +2,7 @@ import {
   NodeVariant,
   PROVJSONBundle,
   PROVJSONDocument,
-  PROVProperty,
+  PROVPropertyDefinition,
   RelationName,
   relations,
 } from './document';
@@ -202,7 +202,7 @@ const mutations = {
       return { ...bundle, [variant]: remaining };
     },
     setProperty: (bundle: PROVJSONBundle) => (
-      id: string, property: PROVProperty, value: any,
+      id: string, property: PROVPropertyDefinition, value: any,
     ): PROVJSONBundle => {
       const { domain, key } = property;
 

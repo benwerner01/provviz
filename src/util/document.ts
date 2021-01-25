@@ -77,14 +77,14 @@ export const tbdIsNodeVariant = (tbd: string): tbd is NodeVariant => (
 
 export type PROVPropertyRange = 'DateTime'
 
-export type PROVProperty = {
+export type PROVPropertyDefinition = {
   name: string;
   key: string;
   domain: NodeVariant;
   range: PROVPropertyRange
 }
 
-export const properties: PROVProperty[] = [
+export const PROPERTY_DEFINITIONS: PROVPropertyDefinition[] = [
   {
     name: 'Started At Time',
     key: 'prov:startedAtTime',

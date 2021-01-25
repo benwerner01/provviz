@@ -2,7 +2,7 @@ import {
   NodeVariant,
   PROVJSONBundle,
   PROVJSONDocument,
-  PROVProperty,
+  PROVPropertyDefinition,
   RelationName,
   relations,
 } from './document';
@@ -45,7 +45,7 @@ const queries = {
       throw new Error(`Node with identifier ${identifier} not found`);
     },
     getPropertyValue: (bundle: PROVJSONBundle) => (
-      property: PROVProperty, id: string,
+      property: PROVPropertyDefinition, id: string,
     ): any | null => {
       const { domain, key } = property;
       if (Object.keys(bundle[domain] || {}).includes(id)) {
