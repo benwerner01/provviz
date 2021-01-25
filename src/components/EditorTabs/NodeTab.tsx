@@ -5,15 +5,51 @@ import Box from '@material-ui/core/Box';
 import Divider from '@material-ui/core/Divider';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import TextField from '@material-ui/core/TextField';
 import DocumentContext from '../contexts/DocumentContext';
 import EditableIdentifier from '../EditableIdentifier';
 import NodeAutocomplete from '../Autocomplete/NodeAutocomplete';
 import queries from '../../util/queries';
 import mutations from '../../util/mutations';
-import { RelationName, relations } from '../../util/document';
+import {
+  properties, PROVProperty, RelationName, relations,
+} from '../../util/document';
 import ColorPicker from '../ColorPicker';
 import VisualisationContext from '../contexts/VisualisationContext';
 import Section from './Section';
+
+const useDateTimeStyles = makeStyles((theme) => ({
+  root: {
+    display: 'block',
+    marginBottom: theme.spacing(2),
+  },
+}));
+
+type DateTimePropertyProps = {
+  domainID: string;
+  property: PROVProperty;
+}
+
+const DateTimeProperty: React.FC<DateTimePropertyProps> = ({
+  domainID, property,
+}) => {
+  const classes = useDateTimeStyles();
+  const { document, setDocument } = useContext(DocumentContext);
+
+  return (
+    <TextField
+      label={property.name}
+      type="datetime-local"
+      classes={classes}
+      value={queries.bundle.getPropertyValue(document)(property, domainID)}
+      onChange={(e) => setDocument((prev) => ({
+        ...prev,
+        ...mutations.bundle.setProperty(document)(domainID, property, e.target.value),
+      }))}
+      InputLabelProps={{ shrink: true }}
+    />
+  );
+};
 
 const useStyles = makeStyles((theme) => ({
   formControlLabel: {
@@ -123,6 +159,13 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
       content: (
         <>
           <EditableIdentifier initialID={id} onChange={onIDChange} />
+          {properties
+            .filter(({ domain }) => domain === variant)
+            .map((p) => (
+              <React.Fragment key={p.name}>
+                {p.range === 'DateTime' && <DateTimeProperty property={p} domainID={id} />}
+              </React.Fragment>
+            ))}
         </>
       ),
     },
