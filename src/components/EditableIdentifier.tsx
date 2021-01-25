@@ -12,6 +12,7 @@ import debounce from 'lodash.debounce';
 import DocumentContext from './contexts/DocumentContext';
 import queries from '../util/queries';
 import mutations from '../util/mutations';
+import VisualisationContext from './contexts/VisualisationContext';
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -53,6 +54,7 @@ type EditableIdentifierProps = {
 const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
   initialID, onChange,
 }) => {
+  const { visualisationSettings, setVisualisationSettings } = useContext(VisualisationContext);
   const { document, setDocument } = useContext(DocumentContext);
   const classes = useStyles();
 
@@ -72,8 +74,22 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
 
   const debouncedUpdateIdentifier = useCallback(debounce((prevID: string, updatedID: string) => {
     setDocument((prev) => mutations.updateIdentifier(prev)(prevID, updatedID));
+    if (visualisationSettings.hidden.includes(prevID)) {
+      setVisualisationSettings((prev) => ({
+        ...prev, hidden: [...prev.hidden.filter((id) => id !== prevID), updatedID],
+      }));
+    }
+    if (visualisationSettings.hideAllPropertiesForNode.includes(prevID)) {
+      setVisualisationSettings((prev) => ({
+        ...prev,
+        hideAllPropertiesForNode: [
+          ...prev.hideAllPropertiesForNode.filter((id) => id !== prevID),
+          updatedID,
+        ],
+      }));
+    }
     if (onChange) onChange(updatedID);
-  }, 200), [document]);
+  }, 200), [document, setDocument, visualisationSettings, setVisualisationSettings]);
 
   useEffect(() => {
     const updatedID = `${prefix}:${name}`;
