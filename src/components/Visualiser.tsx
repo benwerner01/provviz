@@ -11,6 +11,7 @@ import TreeView from './TreeView';
 import VisualisationContext, { VisualisationSettings, defaultSettings } from './contexts/VisualisationContext';
 
 export type VisualiserProps = {
+  documentName?: string;
   document: object;
   onChange: ((newDocumnet: object) => void) | null;
   width: number;
@@ -32,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Visualiser: React.FC<VisualiserProps> = ({
-  wasmFolderURL, width, height, document, onChange,
+  wasmFolderURL, width, height, documentName, document, onChange,
 }) => {
   if (!tbdIsPROVJSONDocument(document)) throw new Error('Could not parse PROV JSON Document');
   const classes = useStyles();
@@ -77,7 +78,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
   const downloadVisualisation = () => {
     if (svgElement) {
       const serializedSVG = (new XMLSerializer()).serializeToString(svgElement);
-      download(new Blob([serializedSVG]), 'Visualisation.svg', 'image/svg');
+      download(new Blob([serializedSVG]), `${documentName || 'Visualisation'}.svg`, 'image/svg');
     }
   };
 
