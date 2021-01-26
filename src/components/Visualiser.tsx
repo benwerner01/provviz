@@ -82,6 +82,11 @@ const Visualiser: React.FC<VisualiserProps> = ({
     }
   };
 
+  const handleSelectedNodeIDChange = (id: string | undefined) => {
+    if (id && !displayEditorContent) setDisplayEditorContent(true);
+    setSelectedNodeID(id);
+  };
+
   return (
     <DocumentContext.Provider
       value={{ document: contextDocument, setDocument: contextSetDocument }}
@@ -96,7 +101,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
               setDisplaySettings(true);
               setDisplayEditorContent(true);
             }}
-            setSelectedNodeID={setSelectedNodeID}
+            setSelectedNodeID={handleSelectedNodeIDChange}
             currentView={currentView}
             setCurrentView={setCurrentView}
             downloadVisualisation={downloadVisualisation}
@@ -104,7 +109,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
           {currentView === 'Graph' && (
           <D3Graphviz
             selectedNodeID={selectedNodeID}
-            setSelectedNodeID={setSelectedNodeID}
+            setSelectedNodeID={handleSelectedNodeIDChange}
             width={width}
             wasmFolderURL={wasmFolderURL}
             setSVGElement={setSVGElement}
@@ -123,7 +128,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
                 - (displayEditor ? TABS_HEIGHT : 0)
                 - (displayEditorContent ? editorContentHeight : 0))}
               selectedNodeID={selectedNodeID}
-              setSelectedNodeID={setSelectedNodeID}
+              setSelectedNodeID={handleSelectedNodeIDChange}
             />
           )}
           <Editor
@@ -132,7 +137,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
             contentHeight={editorContentHeight}
             setContentHeight={setEditorContentHeight}
             selectedNodeID={selectedNodeID}
-            setSelectedNodeID={setSelectedNodeID}
+            setSelectedNodeID={handleSelectedNodeIDChange}
             display={displayEditor}
             setDisplay={setDisplayEditor}
             open={displayEditorContent}

@@ -168,7 +168,7 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
   const collapsableSections = [
     {
       name: 'Definition',
-      initiallyOpen: true,
+      initiallyOpen: false,
       content: (
         <>
           <EditableIdentifier initialID={id} onChange={onIDChange} />
