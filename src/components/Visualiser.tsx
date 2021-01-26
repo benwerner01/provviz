@@ -77,7 +77,9 @@ const Visualiser: React.FC<VisualiserProps> = ({
 
   const downloadVisualisation = () => {
     if (svgElement) {
-      const serializedSVG = (new XMLSerializer()).serializeToString(svgElement);
+      const serializedSVG = (new XMLSerializer())
+        .serializeToString(svgElement)
+        .replace(/(<g.*)(transform=".*")(.*>)/g, '$1$3');
       download(new Blob([serializedSVG]), `${documentName || 'Visualisation'}.svg`, 'image/svg');
     }
   };

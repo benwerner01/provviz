@@ -60,6 +60,44 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
     transition: theme.transitions.create('max-height'),
     overflow: 'hidden',
+    '& svg': {
+      '& .node': {
+        '&.selected': {
+          '& ellipse, polygon': {
+            stroke: 'red',
+          },
+        },
+        '&.hover': {
+          cursor: 'pointer',
+          '& ellipse, polygon': {
+            stroke: 'red',
+          },
+        },
+      },
+      '& .cluster': {
+        '&.selected': {
+          '& ellipse, polygon': {
+            stroke: 'red',
+          },
+        },
+        '&.hover': {
+          cursor: 'pointer',
+          '& ellipse, polygon': {
+            stroke: 'red',
+          },
+        },
+      },
+      '& .edge': {
+        '&.selected': {
+          '& path, polygon': {
+            stroke: 'red',
+          },
+          '& polygon': {
+            fill: 'red',
+          },
+        },
+      },
+    },
   },
 }));
 
@@ -150,39 +188,31 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
         const selectedClusterGroup = d3Clusters
           .filter(({ key }) => selectedNodeID === key.slice(8));
 
-        selectedNodeGroup.selectAll('ellipse, polygon').attr('stroke', 'red');
-        selectedClusterGroup.selectAll('ellipse, polygon').attr('stroke', 'red');
+        selectedNodeGroup.classed('selected', true);
+        selectedClusterGroup.classed('selected', true);
 
         const selectedEdges = d3Edges.filter(({ key }) => key.startsWith(`${selectedNodeID}->`));
-        selectedEdges.selectAll('path, polygon').attr('stroke', 'red');
-        selectedEdges.selectAll('polygon').attr('fill', 'red');
+        selectedEdges.classed('selected', true);
       }
 
       const deselectedNodeGroups = d3Nodes.filter(({ key }) => selectedNodeID !== key);
       const deselectedClusterGroups = d3Clusters
         .filter(({ key }) => selectedNodeID !== key.slice(8));
 
-      if (deselectedNodeGroups) deselectedNodeGroups.selectAll('ellipse, polygon').attr('stroke', 'black');
-      if (deselectedClusterGroups) deselectedClusterGroups.selectAll('ellipse, polygon').attr('stroke', 'black');
+      if (deselectedNodeGroups) deselectedNodeGroups.classed('selected', false);
+      if (deselectedClusterGroups) deselectedClusterGroups.classed('selected', false);
 
       const deselectedEdges = d3Edges.filter(({ key }) => !key.startsWith(`${selectedNodeID}->`));
-      deselectedEdges.selectAll('path, polygon').attr('stroke', 'black');
-      deselectedEdges.selectAll('polygon').attr('fill', 'black');
+      deselectedEdges.classed('selected', false);
 
       d3Nodes.on('mouseover', function mouseover() {
         const nodeGroup = select(this);
-        nodeGroup.style('cursor', 'pointer');
-
-        nodeGroup.selectAll('ellipse, polygon').attr('stroke', 'red');
+        nodeGroup.classed('hover', true);
       });
 
       d3Nodes.on('mouseout', function mouseout({ key }) {
         const nodeGroup = select(this);
-        nodeGroup.style('cursor', 'default');
-
-        if (key !== selectedNodeID) {
-          nodeGroup.selectAll('ellipse, polygon').attr('stroke', 'black');
-        }
+        nodeGroup.classed('hover', false);
       });
 
       d3Nodes.on('click', ({ key, children }) => {
@@ -211,18 +241,8 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
           const key = datum.key.slice(8);
 
           d3Cluster.select('text')
-            .on('mouseover', () => {
-              d3Cluster.style('cursor', 'pointer');
-
-              d3Cluster.selectAll('ellipse, polygon').attr('stroke', 'red');
-            })
-            .on('mouseout', () => {
-              d3Cluster.style('cursor', 'default');
-
-              if (key !== selectedNodeID) {
-                d3Cluster.selectAll('ellipse, polygon').attr('stroke', 'black');
-              }
-            })
+            .on('mouseover', () => d3Cluster.classed('hover', true))
+            .on('mouseout', () => d3Cluster.classed('hover', false))
             .on('click', () => setSelectedNodeID(key));
         });
       }
