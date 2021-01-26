@@ -13,6 +13,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import Tooltip from '@material-ui/core/Tooltip';
 import { Fade, useTheme } from '@material-ui/core';
 import DocumentContext from './contexts/DocumentContext';
 import queries from '../util/queries';
@@ -252,20 +253,34 @@ const Editor: React.FC<EditorProps> = ({
           ))}
         </Tabs>
         <Fade in={open}>
-          <IconButton
-            onMouseDown={handleDragHandleMouseDown}
-            disableFocusRipple
-            disableRipple
+          <Tooltip
+            arrow
+            title="Drag Editor Height"
+            aria-label="drag-editor-height"
+            placement="top"
           >
-            <DragHandleIcon />
-          </IconButton>
+            <IconButton
+              onMouseDown={handleDragHandleMouseDown}
+              disableFocusRipple
+              disableRipple
+            >
+              <DragHandleIcon />
+            </IconButton>
+          </Tooltip>
         </Fade>
-        <IconButton
-          onClick={() => tabs.length > 0 && setOpen(!open)}
-          className={classes.displayEditorIconButton}
+        <Tooltip
+          arrow
+          title={`${open ? 'Close' : 'Open'} Editor`}
+          aria-label={`${open ? 'close' : 'open'}-editor`}
+          placement="top"
         >
-          <ExpandLessIcon style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }} />
-        </IconButton>
+          <IconButton
+            onClick={() => tabs.length > 0 && setOpen(!open)}
+            className={classes.displayEditorIconButton}
+          >
+            <ExpandLessIcon style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+          </IconButton>
+        </Tooltip>
       </Box>
       <Collapse in={open}>
         <Box

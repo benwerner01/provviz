@@ -8,6 +8,7 @@ import IconButton from '@material-ui/core/IconButton';
 import AccountTreeIcon from '@material-ui/icons/AccountTree';
 import SettingsIcon from '@material-ui/icons/Settings';
 import GetAppIcon from '@material-ui/icons/GetApp';
+import Tooltip from '@material-ui/core/Tooltip';
 import queries from '../util/queries';
 import mutations from '../util/mutations';
 import DocumentContext from './contexts/DocumentContext';
@@ -129,15 +130,29 @@ const MenuBar: React.FC<MenuBarProps> = ({
         <Button className={classes.bundleButton} classes={buttonClasses} onClick={handleCreateBundle} variant="contained" endIcon={<AddIcon />}>Bundle</Button>
       </Box>
       <Box>
-        <IconButton onClick={downloadVisualisation}>
-          <GetAppIcon />
-        </IconButton>
-        <IconButton onClick={() => setCurrentView(currentView === 'Graph' ? 'Tree' : 'Graph')}>
-          <AccountTreeIcon />
-        </IconButton>
-        <IconButton onClick={displaySettings}>
-          <SettingsIcon />
-        </IconButton>
+        <Tooltip
+          arrow
+          title="Download Visualisation"
+          aria-label="download-visualisation"
+        >
+          <IconButton onClick={downloadVisualisation}>
+            <GetAppIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip
+          arrow
+          title={currentView === 'Graph' ? 'Tree View' : 'Graph View'}
+          aria-label={currentView === 'Graph' ? 'tree-view' : 'graph-view'}
+        >
+          <IconButton onClick={() => setCurrentView(currentView === 'Graph' ? 'Tree' : 'Graph')}>
+            <AccountTreeIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip arrow title="Settings" aria-label="settings">
+          <IconButton onClick={displaySettings}>
+            <SettingsIcon />
+          </IconButton>
+        </Tooltip>
       </Box>
     </Box>
   );
