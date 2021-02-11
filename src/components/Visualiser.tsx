@@ -10,6 +10,8 @@ import MenuBar, { MENU_BAR_HEIGHT, View } from './MenuBar';
 import TreeView from './TreeView';
 import VisualisationContext, { VisualisationSettings, defaultSettings } from './contexts/VisualisationContext';
 
+export const MIN_WIDTH = 350;
+
 export type VisualiserProps = {
   documentName?: string;
   document: object;

@@ -1,3 +1,5 @@
-import Visualiser from './components/Visualiser';
+import Visualiser, { MIN_WIDTH } from './components/Visualiser';
 
-export { Visualiser };
+export { MIN_WIDTH };
+
+export default Visualiser;
