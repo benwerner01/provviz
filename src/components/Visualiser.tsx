@@ -102,6 +102,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
               setDisplaySettings(true);
               setDisplayEditorContent(true);
             }}
+            collapseButtons={width < 650}
             setSelectedNodeID={handleSelectedNodeIDChange}
             currentView={currentView}
             setCurrentView={setCurrentView}

@@ -1,8 +1,16 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import Color from 'color';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import Grow from '@material-ui/core/Grow';
+import Paper from '@material-ui/core/Paper';
+import Popper from '@material-ui/core/Popper';
+import MenuItem from '@material-ui/core/MenuItem';
+import MenuList from '@material-ui/core/MenuList';
 import AddIcon from '@material-ui/icons/Add';
 import IconButton from '@material-ui/core/IconButton';
 import AccountTreeIcon from '@material-ui/icons/AccountTree';
@@ -13,6 +21,7 @@ import queries from '../util/queries';
 import mutations from '../util/mutations';
 import DocumentContext from './contexts/DocumentContext';
 import VisualisationContext from './contexts/VisualisationContext';
+import { NodeVariant, NODE_VARIANTS } from '../util/document';
 
 export const MENU_BAR_HEIGHT = 48;
 
@@ -23,6 +32,8 @@ type MenuBarStyleProps = {
   bundleColor: string;
 }
 
+const BUTTON_GROUP_FIRST_BUTTON_WIDTH = 100;
+
 const useStyles = makeStyles((theme) => ({
   wrapper: {
     height: MENU_BAR_HEIGHT,
@@ -30,6 +41,14 @@ const useStyles = makeStyles((theme) => ({
     borderBottomStyle: 'solid',
     borderBottomColor: theme.palette.grey[300],
     borderBottomWidth: 1,
+  },
+  buttonGroupRoot: {
+    '& > :first-child': {
+      width: BUTTON_GROUP_FIRST_BUTTON_WIDTH,
+    },
+  },
+  menuListRoot: {
+    width: BUTTON_GROUP_FIRST_BUTTON_WIDTH + 44,
   },
   buttonRoot: {
     '&:not(:first-child)': {
@@ -39,30 +58,34 @@ const useStyles = makeStyles((theme) => ({
   buttonLabel: {
     textTransform: 'none',
   },
-  agentButton: ({ agentColor }: MenuBarStyleProps) => ({
+  agent: ({ agentColor }: MenuBarStyleProps) => ({
     backgroundColor: agentColor,
     color: Color(agentColor).isLight() ? theme.palette.common.black : theme.palette.common.white,
+    borderColor: `${Color(agentColor).isLight() ? theme.palette.common.black : theme.palette.common.white} !important`,
     '&:hover': {
       backgroundColor: Color(agentColor).lighten(0.1).hex(),
     },
   }),
-  activityButton: ({ activityColor }: MenuBarStyleProps) => ({
+  activity: ({ activityColor }: MenuBarStyleProps) => ({
     backgroundColor: activityColor,
     color: Color(activityColor).isLight() ? theme.palette.common.black : theme.palette.common.white,
+    borderColor: `${Color(activityColor).isLight() ? theme.palette.common.black : theme.palette.common.white} !important`,
     '&:hover': {
       backgroundColor: Color(activityColor).lighten(0.1).hex(),
     },
   }),
-  entityButton: ({ entityColor }: MenuBarStyleProps) => ({
+  entity: ({ entityColor }: MenuBarStyleProps) => ({
     backgroundColor: entityColor,
     color: Color(entityColor).isLight() ? theme.palette.common.black : theme.palette.common.white,
+    borderColor: `${Color(entityColor).isLight() ? theme.palette.common.black : theme.palette.common.white} !important`,
     '&:hover': {
       backgroundColor: Color(entityColor).lighten(0.1).hex(),
     },
   }),
-  bundleButton: ({ bundleColor }: MenuBarStyleProps) => ({
+  bundle: ({ bundleColor }: MenuBarStyleProps) => ({
     backgroundColor: bundleColor,
     color: Color(bundleColor).isLight() ? theme.palette.common.black : theme.palette.common.white,
+    borderColor: `${Color(bundleColor).isLight() ? theme.palette.common.black : theme.palette.common.white} !important`,
     '&:hover': {
       backgroundColor: Color(bundleColor).lighten(0.1).hex(),
     },
@@ -74,16 +97,26 @@ export type View = 'Graph' | 'Tree'
 type MenuBarProps = {
   displaySettings: () => void;
   setSelectedNodeID: (id: string) => void;
+  collapseButtons: boolean;
   currentView: View;
   setCurrentView: (newCurrentView: View) => void;
   downloadVisualisation: () => void;
 }
 
 const MenuBar: React.FC<MenuBarProps> = ({
-  displaySettings, setSelectedNodeID, currentView, setCurrentView, downloadVisualisation,
+  displaySettings,
+  setSelectedNodeID,
+  currentView,
+  setCurrentView,
+  downloadVisualisation,
+  collapseButtons,
 }) => {
+  const buttonGroupRef = React.useRef<HTMLDivElement>(null);
   const { document, setDocument } = useContext(DocumentContext);
   const { visualisationSettings } = useContext(VisualisationContext);
+
+  const [buttonGroupOpen, setButtonGroupOpen] = useState<boolean>(false);
+  const [currentButtonGroupVariant, setCurrentButtonGroupVariant] = useState<NodeVariant>('agent');
 
   const {
     agent, activity, entity, bundle,
@@ -92,43 +125,93 @@ const MenuBar: React.FC<MenuBarProps> = ({
     agentColor: agent, activityColor: activity, entityColor: entity, bundleColor: bundle,
   });
 
-  const handleCreateAgent = () => {
+  const handleCreateNode = (variant: NodeVariant) => {
     const prefix = queries.prefix.getAll(document)[0];
-    const name = queries.agent.generateName(document)(prefix);
-    setDocument((prev) => mutations.agent.create(prev)(prefix, name));
+    const name = queries[variant].generateName(document)(prefix);
+    setDocument((prev) => mutations[variant].create(prev)(prefix, name));
     setSelectedNodeID(`${prefix}:${name}`);
-  };
-
-  const handleCreateActivity = () => {
-    const prefix = queries.prefix.getAll(document)[0];
-    const name = queries.activity.generateName(document)(prefix);
-    setDocument((prev) => mutations.activity.create(prev)(prefix, name));
-    setSelectedNodeID(`${prefix}:${name}`);
-  };
-
-  const handleCreateEntity = () => {
-    const prefix = queries.prefix.getAll(document)[0];
-    const name = queries.entity.generateName(document)(prefix);
-    setDocument((prev) => mutations.entity.create(prev)(prefix, name));
-    setSelectedNodeID(`${prefix}:${name}`);
-  };
-
-  const handleCreateBundle = () => {
-    const prefix = queries.prefix.getAll(document)[0];
-    const name = queries.bundle.generateName(document)(prefix);
-    setDocument((prev) => mutations.bundle.create(prev)(prefix, name));
   };
 
   const buttonClasses = { root: classes.buttonRoot, label: classes.buttonLabel };
 
   return (
     <Box px={1} display="flex" alignItems="center" justifyContent="space-between" className={classes.wrapper}>
-      <Box>
-        <Button className={classes.agentButton} classes={buttonClasses} onClick={handleCreateAgent} variant="contained" endIcon={<AddIcon />}>Agent</Button>
-        <Button className={classes.activityButton} classes={buttonClasses} onClick={handleCreateActivity} variant="contained" endIcon={<AddIcon />}>Activity</Button>
-        <Button className={classes.entityButton} classes={buttonClasses} onClick={handleCreateEntity} variant="contained" endIcon={<AddIcon />}>Entity</Button>
-        <Button className={classes.bundleButton} classes={buttonClasses} onClick={handleCreateBundle} variant="contained" endIcon={<AddIcon />}>Bundle</Button>
-      </Box>
+      {collapseButtons ? (
+        <>
+          <ButtonGroup
+            classes={{ root: classes.buttonGroupRoot }}
+            variant="contained"
+            color="primary"
+            ref={buttonGroupRef}
+            aria-label="split button"
+          >
+            <Button
+              className={classes[currentButtonGroupVariant]}
+              classes={buttonClasses}
+              onClick={() => handleCreateNode(currentButtonGroupVariant)}
+              endIcon={<AddIcon />}
+            >
+              {`${currentButtonGroupVariant.charAt(0).toUpperCase()}${currentButtonGroupVariant.slice(1)}`}
+            </Button>
+            <Button
+              size="small"
+              className={classes[currentButtonGroupVariant]}
+              aria-controls={buttonGroupOpen ? 'split-button-menu' : undefined}
+              aria-expanded={buttonGroupOpen ? 'true' : undefined}
+              aria-label="select merge strategy"
+              aria-haspopup="menu"
+              onClick={() => setButtonGroupOpen((prev) => !prev)}
+            >
+              <ArrowDropDownIcon />
+            </Button>
+          </ButtonGroup>
+          <Popper
+            open={buttonGroupOpen}
+            anchorEl={buttonGroupRef.current}
+            role={undefined}
+            placement="bottom-start"
+            transition
+            disablePortal
+          >
+            {({ TransitionProps, placement }) => (
+              <Grow
+                {...TransitionProps}
+                style={{
+                  transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
+                }}
+              >
+                <Paper>
+                  <ClickAwayListener onClickAway={() => setButtonGroupOpen(false)}>
+                    <MenuList classes={{ root: classes.menuListRoot }} id="split-button-menu">
+                      {NODE_VARIANTS
+                        .filter((v) => v !== currentButtonGroupVariant)
+                        .map((variant) => (
+                          <MenuItem
+                            key={variant}
+                            onClick={() => {
+                              setCurrentButtonGroupVariant(variant);
+                              setButtonGroupOpen(false);
+                            }}
+                          >
+                            {`${variant.charAt(0).toUpperCase()}${variant.slice(1)}`}
+                          </MenuItem>
+                        ))}
+                    </MenuList>
+                  </ClickAwayListener>
+                </Paper>
+              </Grow>
+            )}
+          </Popper>
+        </>
+      ) : (
+        <Box>
+          {NODE_VARIANTS.map((variant) => (
+            <Button className={classes[variant]} classes={buttonClasses} onClick={() => handleCreateNode(variant)} variant="contained" endIcon={<AddIcon />}>
+              {`${variant.charAt(0).toUpperCase()}${variant.slice(1)}`}
+            </Button>
+          ))}
+        </Box>
+      )}
       <Box>
         <Tooltip
           arrow
