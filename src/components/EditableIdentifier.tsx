@@ -16,7 +16,7 @@ import VisualisationContext from './contexts/VisualisationContext';
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
-    maxWidth: 500,
+    maxWidth: 750,
     marginBottom: theme.spacing(2),
   },
   prefixFormControlRoot: {

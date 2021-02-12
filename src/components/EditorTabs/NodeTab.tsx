@@ -26,6 +26,7 @@ import ColorPicker from '../ColorPicker';
 import VisualisationContext from '../contexts/VisualisationContext';
 import Section from './Section';
 import { palette } from '../../util/theme';
+import CustomAttributes from '../CustomAttributes';
 
 const useDateTimeStyles = makeStyles((theme) => ({
   root: {
@@ -208,6 +209,16 @@ const NodeTab: React.FC<NodeTabProps> = ({
                 {p.range === 'DateTime' && <DateTimeAttribute attribute={p} domainID={id} />}
               </React.Fragment>
             ))}
+          <CustomAttributes nodeVariant={variant} nodeID={id} />
+        </>
+      ),
+    },
+    {
+      name: 'Attributes',
+      initiallyOpen: false,
+      content: (
+        <>
+          <CustomAttributes nodeVariant={variant} nodeID={id} />
         </>
       ),
     },

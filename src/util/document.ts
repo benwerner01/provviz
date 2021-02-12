@@ -124,7 +124,7 @@ type TypedLiteral = {
 
 type LiteralArray = (string | number | boolean | TypedLiteral)[]
 
-type AttributeValue = string
+export type AttributeValue = string
 | number
 | boolean
 | TypedLiteral

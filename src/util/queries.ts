@@ -5,6 +5,7 @@ import {
   RelationName,
   RELATIONS,
   RELATION_NAMES,
+  AttributeValue,
 } from './document';
 
 const queries = {
@@ -132,6 +133,21 @@ const queries = {
         return 'bundle';
       }
       throw new Error(`Node with identifier ${identifier} not found`);
+    },
+    getAttributes: (
+      variant: NodeVariant, nodeID: string,
+    ) => (document: PROVJSONBundle): [key: string, value: AttributeValue][] | undefined => {
+      if (variant === 'bundle') throw new Error('Cannot get attributes of bundle');
+      const entry = Object.entries<{ [attributeKey: string]: AttributeValue; }>(
+        document[variant] || {},
+      ).find(([id]) => id === nodeID);
+      if (entry) return Object.entries(entry[1]);
+      // eslint-disable-next-line no-restricted-syntax
+      for (const nestedBundle of Object.values(document.bundle || {})) {
+        const res = queries.node.getAttributes(variant, nodeID)(nestedBundle);
+        if (res) return res;
+      }
+      return undefined;
     },
     getOutgoingRelations: (nodeID: string) => (document: PROVJSONBundle) => RELATION_NAMES
       .map((name) => Object.entries(document[name] || {})

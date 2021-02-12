@@ -32,7 +32,7 @@ const mapNodeToDot = (variant: 'agent' | 'activity' | 'entity', settings: Visual
     ) ? [
         `"${id}_attributes" [shape="note" label="${attributes
           .filter(([attributeID]) => !settings.hidden.includes(`${id}_${attributeID}`))
-          .map(([attributeID, value]) => `${attributeID}=${renderAttributeValue(value)}`).join('\n')}"]`,
+          .map(([attributeID, value]) => `${attributeID} = ${renderAttributeValue(value)}`).join('\n')}"]`,
         `"${id}" -> "${id}_attributes" [style="dotted" dir="none"]`,
       ] : [],
   ].flat().join('\n');

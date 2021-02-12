@@ -5,21 +5,26 @@ import Box from '@material-ui/core/Box';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import Collapse from '@material-ui/core/Collapse';
 import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
 
 const useStyles = makeStyles((theme) => ({
   headingWrapper: {
     position: 'relative',
+  },
+  headingIcon: {
     left: -1 * theme.spacing(2),
   },
-  headingIconButton: {
-    padding: theme.spacing(1),
+  headingButton: {
+    justifyContent: 'flex-start',
+    width: '100%',
+    padding: theme.spacing(1, 1, 1, 0),
+    textTransform: 'none',
   },
   headingTypography: {
     fontWeight: 800,
   },
-  collapse: {
-    padding: theme.spacing(0, 0, 0, 3),
+  contentWrapper: {
+    padding: theme.spacing(1, 0, 1, 3),
   },
 }));
 
@@ -34,17 +39,17 @@ const Section: React.FC<SectionProps> = ({ initiallyOpen, name, children }) => {
 
   return (
     <>
-      <Box display="flex" alignItems="center" className={classes.headingWrapper}>
-        <IconButton
-          className={classes.headingIconButton}
+      <Box display="flex" alignItems="center">
+        <Button
+          className={classes.headingButton}
           onClick={() => setOpen(!open)}
         >
-          <ArrowDropDownIcon style={{ transform: `rotate(${open ? 0 : -90}deg)` }} />
-        </IconButton>
-        <Typography className={classes.headingTypography} variant="h5">{name}</Typography>
+          <ArrowDropDownIcon className={classes.headingIcon} style={{ transform: `rotate(${open ? 0 : -90}deg)` }} />
+          <Typography className={classes.headingTypography} variant="h5">{name}</Typography>
+        </Button>
       </Box>
-      <Collapse className={classes.collapse} in={open}>
-        {children}
+      <Collapse in={open}>
+        <Box className={classes.contentWrapper}>{children}</Box>
       </Collapse>
       <Divider />
     </>
