@@ -4,6 +4,7 @@ import {
   PROVAttributeDefinition,
   RelationName,
   RELATIONS,
+  AttributeValue,
 } from './document';
 import queries from './queries';
 
@@ -141,11 +142,63 @@ const mutations = {
       variant: NodeVariant, id: string,
     ) => (document: PROVJSONBundle) => {
       const updatedBundle = mutations.bundle
-        .find(document)(
+        .find(
           (bundle) => Object.keys(bundle[variant] || {}).includes(id),
-        )(mutations.bundle.removeNode(variant, id));
+        )(mutations.bundle.removeNode(variant, id))(document);
       if (!updatedBundle) throw new Error('Could not delete');
       return ({ ...document, ...mutations.relation.deleteWithNode(id)(updatedBundle) });
+    },
+    setAttributeValue: (
+      variant: NodeVariant, nodeID: string, attributeName: string, attributeValue: AttributeValue,
+    ) => (document: PROVJSONBundle) => {
+      if (variant === 'bundle') throw new Error('Cannot set attribute value of bundle');
+      const updatedDocument = mutations.bundle
+        .find(
+          (bundle) => Object.keys(bundle[variant] || {}).includes(nodeID),
+        )(
+          (bundle) => ({
+            ...bundle,
+            [variant]: {
+              ...bundle[variant],
+              [nodeID]: Object.entries(bundle[variant]![nodeID]).reduce(
+                (prev, [name]) => (name === attributeName
+                  ? ({ ...prev, [name]: attributeValue })
+                  : prev),
+                { ...bundle[variant]![nodeID] },
+              ),
+            },
+          }),
+        )(document);
+
+      if (!updatedDocument) throw new Error(`Could not find node with id ${nodeID}`);
+
+      return updatedDocument;
+    },
+    setAttributeName: (
+      variant: NodeVariant, nodeID: string, prevAttributeName: string, newAttributeName: string,
+    ) => (document: PROVJSONBundle) => {
+      if (variant === 'bundle') throw new Error('Cannot set attribute value of bundle');
+      const updatedDocument = mutations.bundle
+        .find(
+          (bundle) => Object.keys(bundle[variant] || {}).includes(nodeID),
+        )(
+          (bundle) => ({
+            ...bundle,
+            [variant]: {
+              ...bundle[variant],
+              [nodeID]: Object.entries(bundle[variant]![nodeID]).reduce(
+                (prev, [name, value]) => (name === prevAttributeName
+                  ? ({ ...prev, [newAttributeName]: value })
+                  : ({ ...prev, [name]: value })),
+                {},
+              ),
+            },
+          }),
+        )(document);
+
+      if (!updatedDocument) throw new Error(`Could not find node with id ${nodeID}`);
+
+      return updatedDocument;
     },
   },
   relation: {
@@ -207,11 +260,11 @@ const mutations = {
     },
   },
   bundle: {
-    find: (bundle: PROVJSONBundle) => (
+    find: (
       isMatchingBundle: (b: PROVJSONBundle) => boolean,
     ) => (
       callback: (b: PROVJSONBundle) => PROVJSONBundle,
-    ): PROVJSONBundle | undefined => {
+    ) => (bundle: PROVJSONBundle): PROVJSONBundle | undefined => {
       if (isMatchingBundle(bundle)) return callback(bundle);
 
       const match = Object.entries(bundle.bundle || {}).find(([_, b]) => isMatchingBundle(b));
@@ -228,7 +281,7 @@ const mutations = {
 
       // eslint-disable-next-line no-restricted-syntax
       for (const [id, nestedBundle] of Object.entries(bundle.bundle || {})) {
-        const res = mutations.bundle.find(nestedBundle)(isMatchingBundle)(callback);
+        const res = mutations.bundle.find(isMatchingBundle)(callback)(nestedBundle);
 
         if (res) {
           return {
