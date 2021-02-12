@@ -13,6 +13,23 @@ export type RelationName = 'wasGeneratedBy'
   | 'alternateOf'
   | 'hadMember'
 
+export const RELATION_NAMES: RelationName[] = [
+  'wasGeneratedBy',
+  'used',
+  'wasInformedBy',
+  'wasStartedBy',
+  'wasEndedBy',
+  'wasInvalidatedBy',
+  'wasDerivedFrom',
+  'wasAttributedTo',
+  'wasAssociatedWith',
+  'actedOnBehalfOf',
+  'wasInfluencedBy',
+  'specializationOf',
+  'alternateOf',
+  'hadMember',
+];
+
 export type Relation = {
   name: RelationName;
   domain: 'activity' | 'agent' | 'entity';
@@ -22,7 +39,7 @@ export type Relation = {
   timestamp?: boolean;
 }
 
-export const relations: Relation[] = [
+export const RELATIONS: Relation[] = [
   {
     name: 'wasGeneratedBy', domain: 'entity', domainKey: 'prov:entity', range: 'activity', rangeKey: 'prov:activity',
   },

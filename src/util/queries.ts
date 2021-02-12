@@ -3,7 +3,8 @@ import {
   PROVJSONBundle,
   PROVAttributeDefinition,
   RelationName,
-  relations,
+  RELATIONS,
+  RELATION_NAMES,
 } from './document';
 
 const queries = {
@@ -62,7 +63,7 @@ const queries = {
     hasRelation: (identifier: string) => (bundle: PROVJSONBundle): boolean => {
       const nestedBundle = bundle.bundle;
       return ((
-        relations.find(({ name }) => {
+        RELATIONS.find(({ name }) => {
           const relation = bundle[name];
           return (
             (relation && Object.keys(relation).includes(identifier)));
@@ -132,6 +133,14 @@ const queries = {
       }
       throw new Error(`Node with identifier ${identifier} not found`);
     },
+    getOutgoingRelations: (nodeID: string) => (document: PROVJSONBundle) => RELATION_NAMES
+      .map((name) => Object.entries(document[name] || {})
+        .filter(([_, relationValue]) => (
+          relationValue[RELATIONS.find((r) => r.name === name)!.domainKey] === nodeID))).flat(),
+    getIncomingRelations: (nodeID: string) => (document: PROVJSONBundle) => RELATION_NAMES
+      .map((name) => Object.entries(document[name] || {})
+        .filter(([_, relationValue]) => (
+          relationValue[RELATIONS.find((r) => r.name === name)!.rangeKey] === nodeID))).flat(),
   },
   agent: {
     getAll: ({ agent, bundle }: PROVJSONBundle): string[] => [
@@ -185,7 +194,7 @@ const queries = {
       relationName: RelationName, domainID: string, rangeID: string,
     ) => (bundle: PROVJSONBundle): string | null => {
       const entry = bundle[relationName];
-      const relation = relations.find((r) => r.name === relationName)!;
+      const relation = RELATIONS.find((r) => r.name === relationName)!;
       const nestedBundles = bundle.bundle;
       return ((
         entry
@@ -205,7 +214,7 @@ const queries = {
       relationName: RelationName, domainID: string,
     ) => (bundle: PROVJSONBundle): string[] => {
       const entry = bundle[relationName];
-      const relation = relations.find((r) => r.name === relationName)!;
+      const relation = RELATIONS.find((r) => r.name === relationName)!;
       const nestedBundles = bundle.bundle;
       return [
         ...(entry

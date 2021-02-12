@@ -179,8 +179,8 @@ const Editor: React.FC<EditorProps> = ({
 
   const handleCloseTab = (
     variant: string, name: string,
-  ) => (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-    e.stopPropagation();
+  ) => (e?: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    if (e) e.stopPropagation();
     const tabIndex = tabs.findIndex((t) => t.name === name);
     if (variant === 'default' && name === 'Settings') setDisplaySettings(false);
     if (tabIndex >= 0) {
@@ -300,6 +300,7 @@ const Editor: React.FC<EditorProps> = ({
                 variant={currentTabVariant}
                 id={tabs[currentTabIndex].name}
                 onIDChange={handleTabIDChange(currentTabIndex)}
+                onDelete={handleCloseTab(currentTabVariant, currentTabName)}
               />
             ))}
         </Box>

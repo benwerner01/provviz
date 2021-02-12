@@ -7,6 +7,8 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
+import Button from '@material-ui/core/Button';
+import WarningIcon from '@material-ui/icons/Warning';
 import DocumentContext from '../contexts/DocumentContext';
 import EditableIdentifier from '../EditableIdentifier';
 import NodeAutocomplete from '../Autocomplete/NodeAutocomplete';
@@ -18,11 +20,12 @@ import {
   PROVJSONBundle,
   PROVAttributeDefinition,
   RelationName,
-  relations,
+  RELATIONS,
 } from '../../util/document';
 import ColorPicker from '../ColorPicker';
 import VisualisationContext from '../contexts/VisualisationContext';
 import Section from './Section';
+import { palette } from '../../util/theme';
 
 const useDateTimeStyles = makeStyles((theme) => ({
   root: {
@@ -63,20 +66,37 @@ const useStyles = makeStyles((theme) => ({
   formControlLabel: {
     marginLeft: 0,
   },
+  deleteButton: {
+    marginRight: theme.spacing(1),
+    backgroundColor: palette.danger.main,
+    color: theme.palette.common.white,
+    '&:hover': {
+      backgroundColor: palette.danger.dark,
+    },
+  },
+  warningIcon: {
+    color: palette.danger.main,
+  },
+  warningTypography: {
+    color: palette.danger.main,
+  },
 }));
 
 type NodeTabProps = {
   variant: NodeVariant;
   id: string;
   onIDChange?: (id: string) => void;
+  onDelete?: () => void;
 }
 
-const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
+const NodeTab: React.FC<NodeTabProps> = ({
+  variant, id, onIDChange, onDelete,
+}) => {
   const classes = useStyles();
   const { document, setDocument } = useContext(DocumentContext);
   const { visualisationSettings, setVisualisationSettings } = useContext(VisualisationContext);
 
-  const relationRangeIncludes = relations
+  const relationRangeIncludes = RELATIONS
     .filter(({ domain }) => domain === variant)
     .reduce((prev, { name }) => ({
       ...prev,
@@ -158,9 +178,15 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
     }));
   };
 
-  const { palette, hidden, hideAllAttributesForNode } = visualisationSettings;
+  const handleDelete = () => {
+    setDocument(mutations.node.delete(variant, id));
+    if (onDelete) onDelete();
+  };
 
-  const overridingColor = palette.overrides.find(({ nodeID }) => nodeID === id)?.color;
+  const { hidden, hideAllAttributesForNode } = visualisationSettings;
+
+  const overridingColor = visualisationSettings.palette.overrides
+    .find(({ nodeID }) => nodeID === id)?.color;
 
   const color = overridingColor || visualisationSettings.palette[variant];
 
@@ -187,7 +213,7 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
     },
     {
       name: 'Relationships',
-      content: relations.filter(({ domain }) => domain === variant).map(({ name, range }) => (
+      content: RELATIONS.filter(({ domain }) => domain === variant).map(({ name, range }) => (
         <NodeAutocomplete
           key={name}
           variant={range}
@@ -249,6 +275,9 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
     },
   ];
 
+  const outgoingRelationships = queries.node.getOutgoingRelations(id)(document);
+  const incomingRelationships = queries.node.getIncomingRelations(id)(document);
+
   return (
     <>
       <Box display="flex" mb={1}>
@@ -263,6 +292,35 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
       {collapsableSections.map(({ initiallyOpen, name, content }) => (
         <Section key={name} initiallyOpen={initiallyOpen} name={name}>{content}</Section>
       ))}
+      <Box display="flex" flexWrap="wrap" alignItems="center" mt={2}>
+        <Button onClick={handleDelete} className={classes.deleteButton} variant="contained">Delete</Button>
+        {(outgoingRelationships.length > 0 || incomingRelationships.length > 0) && (
+          <Box my={1} display="flex" flexWrap="wrap" alignItems="center">
+            <Box display="flex" alignItems="center" mr={1}>
+              <WarningIcon className={classes.warningIcon} />
+              <Typography className={classes.warningTypography}>
+                <strong>Warning:</strong>
+              </Typography>
+            </Box>
+            <Typography>
+              {`deleting this ${variant} will also `}
+              {outgoingRelationships.length > 0
+                ? (
+                  <>
+                    <strong>{`delete ${outgoingRelationships.length} outgoing relationships`}</strong>
+                    {incomingRelationships.length > 0 && (
+                      <>
+                        {' and '}
+                        <strong>{`delete ${incomingRelationships.length} incoming relationships`}</strong>
+                      </>
+                    )}
+                  </>
+                )
+                : <strong>{`delete ${incomingRelationships.length} incoming relationships`}</strong>}
+            </Typography>
+          </Box>
+        )}
+      </Box>
     </>
   );
 };

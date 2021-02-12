@@ -3,7 +3,7 @@ import {
   PROVJSONBundle,
   PROVAttributeDefinition,
   RelationName,
-  relations,
+  RELATIONS,
 } from './document';
 import queries from './queries';
 
@@ -152,7 +152,7 @@ const mutations = {
     create: (
       relationName: RelationName, relationID: string, domainID: string, rangeID: string,
     ) => (document: PROVJSONBundle): PROVJSONBundle => {
-      const { domainKey, rangeKey } = relations.find(({ name }) => name === relationName)!;
+      const { domainKey, rangeKey } = RELATIONS.find(({ name }) => name === relationName)!;
       return {
         ...document,
         [relationName]: {
@@ -167,7 +167,7 @@ const mutations = {
     deleteWithNode: (nodeID: string) => (bundle: PROVJSONBundle): PROVJSONBundle => Object
       .entries(bundle)
       .reduce<PROVJSONBundle>((prevBundle, [bundleKey, entries]) => {
-        const relation = relations.find(({ name }) => name === bundleKey);
+        const relation = RELATIONS.find(({ name }) => name === bundleKey);
         return relation
           ? ({
             ...prevBundle,

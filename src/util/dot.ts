@@ -1,6 +1,6 @@
 import Color from 'color';
 import { PROVENANVE_VIEW_DEFINITIONS, VisualisationSettings } from '../components/contexts/VisualisationContext';
-import { PROVJSONBundle, relations } from './document';
+import { PROVJSONBundle, RELATIONS } from './document';
 
 const getNodeColor = (id: string, { palette }: VisualisationSettings) => palette
   .overrides.find(({ nodeID }) => nodeID === id)?.color;
@@ -69,7 +69,7 @@ const mapBundleToDots = (json: PROVJSONBundle, settings: VisualisationSettings):
     ) ? {} : json.entity || {})
     .filter(([id]) => !settings.hidden.includes(id))
     .map(mapNodeToDot('entity', settings))),
-  ...relations.map(({ name, domainKey, rangeKey }) => Object
+  ...RELATIONS.map(({ name, domainKey, rangeKey }) => Object
     .values((
       settings.view !== null
       && !PROVENANVE_VIEW_DEFINITIONS[settings.view].relations.includes(name)
