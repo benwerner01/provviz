@@ -47,7 +47,7 @@ const DateTimeAttribute: React.FC<DateTimeAttributeProps> = ({
       label={attribute.name}
       type="datetime-local"
       classes={classes}
-      value={queries.bundle.getAttributeValue(document)(attribute, domainID)}
+      value={queries.bundle.getAttributeValue(attribute, domainID)(document)}
       onChange={(e) => setDocument(
         mutations.bundle.setAttribute(domainID, attribute, e.target.value),
       )}
@@ -80,7 +80,7 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
     .filter(({ domain }) => domain === variant)
     .reduce((prev, { name }) => ({
       ...prev,
-      [name]: queries.relation.getRangeWithDomain(document)(name, id),
+      [name]: queries.relation.getRangeWithDomain(name, id)(document),
     }), {} as { [key: string]: string[] });
 
   const handleRelationRangeChange = (relationName: RelationName) => (
@@ -91,14 +91,14 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
     const remove = rangeIncludes.filter((rangeID) => !rangeIDs.includes(rangeID));
 
     add.forEach((activityID) => {
-      const relationID = queries.relation.generateID(document);
+      const relationID = queries.relation.generateID()(document);
       // eslint-disable-next-line no-param-reassign
       updatedDocument = mutations.relation.create(
         relationName, relationID, id, activityID,
       )(updatedDocument);
     });
     remove.forEach((activityID) => {
-      const relationID = queries.relation.getID(document)(relationName, id, activityID);
+      const relationID = queries.relation.getID(relationName, id, activityID)(document);
       if (!relationID) throw new Error('Could not find relationID');
       // eslint-disable-next-line no-param-reassign
       updatedDocument = {
@@ -110,7 +110,7 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
     setDocument(updatedDocument);
   };
 
-  const fullName = queries.node.getFullName(document)(id);
+  const fullName = queries.node.getFullName(id)(document);
 
   const handleColorChange = (updatedColor: string) => {
     const existingOverrideIndex = visualisationSettings.palette.overrides

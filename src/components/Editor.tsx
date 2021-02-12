@@ -146,13 +146,13 @@ const Editor: React.FC<EditorProps> = ({
       const existingTabIndex = tabs.findIndex(({ name }) => name === selectedNodeID);
 
       if (existingTabIndex < 0) {
-        const variant: NodeVariant | undefined = queries.bundle.hasEntity(document)(selectedNodeID)
+        const variant: NodeVariant | undefined = queries.bundle.hasEntity(selectedNodeID)(document)
           ? 'entity'
-          : queries.bundle.hasActivity(document)(selectedNodeID)
+          : queries.bundle.hasActivity(selectedNodeID)(document)
             ? 'activity'
-            : queries.bundle.hasAgent(document)(selectedNodeID)
+            : queries.bundle.hasAgent(selectedNodeID)(document)
               ? 'agent'
-              : queries.bundle.hasBundle(document)(selectedNodeID)
+              : queries.bundle.hasBundle(selectedNodeID)(document)
                 ? 'bundle' : undefined;
 
         if (!variant) throw new Error(`Could not find variant of selected node with identifier ${selectedNodeID}`);

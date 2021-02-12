@@ -19,14 +19,15 @@ const queries = {
         ]).flat()
         : []),
     ],
-    generateName: (document: PROVJSONBundle) => (
+    generateName: (
       prefix: string, index: number = 0,
-    ): string => (queries.bundle.hasBundle(document)(`${prefix}:Bundle${index > 0 ? ` ${index}` : ''}`)
-      ? queries.bundle.generateName(document)(prefix, index + 1)
-      : `Bundle${index > 0 ? ` ${index}` : ''}`),
-    getNode: ({
+    ) => (document: PROVJSONBundle): string => (
+      queries.bundle.hasBundle(`${prefix}:Bundle${index > 0 ? ` ${index}` : ''}`)(document)
+        ? queries.bundle.generateName(prefix, index + 1)(document)
+        : `Bundle${index > 0 ? ` ${index}` : ''}`),
+    getNode: (identifier: string) => ({
       agent, activity, entity, bundle,
-    }: PROVJSONBundle) => (identifier: string): [id: string, value: any] => {
+    }: PROVJSONBundle): [id: string, value: any] => {
       const localNode = Object
         .entries({
           ...agent, ...activity, ...entity, ...bundle,
@@ -36,16 +37,15 @@ const queries = {
       if (localNode) return localNode;
 
       // The bundle containing the nested node
-      const nestedNodeBundle = Object.values(bundle || {})
-        .find((nestedBundle) => queries.bundle.hasNode(nestedBundle)(identifier));
+      const nestedNodeBundle = Object.values(bundle || {}).find(queries.bundle.hasNode(identifier));
 
-      if (nestedNodeBundle) return queries.bundle.getNode(nestedNodeBundle)(identifier);
+      if (nestedNodeBundle) return queries.bundle.getNode(identifier)(nestedNodeBundle);
 
       throw new Error(`Node with identifier ${identifier} not found`);
     },
-    getAttributeValue: (bundle: PROVJSONBundle) => (
+    getAttributeValue: (
       attribute: PROVAttributeDefinition, id: string,
-    ): any | null => {
+    ) => (bundle: PROVJSONBundle): any | null => {
       const { domain, key } = attribute;
       if (domain !== 'bundle' && Object.keys(bundle[domain] || {}).includes(id)) {
         return bundle[domain]?.[id][key];
@@ -53,15 +53,13 @@ const queries = {
       if (bundle.bundle) {
         // eslint-disable-next-line no-restricted-syntax
         for (const value of Object.values(bundle.bundle)) {
-          const result = queries.bundle.getAttributeValue(value)(attribute, id);
+          const result = queries.bundle.getAttributeValue(attribute, id)(value);
           if (result !== null) return result;
         }
       }
       return null;
     },
-    hasRelation: (bundle: PROVJSONBundle) => (
-      identifier: string,
-    ): boolean => {
+    hasRelation: (identifier: string) => (bundle: PROVJSONBundle): boolean => {
       const nestedBundle = bundle.bundle;
       return ((
         relations.find(({ name }) => {
@@ -71,65 +69,65 @@ const queries = {
         }) !== undefined)
       || (
         nestedBundle
-          ? Object.keys(nestedBundle).find((key) => (
-            queries.bundle.hasRelation(nestedBundle[key])(identifier)
-          )) !== undefined
+          ? Object.values(nestedBundle)
+            .find(queries.bundle.hasRelation(identifier)) !== undefined
           : false));
     },
-    hasLocalNode: (bundle: PROVJSONBundle) => (identifier: string): boolean => (
-      queries.bundle.hasLocalActivity(bundle)(identifier)
-      || queries.bundle.hasLocalAgent(bundle)(identifier)
-      || queries.bundle.hasLocalEntity(bundle)(identifier)
-      || queries.bundle.hasLocalBundle(bundle)(identifier)),
-    hasNode: (bundle: PROVJSONBundle) => (identifier: string): boolean => (
-      queries.bundle.hasActivity(bundle)(identifier)
-      || queries.bundle.hasAgent(bundle)(identifier)
-      || queries.bundle.hasEntity(bundle)(identifier)
-      || queries.bundle.hasBundle(bundle)(identifier)
-      || (bundle.bundle !== undefined && Object.values(bundle.bundle).find(((nestedBundle) => (
-        queries.bundle.hasNode(nestedBundle)(identifier)
-      ))) !== undefined)),
-    hasLocalActivity: ({ activity }: PROVJSONBundle) => (identifier: string): boolean => (
+    hasLocalNode: (identifier: string) => (bundle: PROVJSONBundle): boolean => (
+      queries.bundle.hasLocalActivity(identifier)(bundle)
+      || queries.bundle.hasLocalAgent(identifier)(bundle)
+      || queries.bundle.hasLocalEntity(identifier)(bundle)
+      || queries.bundle.hasLocalBundle(identifier)(bundle)),
+    hasNode: (identifier: string) => (bundle: PROVJSONBundle): boolean => (
+      queries.bundle.hasActivity(identifier)(bundle)
+      || queries.bundle.hasAgent(identifier)(bundle)
+      || queries.bundle.hasEntity(identifier)(bundle)
+      || queries.bundle.hasBundle(identifier)(bundle)
+      || (
+        bundle.bundle !== undefined
+        && Object.values(bundle.bundle).find(queries.bundle.hasNode(identifier)) !== undefined)
+    ),
+    hasLocalActivity: (identifier: string) => ({ activity }: PROVJSONBundle): boolean => (
       (activity !== undefined && Object.keys(activity).includes(identifier))),
-    hasActivity: ({ activity, bundle }: PROVJSONBundle) => (identifier: string): boolean => (
+    hasActivity: (identifier: string) => ({ activity, bundle }: PROVJSONBundle): boolean => (
       (activity !== undefined && Object.keys(activity).includes(identifier))
-      || (bundle !== undefined && Object.values(bundle).find(((nestedBundle) => (
-        queries.bundle.hasActivity(nestedBundle)(identifier)
-      ))) !== undefined)),
-    hasLocalAgent: ({ agent }: PROVJSONBundle) => (identifier: string): boolean => (
+      || (
+        bundle !== undefined
+        && Object.values(bundle).find(queries.bundle.hasActivity(identifier)) !== undefined)),
+    hasLocalAgent: (identifier: string) => ({ agent }: PROVJSONBundle): boolean => (
       (agent !== undefined && Object.keys(agent).includes(identifier))),
-    hasAgent: ({ agent, bundle }: PROVJSONBundle) => (identifier: string): boolean => (
+    hasAgent: (identifier: string) => ({ agent, bundle }: PROVJSONBundle): boolean => (
       (agent !== undefined && Object.keys(agent).includes(identifier))
-      || (bundle !== undefined && Object.values(bundle).find(((nestedBundle) => (
-        queries.bundle.hasAgent(nestedBundle)(identifier)
-      ))) !== undefined)),
-    hasLocalEntity: ({ entity }: PROVJSONBundle) => (identifier: string): boolean => (
+      || (
+        bundle !== undefined
+        && Object.values(bundle).find(queries.bundle.hasAgent(identifier)) !== undefined)),
+    hasLocalEntity: (identifier: string) => ({ entity }: PROVJSONBundle): boolean => (
       (entity !== undefined && Object.keys(entity).includes(identifier))),
-    hasEntity: ({ entity, bundle }: PROVJSONBundle) => (identifier: string): boolean => (
+    hasEntity: (identifier: string) => ({ entity, bundle }: PROVJSONBundle): boolean => (
       (entity !== undefined && Object.keys(entity).includes(identifier))
-      || (bundle !== undefined && Object.values(bundle).find(((nestedBundle) => (
-        queries.bundle.hasEntity(nestedBundle)(identifier)
-      ))) !== undefined)),
-    hasLocalBundle: ({ bundle }: PROVJSONBundle) => (identifier: string): boolean => (
+      || (
+        bundle !== undefined
+        && Object.values(bundle).find(queries.bundle.hasEntity(identifier)) !== undefined)),
+    hasLocalBundle: (identifier: string) => ({ bundle }: PROVJSONBundle): boolean => (
       (bundle !== undefined && Object.keys(bundle).includes(identifier))),
-    hasBundle: ({ bundle }: PROVJSONBundle) => (identifier: string): boolean => (
+    hasBundle: (identifier: string) => ({ bundle }: PROVJSONBundle): boolean => (
       (bundle !== undefined && Object.keys(bundle).includes(identifier))
-      || (bundle !== undefined && Object.values(bundle).find(((nestedBundle) => (
-        queries.bundle.hasBundle(nestedBundle)(identifier)
-      ))) !== undefined)),
+      || (
+        bundle !== undefined
+        && Object.values(bundle).find(queries.bundle.hasBundle(identifier)) !== undefined)),
   },
   node: {
-    getFullName: ({ prefix }: PROVJSONBundle) => (identifier: string) => (
+    getFullName: (identifier: string) => ({ prefix }: PROVJSONBundle) => (
       `${(prefix || {})[identifier.split(':')[0]]}${identifier.split(':')[1]}`
     ),
-    getVariant: (document: PROVJSONBundle) => (identifier: string): NodeVariant => {
-      if (queries.bundle.hasEntity(document)(identifier)) {
+    getVariant: (identifier: string) => (document: PROVJSONBundle): NodeVariant => {
+      if (queries.bundle.hasEntity(identifier)(document)) {
         return 'entity';
-      } if (queries.bundle.hasActivity(document)(identifier)) {
+      } if (queries.bundle.hasActivity(identifier)(document)) {
         return 'activity';
-      } if (queries.bundle.hasAgent(document)(identifier)) {
+      } if (queries.bundle.hasAgent(identifier)(document)) {
         return 'agent';
-      } if (queries.bundle.hasBundle(document)(identifier)) {
+      } if (queries.bundle.hasBundle(identifier)(document)) {
         return 'bundle';
       }
       throw new Error(`Node with identifier ${identifier} not found`);
@@ -138,25 +136,26 @@ const queries = {
   agent: {
     getAll: ({ agent, bundle }: PROVJSONBundle): string[] => [
       ...(agent ? Object.keys(agent) : []),
-      ...(bundle ? Object.keys(bundle).map((key) => queries.agent.getAll(bundle[key])).flat() : []),
+      ...(bundle ? Object.values(bundle).map(queries.agent.getAll).flat() : []),
     ],
-    generateName: (document: PROVJSONBundle) => (
+    generateName: (
       prefix: string, index: number = 0,
-    ): string => (queries.bundle.hasNode(document)(`${prefix}:Agent${index > 0 ? ` ${index}` : ''}`)
-      ? queries.agent.generateName(document)(prefix, index + 1)
-      : `Agent${index > 0 ? ` ${index}` : ''}`),
+    ) => (document: PROVJSONBundle): string => (
+      queries.bundle.hasNode(`${prefix}:Agent${index > 0 ? ` ${index}` : ''}`)(document)
+        ? queries.agent.generateName(prefix, index + 1)(document)
+        : `Agent${index > 0 ? ` ${index}` : ''}`),
   },
   activity: {
     getAll: ({ activity, bundle }: PROVJSONBundle): string[] => [
       ...(activity ? Object.keys(activity) : []),
       ...(bundle
-        ? Object.keys(bundle).map((key) => queries.activity.getAll(bundle[key])).flat()
+        ? Object.values(bundle).map(queries.activity.getAll).flat()
         : []),
     ],
-    generateName: (document: PROVJSONBundle) => (
+    generateName: (
       prefix: string, index: number = 0,
-    ): string => (queries.bundle.hasNode(document)(`${prefix}:Activity${index > 0 ? ` ${index}` : ''}`)
-      ? queries.activity.generateName(document)(prefix, index + 1)
+    ) => (document: PROVJSONBundle): string => (queries.bundle.hasNode(`${prefix}:Activity${index > 0 ? ` ${index}` : ''}`)(document)
+      ? queries.activity.generateName(prefix, index + 1)(document)
       : `Activity${index > 0 ? ` ${index}` : ''}`),
   },
   entity: {
@@ -169,22 +168,22 @@ const queries = {
           .map((nestedBundle) => queries.entity.getAll(nestedBundle)).flat()
         : []),
     ],
-    generateName: (document: PROVJSONBundle) => (
+    generateName: (
       prefix: string, index: number = 0,
-    ): string => (queries.bundle.hasNode(document)(`${prefix}:Entity${index > 0 ? ` ${index}` : ''}`)
-      ? queries.entity.generateName(document)(prefix, index + 1)
+    ) => (document: PROVJSONBundle): string => (queries.bundle.hasNode(`${prefix}:Entity${index > 0 ? ` ${index}` : ''}`)(document)
+      ? queries.entity.generateName(prefix, index + 1)(document)
       : `Entity${index > 0 ? ` ${index}` : ''}`),
   },
   relation: {
-    generateID: (bundle: PROVJSONBundle, index: number = 1): string => {
+    generateID: (index: number = 1) => (bundle: PROVJSONBundle): string => {
       const id = `_:id${index}`;
-      return queries.bundle.hasRelation(bundle)(id)
-        ? queries.relation.generateID(bundle, index + 1)
+      return queries.bundle.hasRelation(id)(bundle)
+        ? queries.relation.generateID(index + 1)(bundle)
         : id;
     },
-    getID: (bundle: PROVJSONBundle) => (
+    getID: (
       relationName: RelationName, domainID: string, rangeID: string,
-    ): string | null => {
+    ) => (bundle: PROVJSONBundle): string | null => {
       const entry = bundle[relationName];
       const relation = relations.find((r) => r.name === relationName)!;
       const nestedBundles = bundle.bundle;
@@ -196,15 +195,15 @@ const queries = {
               && value[relation.rangeKey] === rangeID))?.[0]
           : null) || (
         nestedBundles
-          ? Object.values(nestedBundles).map((nestedBundle) => (
-            queries.relation.getID(nestedBundle)(relationName, domainID, rangeID)
-          )).find((id) => id !== null) || null
+          ? Object.values(nestedBundles)
+            .map(queries.relation.getID(relationName, domainID, rangeID))
+            .find((id) => id !== null) || null
           : null
       ));
     },
-    getRangeWithDomain: (bundle: PROVJSONBundle) => (
+    getRangeWithDomain: (
       relationName: RelationName, domainID: string,
-    ): string[] => {
+    ) => (bundle: PROVJSONBundle): string[] => {
       const entry = bundle[relationName];
       const relation = relations.find((r) => r.name === relationName)!;
       const nestedBundles = bundle.bundle;
@@ -215,9 +214,9 @@ const queries = {
             .map(([_, value]) => value[relation.rangeKey])
           : []),
         ...nestedBundles
-          ? Object.values(nestedBundles).map((nestedBundle) => (
-            queries.relation.getRangeWithDomain(nestedBundle)(relationName, domainID)
-          )).flat()
+          ? Object.values(nestedBundles)
+            .map(queries.relation.getRangeWithDomain(relationName, domainID))
+            .flat()
           : [],
       ];
     },

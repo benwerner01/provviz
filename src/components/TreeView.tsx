@@ -112,7 +112,7 @@ const getAddedToBundle = (
   treeData: TreeItem[],
 ): { bundleID: string, nodeID: string }[] => [
   ...treeData
-    .filter(({ key }) => !queries.bundle.hasLocalNode(bundle)(key))
+    .filter(({ key }) => !queries.bundle.hasLocalNode(key)(bundle))
     .map(({ key }) => ({ bundleID, nodeID: key })),
   ...(Object
     .entries(bundle.bundle || {})
@@ -184,7 +184,7 @@ const TreeView: React.FC<TreeViewProps> = ({
 
         const { nodeID } = removed;
 
-        const variant = queries.node.getVariant(document)(nodeID);
+        const variant = queries.node.getVariant(nodeID)(document);
 
         setDocument(mutations.node.move(
           oldBundleID, newBundleID, variant, nodeID,

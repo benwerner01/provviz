@@ -127,7 +127,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
 
   const handleCreateNode = (variant: NodeVariant) => {
     const prefix = queries.prefix.getAll(document)[0];
-    const name = queries[variant].generateName(document)(prefix);
+    const name = queries[variant].generateName(prefix)(document);
     setDocument(mutations.node.create(variant, prefix, name));
     setSelectedNodeID(`${prefix}:${name}`);
   };

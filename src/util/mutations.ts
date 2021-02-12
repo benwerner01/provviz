@@ -122,7 +122,7 @@ const mutations = {
     move: (
       oldBundleID: string, newBundleID: string, variant: NodeVariant, id: string,
     ) => (document: PROVJSONBundle): PROVJSONBundle => {
-      const [_, value] = queries.bundle.getNode(document)(id);
+      const [_, value] = queries.bundle.getNode(id)(document);
 
       const removed = mutations.bundle.findByID(document)(oldBundleID)(
         mutations.bundle.removeNode(variant, id),
