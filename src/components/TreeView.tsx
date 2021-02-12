@@ -186,9 +186,9 @@ const TreeView: React.FC<TreeViewProps> = ({
 
         const variant = queries.node.getVariant(document)(nodeID);
 
-        setDocument(mutations.document.moveNode(document)(
+        setDocument(mutations.node.move(
           oldBundleID, newBundleID, variant, nodeID,
-        ));
+        )(document));
       });
     }
   };

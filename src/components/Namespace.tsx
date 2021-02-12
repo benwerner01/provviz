@@ -11,7 +11,7 @@ import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import debounce from 'lodash.debounce';
-import { PROVJSONDocument } from '../util/document';
+import { PROVJSONBundle } from '../util/document';
 import mutations from '../util/mutations';
 import DocumentContext from './contexts/DocumentContext';
 import { palette } from '../util/theme';
@@ -263,14 +263,14 @@ const generateKey = () => {
 const sortNamespaces = (a: Namespace, b: Namespace) => (
   a.prefix.charCodeAt(0) - b.prefix.charCodeAt(0));
 
-const mapDocumentToNamespaces = ({ prefix }: PROVJSONDocument) => Object
-  .keys(prefix)
-  .map((key) => ({ key: generateKey(), prefix: key, value: prefix[key] }))
+const mapDocumentToNamespaces = ({ prefix }: PROVJSONBundle) => Object
+  .entries(prefix || {})
+  .map(([key, value]) => ({ key: generateKey(), prefix: key, value }))
   .sort(sortNamespaces);
 
-const namespaceHasChanged = (namespaces: Namespace[], document: PROVJSONDocument): boolean => (
-  namespaces.length !== Object.keys(document.prefix).length
-  || (Object.entries(document.prefix).find(([p, v]) => {
+const namespaceHasChanged = (namespaces: Namespace[], document: PROVJSONBundle): boolean => (
+  namespaces.length !== Object.keys(document.prefix || {}).length
+  || (Object.entries(document.prefix || {}).find(([p, v]) => {
     const namespace = namespaces.find(({ prefix }) => prefix === p);
     if (!namespace || namespace.value !== v) return true;
     return false;
@@ -301,7 +301,7 @@ const NamespaceComponent: React.FC<NamespaceProps> = () => {
       ...namespaces.slice(index + 1),
     ]);
 
-    setDocument((prev) => mutations.namespace.updatePrefix(prev)(prevPrefix, prefix));
+    setDocument(mutations.namespace.updatePrefix(prevPrefix, prefix));
   }, 200), [namespaces, setDocument]);
 
   const debouncedUpdateValue = useCallback((index: number) => debounce((value: string) => {
@@ -313,7 +313,7 @@ const NamespaceComponent: React.FC<NamespaceProps> = () => {
       ...namespaces.slice(index + 1),
     ]);
 
-    setDocument((prev) => mutations.namespace.updateValue(prev)(prefix, value));
+    setDocument(mutations.namespace.updateValue(prefix, value));
   }, 200), [namespaces, setDocument]);
 
   const handleDelete = (index: number) => () => {
@@ -321,13 +321,13 @@ const NamespaceComponent: React.FC<NamespaceProps> = () => {
 
     setNamespaces([...namespaces.slice(0, index), ...namespaces.slice(index + 1)]);
 
-    setDocument((prev) => mutations.namespace.delete(prev)(prefix));
+    setDocument(mutations.namespace.delete(prefix));
   };
 
   const handleCreated = (namespace: Omit<Namespace, 'key'>) => {
     setCreating(false);
     setNamespaces([...namespaces, { ...namespace, key: `${namespaces.length}-${namespace.prefix}` }]);
-    setDocument((prev) => mutations.namespace.create(prev)(namespace.prefix, namespace.value));
+    setDocument(mutations.namespace.create(namespace.prefix, namespace.value));
   };
 
   return (

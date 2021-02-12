@@ -1,8 +1,6 @@
 import Color from 'color';
 import { PROVENANVE_VIEW_DEFINITIONS, VisualisationSettings } from '../components/contexts/VisualisationContext';
-import {
-  PROVJSONBundle, PROVJSONDocument, relations,
-} from './document';
+import { PROVJSONBundle, relations } from './document';
 
 const getNodeColor = (id: string, { palette }: VisualisationSettings) => palette
   .overrides.find(({ nodeID }) => nodeID === id)?.color;
@@ -85,7 +83,7 @@ const mapBundleToDots = (json: PROVJSONBundle, settings: VisualisationSettings):
 ].join('\n');
 
 export const mapDocumentToDots = (
-  json: PROVJSONDocument,
+  json: PROVJSONBundle,
   settings: VisualisationSettings,
 ): string => [
   'digraph  {',

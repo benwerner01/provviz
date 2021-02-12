@@ -116,7 +116,7 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
           onChange={handlePrefixChange}
           classes={{ select: classes.prefixSelect }}
         >
-          {Object.keys(document.prefix).map((p) => (
+          {Object.keys(document.prefix || {}).map((p) => (
             <MenuItem key={p} value={p}>{p}</MenuItem>
           ))}
         </Select>

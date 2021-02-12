@@ -1,7 +1,6 @@
 import {
   NodeVariant,
   PROVJSONBundle,
-  PROVJSONDocument,
   PROVAttributeDefinition,
   RelationName,
   relations,
@@ -9,7 +8,7 @@ import {
 
 const queries = {
   prefix: {
-    getAll: ({ prefix }: PROVJSONDocument) => Object.keys(prefix),
+    getAll: ({ prefix }: PROVJSONBundle) => Object.keys(prefix || {}),
   },
   bundle: {
     getAll: ({ bundle }: PROVJSONBundle): string[] => [
@@ -20,7 +19,7 @@ const queries = {
         ]).flat()
         : []),
     ],
-    generateName: (document: PROVJSONDocument) => (
+    generateName: (document: PROVJSONBundle) => (
       prefix: string, index: number = 0,
     ): string => (queries.bundle.hasBundle(document)(`${prefix}:Bundle${index > 0 ? ` ${index}` : ''}`)
       ? queries.bundle.generateName(document)(prefix, index + 1)
@@ -48,7 +47,7 @@ const queries = {
       attribute: PROVAttributeDefinition, id: string,
     ): any | null => {
       const { domain, key } = attribute;
-      if (Object.keys(bundle[domain] || {}).includes(id)) {
+      if (domain !== 'bundle' && Object.keys(bundle[domain] || {}).includes(id)) {
         return bundle[domain]?.[id][key];
       }
       if (bundle.bundle) {
@@ -120,10 +119,10 @@ const queries = {
       ))) !== undefined)),
   },
   node: {
-    getFullName: ({ prefix }: PROVJSONDocument) => (identifier: string) => (
-      `${prefix[identifier.split(':')[0]]}${identifier.split(':')[1]}`
+    getFullName: ({ prefix }: PROVJSONBundle) => (identifier: string) => (
+      `${(prefix || {})[identifier.split(':')[0]]}${identifier.split(':')[1]}`
     ),
-    getVariant: (document: PROVJSONDocument) => (identifier: string): NodeVariant => {
+    getVariant: (document: PROVJSONBundle) => (identifier: string): NodeVariant => {
       if (queries.bundle.hasEntity(document)(identifier)) {
         return 'entity';
       } if (queries.bundle.hasActivity(document)(identifier)) {
@@ -141,7 +140,7 @@ const queries = {
       ...(agent ? Object.keys(agent) : []),
       ...(bundle ? Object.keys(bundle).map((key) => queries.agent.getAll(bundle[key])).flat() : []),
     ],
-    generateName: (document: PROVJSONDocument) => (
+    generateName: (document: PROVJSONBundle) => (
       prefix: string, index: number = 0,
     ): string => (queries.bundle.hasNode(document)(`${prefix}:Agent${index > 0 ? ` ${index}` : ''}`)
       ? queries.agent.generateName(document)(prefix, index + 1)
@@ -154,7 +153,7 @@ const queries = {
         ? Object.keys(bundle).map((key) => queries.activity.getAll(bundle[key])).flat()
         : []),
     ],
-    generateName: (document: PROVJSONDocument) => (
+    generateName: (document: PROVJSONBundle) => (
       prefix: string, index: number = 0,
     ): string => (queries.bundle.hasNode(document)(`${prefix}:Activity${index > 0 ? ` ${index}` : ''}`)
       ? queries.activity.generateName(document)(prefix, index + 1)
@@ -170,7 +169,7 @@ const queries = {
           .map((nestedBundle) => queries.entity.getAll(nestedBundle)).flat()
         : []),
     ],
-    generateName: (document: PROVJSONDocument) => (
+    generateName: (document: PROVJSONBundle) => (
       prefix: string, index: number = 0,
     ): string => (queries.bundle.hasNode(document)(`${prefix}:Entity${index > 0 ? ` ${index}` : ''}`)
       ? queries.entity.generateName(document)(prefix, index + 1)

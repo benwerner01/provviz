@@ -14,7 +14,11 @@ import queries from '../../util/queries';
 import mutations from '../../util/mutations';
 import {
   NodeVariant,
-  ATTRIBUTE_DEFINITIONS, PROVJSONDocument, PROVAttributeDefinition, RelationName, relations,
+  ATTRIBUTE_DEFINITIONS,
+  PROVJSONBundle,
+  PROVAttributeDefinition,
+  RelationName,
+  relations,
 } from '../../util/document';
 import ColorPicker from '../ColorPicker';
 import VisualisationContext from '../contexts/VisualisationContext';
@@ -44,10 +48,9 @@ const DateTimeAttribute: React.FC<DateTimeAttributeProps> = ({
       type="datetime-local"
       classes={classes}
       value={queries.bundle.getAttributeValue(document)(attribute, domainID)}
-      onChange={(e) => setDocument((prev) => ({
-        ...prev,
-        ...mutations.bundle.setAttribute(document)(domainID, attribute, e.target.value),
-      }))}
+      onChange={(e) => setDocument(
+        mutations.bundle.setAttribute(domainID, attribute, e.target.value),
+      )}
       InputLabelProps={{ shrink: true }}
     />
   );
@@ -81,7 +84,7 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
     }), {} as { [key: string]: string[] });
 
   const handleRelationRangeChange = (relationName: RelationName) => (
-    updatedDocument: PROVJSONDocument, rangeIDs: string[],
+    updatedDocument: PROVJSONBundle, rangeIDs: string[],
   ) => {
     const rangeIncludes = relationRangeIncludes[relationName];
     const add = rangeIDs.filter((rangeID) => !rangeIncludes.includes(rangeID));
@@ -90,9 +93,9 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
     add.forEach((activityID) => {
       const relationID = queries.relation.generateID(document);
       // eslint-disable-next-line no-param-reassign
-      updatedDocument = mutations.relation.create(updatedDocument)(
+      updatedDocument = mutations.relation.create(
         relationName, relationID, id, activityID,
-      );
+      )(updatedDocument);
     });
     remove.forEach((activityID) => {
       const relationID = queries.relation.getID(document)(relationName, id, activityID);
@@ -100,7 +103,7 @@ const NodeTab: React.FC<NodeTabProps> = ({ variant, id, onIDChange }) => {
       // eslint-disable-next-line no-param-reassign
       updatedDocument = {
         ...updatedDocument,
-        ...mutations.relation.delete(updatedDocument)(relationName, relationID),
+        ...mutations.relation.delete(relationName, relationID)(updatedDocument),
       };
     });
 

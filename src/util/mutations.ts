@@ -1,7 +1,6 @@
 import {
   NodeVariant,
   PROVJSONBundle,
-  PROVJSONDocument,
   PROVAttributeDefinition,
   RelationName,
   relations,
@@ -69,9 +68,9 @@ const updatePrefixesInObject = (obj: { [key: string]: any }) => (
 };
 
 const mutations = {
-  updateIdentifier: (document: PROVJSONDocument) => (
+  updateIdentifier: (document: PROVJSONBundle) => (
     prevID: string, updatedID: string,
-  ): PROVJSONDocument => {
+  ): PROVJSONBundle => {
     const { prefix, ...remaining } = document;
 
     return ({
@@ -80,37 +79,29 @@ const mutations = {
     });
   },
   namespace: {
-    create: (document: PROVJSONDocument) => (
+    create: (
       prefixName: string, updatedValue: string,
-    ): PROVJSONDocument => ({
+    ) => (document: PROVJSONBundle): PROVJSONBundle => ({
       ...document,
       prefix: {
         ...document.prefix,
         [prefixName]: updatedValue,
       },
     }),
-    delete: (document: PROVJSONDocument) => (
-      prefix: string,
-    ): PROVJSONDocument => {
-      const { [prefix]: value, ...remainingNamespaces } = document.prefix;
-      return ({
-        ...document,
-        prefix: remainingNamespaces,
-      });
+    delete: (prefix: string) => (document: PROVJSONBundle): PROVJSONBundle => {
+      const { [prefix]: value, ...remainingNamespaces } = document.prefix || {};
+      return ({ ...document, prefix: remainingNamespaces });
     },
-    updateValue: (document: PROVJSONDocument) => (
+    updateValue: (
       prefix: string, updatedValue: string,
-    ): PROVJSONDocument => ({
+    ) => (document: PROVJSONBundle): PROVJSONBundle => ({
       ...document,
-      prefix: {
-        ...document.prefix,
-        [prefix]: updatedValue,
-      },
+      prefix: { ...document.prefix, [prefix]: updatedValue },
     }),
-    updatePrefix: (document: PROVJSONDocument) => (
+    updatePrefix: (
       prevPrefix: string, updatedName: string,
-    ): PROVJSONDocument => {
-      const { [prevPrefix]: prevValue, ...updatedPrefix } = document.prefix;
+    ) => (document: PROVJSONBundle): PROVJSONBundle => {
+      const { [prevPrefix]: prevValue, ...updatedPrefix } = document.prefix || {};
 
       return ({
         ...updatePrefixesInObject(document)(prevPrefix, updatedName),
@@ -121,39 +112,135 @@ const mutations = {
       });
     },
   },
-  document: {
-    moveNode: (document: PROVJSONDocument) => (
+  node: {
+    create: (
+      variant: NodeVariant, prefix: string, name: string,
+    ) => (document: PROVJSONBundle): PROVJSONBundle => ({
+      ...document,
+      [variant]: { ...document.bundle, [`${prefix}:${name}`]: { } },
+    }),
+    move: (
       oldBundleID: string, newBundleID: string, variant: NodeVariant, id: string,
-    ): PROVJSONDocument => {
+    ) => (document: PROVJSONBundle): PROVJSONBundle => {
       const [_, value] = queries.bundle.getNode(document)(id);
 
-      const removed = mutations.bundle.find(document)(oldBundleID)(
-        (b) => mutations.bundle.removeNode(b)(variant, id),
+      const removed = mutations.bundle.findByID(document)(oldBundleID)(
+        mutations.bundle.removeNode(variant, id),
       );
 
       if (removed) {
-        const added = mutations.bundle.find(removed)(newBundleID)(
-          (b) => mutations.bundle.addNode(b)(variant, id, value),
+        const added = mutations.bundle.findByID(removed)(newBundleID)(
+          mutations.bundle.addNode(variant, id, value),
         );
         if (added) return { ...document, ...added };
       }
 
       throw new Error('');
     },
+    delete: (
+      variant: NodeVariant, id: string,
+    ) => (document: PROVJSONBundle) => {
+      const updatedBundle = mutations.bundle
+        .find(document)(
+          (bundle) => Object.keys(bundle[variant] || {}).includes(id),
+        )(mutations.bundle.removeNode(variant, id));
+      if (!updatedBundle) throw new Error('Could not delete');
+      return ({ ...document, ...mutations.relation.deleteWithNode(id)(updatedBundle) });
+    },
+  },
+  relation: {
+    create: (
+      relationName: RelationName, relationID: string, domainID: string, rangeID: string,
+    ) => (document: PROVJSONBundle): PROVJSONBundle => {
+      const { domainKey, rangeKey } = relations.find(({ name }) => name === relationName)!;
+      return {
+        ...document,
+        [relationName]: {
+          ...document[relationName],
+          [relationID]: {
+            [domainKey]: domainID,
+            [rangeKey]: rangeID,
+          },
+        },
+      };
+    },
+    deleteWithNode: (nodeID: string) => (bundle: PROVJSONBundle): PROVJSONBundle => Object
+      .entries(bundle)
+      .reduce<PROVJSONBundle>((prevBundle, [bundleKey, entries]) => {
+        const relation = relations.find(({ name }) => name === bundleKey);
+        return relation
+          ? ({
+            ...prevBundle,
+            [bundleKey]: Object.entries<{ [id: string]: string }>(entries)
+              .reduce((prevValue, [key, value]) => ((
+                value[relation.domainKey] === nodeID
+                || value[relation.rangeKey] === nodeID
+              )
+                ? prevValue
+                : { ...prevValue, [key]: value }), {}),
+          })
+          : (bundleKey === 'bundle'
+            ? ({
+              ...prevBundle,
+              [bundleKey]: Object.entries<PROVJSONBundle>(entries)
+                .reduce((prev, [bundleID, nestedBundle]) => ({
+                  ...prev,
+                  [bundleID]: mutations.relation.deleteWithNode(nodeID)(nestedBundle),
+                }), {}),
+            })
+            : prevBundle);
+      }, { ...bundle }),
+    delete: (
+      relationName: RelationName, relationID: string,
+    ) => (bundle: PROVJSONBundle): PROVJSONBundle => {
+      const { [relationID]: value, ...remaining } = bundle[relationName] || {};
+      return ({
+        ...bundle,
+        [relationName]: remaining,
+        bundle: bundle.bundle
+          ? Object.keys(bundle.bundle).reduce((prev, key) => ({
+            ...prev,
+            [key]: mutations.relation.delete(relationName, relationID)(prev[key]),
+          }), bundle.bundle)
+          : bundle.bundle,
+      });
+    },
   },
   bundle: {
-    create: (document: PROVJSONDocument) => (
-      prefix: string, name: string,
-    ): PROVJSONDocument => ({
-      ...document,
-      bundle: {
-        ...document.bundle,
-        [`${prefix}:${name}`]: {
+    find: (bundle: PROVJSONBundle) => (
+      isMatchingBundle: (b: PROVJSONBundle) => boolean,
+    ) => (
+      callback: (b: PROVJSONBundle) => PROVJSONBundle,
+    ): PROVJSONBundle | undefined => {
+      if (isMatchingBundle(bundle)) return callback(bundle);
 
-        },
-      },
-    }),
-    find: (bundle: PROVJSONBundle) => (bundleID: string) => (
+      const match = Object.entries(bundle.bundle || {}).find(([_, b]) => isMatchingBundle(b));
+
+      if (match) {
+        return {
+          ...bundle,
+          bundle: {
+            ...bundle.bundle,
+            [match[0]]: callback(match[1]),
+          },
+        };
+      }
+
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [id, nestedBundle] of Object.entries(bundle.bundle || {})) {
+        const res = mutations.bundle.find(nestedBundle)(isMatchingBundle)(callback);
+
+        if (res) {
+          return {
+            ...bundle,
+            bundle: { ...bundle.bundle, [id]: res },
+          };
+        }
+      }
+
+      return undefined;
+    },
+    findByID: (bundle: PROVJSONBundle) => (bundleID: string) => (
       callback: (b: PROVJSONBundle) => PROVJSONBundle,
     ): PROVJSONBundle | undefined => {
       if (bundleID === 'root') return callback(bundle);
@@ -174,7 +261,7 @@ const mutations = {
 
       // eslint-disable-next-line no-restricted-syntax
       for (const [id, nestedBundle] of Object.entries(bundle.bundle || {})) {
-        const res = mutations.bundle.find(nestedBundle)(bundleID)(callback);
+        const res = mutations.bundle.findByID(nestedBundle)(bundleID)(callback);
 
         if (res) {
           return {
@@ -186,24 +273,29 @@ const mutations = {
 
       return undefined;
     },
-    addNode: (bundle: PROVJSONBundle) => (
+    addNode: (
       variant: NodeVariant, id: string, value: any,
-    ): PROVJSONBundle => ({
+    ) => (bundle: PROVJSONBundle): PROVJSONBundle => ({
       ...bundle,
       [variant]: {
         ...bundle[variant],
         [id]: value,
       },
     }),
-    removeNode: (bundle: PROVJSONBundle) => (
+    removeNode: (
       variant: NodeVariant, id: string,
-    ) => {
-      const { [id]: value, ...remaining } = bundle[variant] || {};
-      return { ...bundle, [variant]: remaining };
-    },
-    setAttribute: (bundle: PROVJSONBundle) => (
+    ) => (bundle: PROVJSONBundle): PROVJSONBundle => ({
+      ...bundle,
+      [variant]: Object
+        .entries(bundle[variant] || {})
+        .reduce((prev, [key, value]) => (key === id
+          ? prev
+          : ({ ...prev, [key]: value })
+        ), {}),
+    }),
+    setAttribute: (
       id: string, attribute: PROVAttributeDefinition, value: any,
-    ): PROVJSONBundle => {
+    ) => (bundle: PROVJSONBundle): PROVJSONBundle => {
       const { domain, key } = attribute;
 
       return Object.keys(bundle[domain] || {}).includes(id)
@@ -221,81 +313,10 @@ const mutations = {
           bundle: bundle.bundle
             ? Object.keys(bundle.bundle).reduce((prev, bundleKey) => ({
               ...prev,
-              [bundleKey]: mutations.bundle.setAttribute(prev[bundleKey])(id, attribute, value),
+              [bundleKey]: mutations.bundle.setAttribute(id, attribute, value)(prev[bundleKey]),
             }), bundle.bundle)
             : bundle.bundle,
         });
-    },
-  },
-  agent: {
-    create: (document: PROVJSONDocument) => (
-      prefix: string, name: string,
-    ): PROVJSONDocument => ({
-      ...document,
-      agent: {
-        ...document.agent,
-        [`${prefix}:${name}`]: {
-
-        },
-      },
-    }),
-  },
-  activity: {
-    create: (document: PROVJSONDocument) => (
-      prefix: string, name: string,
-    ): PROVJSONDocument => ({
-      ...document,
-      activity: {
-        ...document.activity,
-        [`${prefix}:${name}`]: {
-
-        },
-      },
-    }),
-  },
-  entity: {
-    create: (document: PROVJSONDocument) => (
-      prefix: string, name: string,
-    ): PROVJSONDocument => ({
-      ...document,
-      entity: {
-        ...document.entity,
-        [`${prefix}:${name}`]: {
-
-        },
-      },
-    }),
-  },
-  relation: {
-    create: (document: PROVJSONDocument) => (
-      relationName: RelationName, relationID: string, domainID: string, rangeID: string,
-    ): PROVJSONDocument => {
-      const { domainKey, rangeKey } = relations.find(({ name }) => name === relationName)!;
-      return {
-        ...document,
-        [relationName]: {
-          ...document[relationName],
-          [relationID]: {
-            [domainKey]: domainID,
-            [rangeKey]: rangeID,
-          },
-        },
-      };
-    },
-    delete: (bundle: PROVJSONBundle) => (
-      relationName: RelationName, relationID: string,
-    ): PROVJSONBundle => {
-      const { [relationID]: value, ...remaining } = bundle[relationName] || {};
-      return ({
-        ...bundle,
-        [relationName]: remaining,
-        bundle: bundle.bundle
-          ? Object.keys(bundle.bundle).reduce((prev, key) => ({
-            ...prev,
-            [key]: mutations.relation.delete(prev[key])(relationName, relationID),
-          }), bundle.bundle)
-          : bundle.bundle,
-      });
     },
   },
 };

@@ -1,16 +1,16 @@
 import React, { Dispatch, SetStateAction } from 'react';
-import { PROVJSONDocument } from '../../util/document';
+import { PROVJSONBundle } from '../../util/document';
 
 export type DocumentContext = {
-  document: PROVJSONDocument;
-  setDocument: Dispatch<SetStateAction<PROVJSONDocument>>;
+  document: PROVJSONBundle;
+  setDocument: Dispatch<SetStateAction<PROVJSONBundle>>;
 }
 
-const emptyDocument: PROVJSONDocument = {
+const emptyDocument: PROVJSONBundle = {
   prefix: {},
 };
 
 export default React.createContext<DocumentContext>({
   document: emptyDocument,
-  setDocument: (d: SetStateAction<PROVJSONDocument>) => undefined,
+  setDocument: (d: SetStateAction<PROVJSONBundle>) => undefined,
 });

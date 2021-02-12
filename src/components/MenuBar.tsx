@@ -128,7 +128,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
   const handleCreateNode = (variant: NodeVariant) => {
     const prefix = queries.prefix.getAll(document)[0];
     const name = queries[variant].generateName(document)(prefix);
-    setDocument((prev) => mutations[variant].create(prev)(prefix, name));
+    setDocument(mutations.node.create(variant, prefix, name));
     setSelectedNodeID(`${prefix}:${name}`);
   };
 
@@ -206,7 +206,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
       ) : (
         <Box>
           {NODE_VARIANTS.map((variant) => (
-            <Button className={classes[variant]} classes={buttonClasses} onClick={() => handleCreateNode(variant)} variant="contained" endIcon={<AddIcon />}>
+            <Button key={variant} className={classes[variant]} classes={buttonClasses} onClick={() => handleCreateNode(variant)} variant="contained" endIcon={<AddIcon />}>
               {`${variant.charAt(0).toUpperCase()}${variant.slice(1)}`}
             </Button>
           ))}

@@ -2,7 +2,7 @@ import React, { SetStateAction, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import download from 'downloadjs';
-import { PROVJSONDocument, tbdIsPROVJSONDocument } from '../util/document';
+import { PROVJSONBundle, tbdIsPROVJSONBundle } from '../util/document';
 import DocumentContext from './contexts/DocumentContext';
 import Editor, { TABS_HEIGHT } from './Editor';
 import D3Graphviz from './D3Graphviz';
@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
 const Visualiser: React.FC<VisualiserProps> = ({
   wasmFolderURL, width, height, documentName, document, onChange,
 }) => {
-  if (!tbdIsPROVJSONDocument(document)) throw new Error('Could not parse PROV JSON Document');
+  if (!tbdIsPROVJSONBundle(document)) throw new Error('Could not parse PROV JSON Document');
   const classes = useStyles();
   const [svgElement, setSVGElement] = useState<SVGSVGElement | undefined>();
 
@@ -47,7 +47,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
     visualisationSettings,
     setVisualisationSettings] = useState<VisualisationSettings>(defaultSettings);
 
-  const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(document);
+  const [localDocument, setLocalDocument] = useState<PROVJSONBundle>(document);
   const [displayEditor, setDisplayEditor] = useState<boolean>(false);
   const [displayEditorContent, setDisplayEditorContent] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<View>('Graph');
@@ -70,7 +70,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
 
   const contextSetDocument = controllingState
     ? setLocalDocument
-    : (action: SetStateAction<PROVJSONDocument>) => {
+    : (action: SetStateAction<PROVJSONBundle>) => {
       if (onChange) {
         if (typeof action === 'function') onChange(action(contextDocument));
         else onChange(action);
@@ -89,7 +89,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
     if (id && !displayEditorContent) setDisplayEditorContent(true);
     setSelectedNodeID(id);
   };
-
+  console.log(contextDocument);
   return (
     <DocumentContext.Provider
       value={{ document: contextDocument, setDocument: contextSetDocument }}
