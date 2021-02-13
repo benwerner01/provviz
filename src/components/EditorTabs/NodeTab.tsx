@@ -209,19 +209,20 @@ const NodeTab: React.FC<NodeTabProps> = ({
                 {p.range === 'DateTime' && <DateTimeAttribute attribute={p} domainID={id} />}
               </React.Fragment>
             ))}
-          <CustomAttributes nodeVariant={variant} nodeID={id} />
         </>
       ),
     },
-    {
-      name: 'Attributes',
-      initiallyOpen: false,
-      content: (
-        <>
-          <CustomAttributes nodeVariant={variant} nodeID={id} />
-        </>
-      ),
-    },
+    variant === 'bundle'
+      ? []
+      : {
+        name: 'Attributes',
+        initiallyOpen: false,
+        content: (
+          <>
+            <CustomAttributes nodeVariant={variant} nodeID={id} />
+          </>
+        ),
+      },
     {
       name: 'Relationships',
       content: RELATIONS.filter(({ domain }) => domain === variant).map(({ name, range }) => (
@@ -284,7 +285,7 @@ const NodeTab: React.FC<NodeTabProps> = ({
         </>
       ),
     },
-  ];
+  ].flat();
 
   const outgoingRelationships = queries.node.getOutgoingRelations(id)(document);
   const incomingRelationships = queries.node.getIncomingRelations(id)(document);
