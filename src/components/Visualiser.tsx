@@ -89,7 +89,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
     if (id && !displayEditorContent) setDisplayEditorContent(true);
     setSelectedNodeID(id);
   };
-  console.log(contextDocument);
+
   return (
     <DocumentContext.Provider
       value={{ document: contextDocument, setDocument: contextSetDocument }}
