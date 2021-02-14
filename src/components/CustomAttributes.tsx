@@ -339,9 +339,8 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
       {attributes.map(({
         key, prevName, name, value,
       }) => (
-        <Box display="flex" alignItems="center">
+        <Box key={key} display="flex" alignItems="center">
           <CustomAttribute
-            key={key}
             name={name}
             value={value}
             onNameChange={handleNameChange(key, prevName)}
