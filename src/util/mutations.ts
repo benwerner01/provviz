@@ -148,10 +148,59 @@ const mutations = {
       if (!updatedBundle) throw new Error('Could not delete');
       return ({ ...document, ...mutations.relation.deleteWithNode(id)(updatedBundle) });
     },
+    createAttribute: (
+      variant: NodeVariant, nodeID: string, name: string, value: AttributeValue,
+    ) => (document: PROVJSONBundle) => {
+      if (variant === 'bundle') throw new Error('Cannot create attribute for bundles');
+
+      const updatedDocument = mutations.bundle
+        .find(
+          (bundle) => Object.keys(bundle[variant] || {}).includes(nodeID),
+        )(
+          (bundle) => ({
+            ...bundle,
+            [variant]: {
+              ...bundle[variant],
+              [nodeID]: { ...bundle[variant]![nodeID], [name]: value },
+            },
+          }),
+        )(document);
+
+      if (!updatedDocument) throw new Error(`Could not find node with id ${nodeID}`);
+
+      return updatedDocument;
+    },
+    deleteAttribute: (
+      variant: NodeVariant, nodeID: string, attributeName: string,
+    ) => (document: PROVJSONBundle) => {
+      if (variant === 'bundle') throw new Error('Cannot create attribute for bundles');
+
+      const updatedDocument = mutations.bundle
+        .find(
+          (bundle) => Object.keys(bundle[variant] || {}).includes(nodeID),
+        )(
+          (bundle) => ({
+            ...bundle,
+            [variant]: {
+              ...bundle[variant],
+              [nodeID]: Object.entries(bundle[variant]![nodeID]).reduce(
+                (prev, [name, value]) => (name === attributeName
+                  ? prev
+                  : ({ ...prev, [name]: value })),
+                { },
+              ),
+            },
+          }),
+        )(document);
+
+      if (!updatedDocument) throw new Error(`Could not find node with id ${nodeID}`);
+
+      return updatedDocument;
+    },
     setAttributeValue: (
       variant: NodeVariant, nodeID: string, attributeName: string, attributeValue: AttributeValue,
     ) => (document: PROVJSONBundle) => {
-      if (variant === 'bundle') throw new Error('Cannot set attribute value of bundle');
+      if (variant === 'bundle') throw new Error('Cannot set attribute value of bundles');
       const updatedDocument = mutations.bundle
         .find(
           (bundle) => Object.keys(bundle[variant] || {}).includes(nodeID),
@@ -177,7 +226,7 @@ const mutations = {
     setAttributeName: (
       variant: NodeVariant, nodeID: string, prevAttributeName: string, newAttributeName: string,
     ) => (document: PROVJSONBundle) => {
-      if (variant === 'bundle') throw new Error('Cannot set attribute value of bundle');
+      if (variant === 'bundle') throw new Error('Cannot set attribute value of bundles');
       const updatedDocument = mutations.bundle
         .find(
           (bundle) => Object.keys(bundle[variant] || {}).includes(nodeID),

@@ -11,6 +11,9 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
 import debounce from 'lodash.debounce';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
+import Collapse from '@material-ui/core/Collapse';
 import { AttributeValue, ATTRIBUTE_DEFINITIONS, NodeVariant } from '../util/document';
 import queries from '../util/queries';
 import DocumentContext from './contexts/DocumentContext';
@@ -118,7 +121,7 @@ const CustomAttribute: React.FC<CustomAttributeProps> = ({
   const selectFormControlClasses = { root: classes.selectFormControlRoot };
 
   return (
-    <Box display="flex" className={classes.wrapper}>
+    <Box flexGrow={1} display="flex" className={classes.wrapper}>
       <TextField
         className={classes.nameTextField}
         classes={textFieldClasses}
@@ -193,6 +196,15 @@ const CustomAttribute: React.FC<CustomAttributeProps> = ({
   );
 };
 
+const useCustomAttributesStyles = makeStyles((theme) => ({
+  button: {
+    textTransform: 'none',
+  },
+  cancelButton: {
+    marginRight: theme.spacing(1),
+  },
+}));
+
 type Attribute = {
   key: string;
   prevName: string;
@@ -224,16 +236,26 @@ type CustomAttributesProps = {
 const CustomAttributes: React.FC<CustomAttributesProps> = ({
   nodeVariant, nodeID,
 }) => {
+  const classes = useCustomAttributesStyles();
   const { document, setDocument } = useContext(DocumentContext);
 
   const [creating, setCreating] = useState<boolean>(false);
+  const [creatingName, setCreatingName] = useState<string>('');
+  const [creatingValue, setCreatingValue] = useState<AttributeValue>('');
   const [attributes, setAttributes] = useState<Attribute[]>(
     queries.node.getAttributes(nodeVariant, nodeID)(document)!
       .filter(([key]) => ATTRIBUTE_DEFINITIONS.find((a) => a.key === key) === undefined)
       .map(mapDocumentAttributeEntryToAttribute),
   );
 
+  const resetCreating = () => {
+    setCreating(false);
+    setCreatingName('');
+    setCreatingValue('');
+  };
+
   useEffect(() => {
+    resetCreating();
     setAttributes(queries.node.getAttributes(nodeVariant, nodeID)(document)!
       .filter(([key]) => ATTRIBUTE_DEFINITIONS.find((a) => a.key === key) === undefined)
       .map(mapDocumentAttributeEntryToAttribute));
@@ -264,7 +286,7 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
   ), [nodeID]);
 
   const handleNameChange = (key: string, prevName: string) => (updatedName: string) => {
-    if (updatedName === '') debouncedUpdateName(key, prevName, updatedName);
+    if (updatedName !== '') debouncedUpdateName(key, prevName, updatedName);
     setAttributes((prev) => {
       const index = prev.findIndex((a) => key === a.key);
       return index === -1
@@ -291,27 +313,67 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
     });
   };
 
+  const creatingIsValid = (
+    creatingName !== ''
+    && attributes.find(({ prevName }) => prevName === creatingName) === undefined
+  );
+
+  const handleCreate = () => {
+    if (!creatingIsValid) return;
+    const name = creatingName;
+    const value = creatingValue;
+    setDocument(mutations.node.createAttribute(nodeVariant, nodeID, name, value));
+    setAttributes((prev) => [...prev, {
+      key: feshAttributeKey(), prevName: name, name, value,
+    }]);
+    resetCreating();
+  };
+
+  const handleDelete = (key: string, name: string) => {
+    setDocument(mutations.node.deleteAttribute(nodeVariant, nodeID, name));
+    setAttributes((prev) => prev.filter((a) => a.key !== key));
+  };
+
   return (
     <>
       {attributes.map(({
         key, prevName, name, value,
       }) => (
-        <CustomAttribute
-          key={key}
-          name={name}
-          value={value}
-          onNameChange={handleNameChange(key, prevName)}
-          onValueChange={handleValueChange(key, prevName)}
-        />
+        <Box display="flex" alignItems="center">
+          <CustomAttribute
+            key={key}
+            name={name}
+            value={value}
+            onNameChange={handleNameChange(key, prevName)}
+            onValueChange={handleValueChange(key, prevName)}
+          />
+          <IconButton onClick={() => handleDelete(key, prevName)}><DeleteIcon /></IconButton>
+        </Box>
       ))}
-      <Button
-        onClick={() => setCreating(true)}
-        variant="contained"
-        color="primary"
-        endIcon={<AddIcon />}
-      >
-        Create
-      </Button>
+      <Collapse in={creating}>
+        <CustomAttribute
+          name={creatingName}
+          value={creatingValue}
+          onNameChange={setCreatingName}
+          onValueChange={setCreatingValue}
+        />
+      </Collapse>
+      {creating ? (
+        <>
+          <Button className={[classes.button, classes.cancelButton].join(' ')} variant="contained" onClick={resetCreating}>Cancel</Button>
+          <Button className={classes.button} variant="contained" color="primary" disabled={!creatingIsValid} onClick={handleCreate}>Done</Button>
+        </>
+      ) : (
+        <Button
+          className={classes.button}
+          onClick={() => setCreating(true)}
+          variant="contained"
+          color="primary"
+          endIcon={<AddIcon />}
+        >
+          Create
+        </Button>
+      )}
     </>
   );
 };
