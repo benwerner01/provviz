@@ -118,7 +118,7 @@ const mutations = {
       variant: NodeVariant, prefix: string, name: string,
     ) => (document: PROVJSONBundle): PROVJSONBundle => ({
       ...document,
-      [variant]: { ...document.bundle, [`${prefix}:${name}`]: { } },
+      [variant]: { ...document[variant], [`${prefix}:${name}`]: { } },
     }),
     move: (
       oldBundleID: string, newBundleID: string, variant: NodeVariant, id: string,
