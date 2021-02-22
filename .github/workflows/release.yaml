@@ -10,6 +10,8 @@ jobs:
       - uses: actions/setup-node@v1
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+      - name: Run tests
+        run: yarn test
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
