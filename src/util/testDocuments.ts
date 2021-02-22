@@ -1,0 +1,52 @@
+import { PROVJSONDocument } from './document';
+
+export const date1 = (new Date()).toISOString();
+
+export const testDocument1: PROVJSONDocument = {
+  prefix: {
+    prefix1: 'prefix1Value',
+    prefix2: 'prefix2Value',
+  },
+  agent: {
+    'prefix1:Agent': {
+      agentKey: 'agentValue',
+    },
+  },
+  activity: {
+    'prefix1:Activity': {
+      'prov:startedAtTime': date1,
+    },
+  },
+  entity: {
+    'prefix1:Entity': { },
+  },
+  wasAttributedTo: {
+    '_:id1': {
+      'prov:agent': 'prefix1:Agent',
+      'prov:entity': 'prefix1:Entity',
+    },
+  },
+  bundle: {
+    'prefix1:Bundle': {
+      prefix: {
+        nestedPrefix1: 'nestedPrefix1Value',
+        nestedPrefix2: 'nestedPrefix2Value',
+      },
+      agent: {
+        'nestedPrefix1:nestedAgent': {
+          nestedAgent1Key: 'nestedAgent1Value',
+        },
+      },
+      activity: {
+        'nestedPrefix1:nestedActivity': {
+          'prov:startedAtTime': date1,
+        },
+      },
+      entity: {
+        'nestedPrefix1:nestedEntity': { },
+      },
+    },
+    'prefix1:Bundle 1': {
+    },
+  },
+};
