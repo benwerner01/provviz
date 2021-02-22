@@ -166,10 +166,10 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
 
           setD3Nodes(svg
             .selectAll<SVGGElement, NodeGroupDatum>('.node')
-            .filter(({ key }) => queries.bundle.hasNode(key)(document)));
+            .filter(({ key }) => queries.document.hasNode(key)(document)));
           setD3Clusters(svg
             .selectAll<SVGGElement, ClusterGroupDatum>('.cluster')
-            .filter(({ key }) => queries.bundle.hasNode(key.slice(8))(document)));
+            .filter(({ key }) => queries.document.hasNode(key.slice(8))(document)));
           setD3Edges(svg.selectAll<SVGGElement, EdgeGroupDatum>('.edge'));
 
           const svgElement = svg.node();

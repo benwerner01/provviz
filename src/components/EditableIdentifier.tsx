@@ -70,10 +70,11 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
   }, [initialPrefix, initialName]);
 
   const prefixIsValid = prefix !== '';
-  const nameIsValid = name !== '' && !queries.bundle.hasNode(`${prefix}:${name}`)(document);
+  const nameIsValid = name !== '' && !queries.document.hasNode(`${prefix}:${name}`)(document);
 
   const debouncedUpdateIdentifier = useCallback(debounce((prevID: string, updatedID: string) => {
-    setDocument((prev) => mutations.updateIdentifier(prev)(prevID, updatedID));
+    if (onChange) onChange(updatedID);
+    setDocument(mutations.updateIdentifier(prevID, updatedID));
     if (visualisationSettings.hidden.includes(prevID)) {
       setVisualisationSettings((prev) => ({
         ...prev, hidden: [...prev.hidden.filter((id) => id !== prevID), updatedID],
@@ -88,7 +89,6 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
         ],
       }));
     }
-    if (onChange) onChange(updatedID);
   }, 200), [document, setDocument, visualisationSettings, setVisualisationSettings]);
 
   useEffect(() => {

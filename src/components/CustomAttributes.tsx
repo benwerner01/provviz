@@ -243,9 +243,9 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
   const [creatingName, setCreatingName] = useState<string>('');
   const [creatingValue, setCreatingValue] = useState<AttributeValue>('');
   const [attributes, setAttributes] = useState<Attribute[]>(
-    queries.node.getAttributes(nodeVariant, nodeID)(document)!
-      .filter(([key]) => ATTRIBUTE_DEFINITIONS.find((a) => a.key === key) === undefined)
-      .map(mapDocumentAttributeEntryToAttribute),
+    queries.node.getAttributes(nodeVariant, nodeID)(document)
+      ?.filter(([key]) => ATTRIBUTE_DEFINITIONS.find((a) => a.key === key) === undefined)
+      .map(mapDocumentAttributeEntryToAttribute) || [],
   );
 
   const resetCreating = () => {
@@ -255,11 +255,14 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
   };
 
   useEffect(() => {
-    resetCreating();
-    setAttributes(queries.node.getAttributes(nodeVariant, nodeID)(document)!
-      .filter(([key]) => ATTRIBUTE_DEFINITIONS.find((a) => a.key === key) === undefined)
-      .map(mapDocumentAttributeEntryToAttribute));
-  }, [nodeID]);
+    const newAttributes = queries.node.getAttributes(nodeVariant, nodeID)(document);
+    if (newAttributes) {
+      resetCreating();
+      setAttributes(newAttributes
+        .filter(([key]) => ATTRIBUTE_DEFINITIONS.find((a) => a.key === key) === undefined)
+        .map(mapDocumentAttributeEntryToAttribute));
+    }
+  }, [document, nodeID]);
 
   if (!attributes) throw new Error(`Could not get attributes for node ${nodeID}`);
 

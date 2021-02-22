@@ -21,7 +21,7 @@ import queries from '../util/queries';
 import mutations from '../util/mutations';
 import DocumentContext from './contexts/DocumentContext';
 import VisualisationContext from './contexts/VisualisationContext';
-import { NodeVariant, NODE_VARIANTS } from '../util/document';
+import { Variant, VARIANTS } from '../util/document';
 
 export const MENU_BAR_HEIGHT = 48;
 
@@ -116,7 +116,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
   const { visualisationSettings } = useContext(VisualisationContext);
 
   const [buttonGroupOpen, setButtonGroupOpen] = useState<boolean>(false);
-  const [currentButtonGroupVariant, setCurrentButtonGroupVariant] = useState<NodeVariant>('agent');
+  const [currentButtonGroupVariant, setCurrentButtonGroupVariant] = useState<Variant>('agent');
 
   const {
     agent, activity, entity, bundle,
@@ -125,10 +125,12 @@ const MenuBar: React.FC<MenuBarProps> = ({
     agentColor: agent, activityColor: activity, entityColor: entity, bundleColor: bundle,
   });
 
-  const handleCreateNode = (variant: NodeVariant) => {
+  const handleCreateNode = (variant: Variant) => {
     const prefix = queries.prefix.getAll(document)[0];
-    const name = queries[variant].generateName(prefix)(document);
-    setDocument(mutations.node.create(variant, prefix, name));
+    const name = variant === 'bundle'
+      ? queries.bundle.generateName(prefix)(document)
+      : queries.node.generateName(variant, prefix)(document);
+    setDocument(mutations.document.create(variant, prefix, name));
     setSelectedNodeID(`${prefix}:${name}`);
   };
 
@@ -183,7 +185,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
                 <Paper>
                   <ClickAwayListener onClickAway={() => setButtonGroupOpen(false)}>
                     <MenuList classes={{ root: classes.menuListRoot }} id="split-button-menu">
-                      {NODE_VARIANTS
+                      {VARIANTS
                         .filter((v) => v !== currentButtonGroupVariant)
                         .map((variant) => (
                           <MenuItem
@@ -205,7 +207,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
         </>
       ) : (
         <Box>
-          {NODE_VARIANTS.map((variant) => (
+          {VARIANTS.map((variant) => (
             <Button key={variant} className={classes[variant]} classes={buttonClasses} onClick={() => handleCreateNode(variant)} variant="contained" endIcon={<AddIcon />}>
               {`${variant.charAt(0).toUpperCase()}${variant.slice(1)}`}
             </Button>

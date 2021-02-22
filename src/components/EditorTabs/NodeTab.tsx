@@ -15,7 +15,7 @@ import NodeAutocomplete from '../Autocomplete/NodeAutocomplete';
 import queries from '../../util/queries';
 import mutations from '../../util/mutations';
 import {
-  NodeVariant,
+  Variant,
   ATTRIBUTE_DEFINITIONS,
   PROVJSONBundle,
   PROVAttributeDefinition,
@@ -51,9 +51,9 @@ const DateTimeAttribute: React.FC<DateTimeAttributeProps> = ({
       label={attribute.name}
       type="datetime-local"
       classes={classes}
-      value={queries.bundle.getAttributeValue(attribute, domainID)(document)}
+      value={queries.document.getAttributeValue(attribute, domainID)(document)}
       onChange={(e) => setDocument(
-        mutations.bundle.setAttribute(domainID, attribute, e.target.value),
+        mutations.node.setAttribute(domainID, attribute, e.target.value),
       )}
       InputLabelProps={{ shrink: true }}
     />
@@ -84,7 +84,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type NodeTabProps = {
-  variant: NodeVariant;
+  variant: Variant;
   id: string;
   onIDChange?: (id: string) => void;
   onDelete?: () => void;
@@ -180,7 +180,9 @@ const NodeTab: React.FC<NodeTabProps> = ({
   };
 
   const handleDelete = () => {
-    setDocument(mutations.node.delete(variant, id));
+    setDocument(variant === 'bundle'
+      ? mutations.bundle.remove(id)
+      : mutations.node.delete(variant, id));
     if (onDelete) onDelete();
   };
 

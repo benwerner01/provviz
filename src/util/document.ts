@@ -32,9 +32,9 @@ export const RELATION_NAMES: RelationName[] = [
 
 export type Relation = {
   name: RelationName;
-  domain: 'activity' | 'agent' | 'entity';
+  domain: NodeVariant;
   domainKey: string;
-  range: 'activity' | 'agent' | 'entity';
+  range: NodeVariant;
   rangeKey: string;
   timestamp?: boolean;
 }
@@ -84,13 +84,19 @@ export const RELATIONS: Relation[] = [
   },
 ];
 
-export type NodeVariant = 'activity' | 'agent' | 'entity' | 'bundle'
+export type NodeVariant = 'activity' | 'agent' | 'entity'
 
-export const NODE_VARIANTS: NodeVariant[] = ['activity', 'agent', 'entity', 'bundle'];
+export const NODE_VARIANTS: NodeVariant[] = ['activity', 'agent', 'entity'];
 
 export const tbdIsNodeVariant = (tbd: string): tbd is NodeVariant => (
   NODE_VARIANTS.includes(tbd as NodeVariant)
 );
+
+export type Variant = 'bundle' | NodeVariant
+
+export const VARIANTS: Variant[] = ['activity', 'agent', 'entity', 'bundle'];
+
+export const tbdIsVariant = (tbd: string): tbd is Variant => VARIANTS.includes(tbd as Variant);
 
 export type PROVAttributeRange = 'DateTime'
 
@@ -214,7 +220,6 @@ type Membership = {
 
 export interface PROVJSONBundle {
   prefix?: { [prefixName: string]: string; }
-  bundle?: { [bundleID: string]: PROVJSONBundle; }
   agent?: { [agentID: string]: { [attributeKey: string]: AttributeValue; } }
   actedOnBehalfOf?: { [relationID: string]: Delegation }
   wasInfluencedBy?: { [relationID: string]: Influence }
@@ -232,6 +237,10 @@ export interface PROVJSONBundle {
   specializationOf?: { [relationID: string]: Specialization }
   alternateOf?: { [relationID: string]: Alternate }
   hadMember?: { [relationID: string]: Membership }
+}
+
+export interface PROVJSONDocument extends PROVJSONBundle {
+  bundle?: { [bundleID: string]: PROVJSONBundle; }
 }
 
 export const tbdIsPROVJSONBundle = (tbd: object): tbd is PROVJSONBundle => true;

@@ -6,7 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import 'react-sortable-tree/style.css';
 import Color from 'color';
 import DocumentContext from './contexts/DocumentContext';
-import { PROVJSONBundle, tbdIsNodeVariant } from '../util/document';
+import { PROVJSONBundle, PROVJSONDocument, tbdIsNodeVariant } from '../util/document';
 import queries from '../util/queries';
 import mutations from '../util/mutations';
 import VisualisationContext from './contexts/VisualisationContext';
@@ -80,7 +80,7 @@ const isBundleExpanded = (treeData: TreeItem[], bundleID: string) => {
 };
 
 const mapBundleToTreeData = ({
-  activity, agent, entity, bundle,
+  activity, agent, entity,
 }: PROVJSONBundle, prevTreeData?: TreeItem[]): TreeItem[] => [
   ...(activity ? Object.keys(activity).map((key) => ({
     title: <Typography variant="body1">{key}</Typography>,
@@ -97,6 +97,12 @@ const mapBundleToTreeData = ({
     variant: 'entity',
     key,
   })) : []),
+].flat();
+
+const mapDocumentToTreeData = ({
+  bundle, ...remaining
+}: PROVJSONDocument, prevTreeData?: TreeItem[]): TreeItem[] => [
+  ...mapBundleToTreeData(remaining, prevTreeData),
   ...(bundle ? Object.keys(bundle).map((key) => ({
     title: <Typography variant="body1">{key}</Typography>,
     variant: 'bundle',
@@ -110,12 +116,18 @@ const getAddedToBundle = (
   bundle: PROVJSONBundle,
   bundleID: string,
   treeData: TreeItem[],
+): { bundleID: string, nodeID: string }[] => treeData
+  .filter(({ key }) => !queries.bundle.hasLocalNode(key)(bundle))
+  .map(({ key }) => ({ bundleID, nodeID: key }));
+
+const getAddedToDocument = (
+  document: PROVJSONDocument,
+  bundleID: string,
+  treeData: TreeItem[],
 ): { bundleID: string, nodeID: string }[] => [
-  ...treeData
-    .filter(({ key }) => !queries.bundle.hasLocalNode(key)(bundle))
-    .map(({ key }) => ({ bundleID, nodeID: key })),
+  ...getAddedToBundle(document, bundleID, treeData),
   ...(Object
-    .entries(bundle.bundle || {})
+    .entries(document.bundle || {})
     .map(([key, value]) => {
       const treeItem = treeData.find((n) => n.key === key);
       return treeItem?.children && typeof treeItem?.children !== 'function'
@@ -128,19 +140,19 @@ const getRemovedFromBundle = (
   bundle: PROVJSONBundle,
   bundleID: string,
   treeData: TreeItem[],
+): { bundleID: string, nodeID: string }[] => Object
+  .keys({ ...bundle.agent, ...bundle.activity, ...bundle.entity })
+  .filter((key) => treeData.find((n) => n.key === key) === undefined)
+  .map((key) => ({ bundleID, nodeID: key }));
+
+const getRemovedFromDocument = (
+  document: PROVJSONDocument,
+  bundleID: string,
+  treeData: TreeItem[],
 ): { bundleID: string, nodeID: string }[] => [
+  ...getRemovedFromBundle(document, bundleID, treeData),
   ...(Object
-    .keys({
-      ...bundle.agent,
-      ...bundle.activity,
-      ...bundle.entity,
-      ...bundle.bundle,
-    })
-    .filter((key) => treeData.find((n) => n.key === key) === undefined)
-    .map((key) => ({ bundleID, nodeID: key }))
-  ),
-  ...(Object
-    .entries(bundle.bundle || {})
+    .entries(document.bundle || {})
     .map(([key, value]) => {
       const treeItem = treeData.find((n) => n.key === key);
       return treeItem?.children && typeof treeItem?.children !== 'function'
@@ -163,17 +175,17 @@ const TreeView: React.FC<TreeViewProps> = ({
     agentColor: agent, activityColor: activity, entityColor: entity, bundleColor: bundle,
   });
 
-  const [treeData, setTreeData] = useState<TreeItem[]>(mapBundleToTreeData(document));
+  const [treeData, setTreeData] = useState<TreeItem[]>(mapDocumentToTreeData(document));
 
   useEffect(() => {
-    setTreeData((prevTreeData) => mapBundleToTreeData(document, prevTreeData));
+    setTreeData((prevTreeData) => mapDocumentToTreeData(document, prevTreeData));
   }, [document]);
 
   const handleChange = (updatedTreeData: TreeItem[]) => {
     setTreeData(updatedTreeData);
 
-    const addToBundle = getAddedToBundle(document, 'root', updatedTreeData);
-    const removeFromBundle = getRemovedFromBundle(document, 'root', updatedTreeData);
+    const addToBundle = getAddedToDocument(document, 'root', updatedTreeData);
+    const removeFromBundle = getRemovedFromDocument(document, 'root', updatedTreeData);
 
     // If an item was added to a bundle and removed...
     if (addToBundle.length > 0 && removeFromBundle.length > 0) {
@@ -202,6 +214,9 @@ const TreeView: React.FC<TreeViewProps> = ({
       <SortableTree
         treeData={treeData}
         onChange={handleChange}
+        canDrop={({ node, nextParent }) => !(
+          node.variant === 'bundle'
+          && nextParent?.variant === 'bundle')}
         canNodeHaveChildren={({ variant }) => variant === 'bundle'}
         generateNodeProps={({ node }) => ({
           className: [

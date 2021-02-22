@@ -39,7 +39,8 @@ const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
 
   const autocompleteClasses = useAutocompleteStyles();
 
-  const options = queries[variant].getAll(document).filter((o) => !exclude || !exclude.includes(o));
+  const options = queries.node.getAll(variant)(document)
+    .filter((o) => !exclude || !exclude.includes(o));
 
   const defaultPrefix = queries.prefix.getAll(document)[0];
 
@@ -61,7 +62,7 @@ const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
             return item;
           }
           const { prefix, name } = item;
-          updatedDocument = mutations.node.create(variant, prefix, name)(updatedDocument);
+          updatedDocument = mutations.document.create(variant, prefix, name)(updatedDocument);
           return `${prefix || defaultPrefix}:${name}`;
         });
         onChange(updatedDocument, values);

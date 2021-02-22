@@ -1,6 +1,6 @@
 import Color from 'color';
 import { PROVENANVE_VIEW_DEFINITIONS, VisualisationSettings } from '../components/contexts/VisualisationContext';
-import { PROVJSONBundle, RELATIONS } from './document';
+import { PROVJSONBundle, PROVJSONDocument, RELATIONS } from './document';
 
 const getNodeColor = (id: string, { palette }: VisualisationSettings) => palette
   .overrides.find(({ nodeID }) => nodeID === id)?.color;
@@ -38,42 +38,33 @@ const mapNodeToDot = (variant: 'agent' | 'activity' | 'entity', settings: Visual
   ].flat().join('\n');
 };
 
-const mapBundleToDots = (json: PROVJSONBundle, settings: VisualisationSettings): string => [
-  ...(Object
-    .entries(json.bundle || {})
-    .filter(([id]) => !settings.hidden.includes(id))
-    .map(([bundleID, value]) => [
-      `subgraph "cluster_${bundleID}" {`,
-      `label="${bundleID}";`,
-      mapBundleToDots(value, settings),
-      '}',
-    ])).flat(),
+const mapBundleToDots = (bundle: PROVJSONBundle, settings: VisualisationSettings): string => [
   ...(Object
     .entries((
       settings.view !== null
       && !PROVENANVE_VIEW_DEFINITIONS[settings.view].nodes.includes('agent')
-    ) ? {} : json.agent || {})
+    ) ? {} : bundle.agent || {})
     .filter(([id]) => !settings.hidden.includes(id))
     .map(mapNodeToDot('agent', settings))),
   ...(Object
     .entries((
       settings.view !== null
       && !PROVENANVE_VIEW_DEFINITIONS[settings.view].nodes.includes('activity')
-    ) ? {} : json.activity || {})
+    ) ? {} : bundle.activity || {})
     .filter(([id]) => !settings.hidden.includes(id))
     .map(mapNodeToDot('activity', settings))),
   ...(Object
     .entries((
       settings.view !== null
       && !PROVENANVE_VIEW_DEFINITIONS[settings.view].nodes.includes('entity')
-    ) ? {} : json.entity || {})
+    ) ? {} : bundle.entity || {})
     .filter(([id]) => !settings.hidden.includes(id))
     .map(mapNodeToDot('entity', settings))),
   ...RELATIONS.map(({ name, domainKey, rangeKey }) => Object
     .values((
       settings.view !== null
       && !PROVENANVE_VIEW_DEFINITIONS[settings.view].relations.includes(name)
-    ) ? {} : json[name] || {})
+    ) ? {} : bundle[name] || {})
     .filter((value) => (
       !settings.hidden.includes(value[domainKey])
       && !settings.hidden.includes(value[rangeKey])))
@@ -83,11 +74,20 @@ const mapBundleToDots = (json: PROVJSONBundle, settings: VisualisationSettings):
 ].join('\n');
 
 export const mapDocumentToDots = (
-  json: PROVJSONBundle,
+  document: PROVJSONDocument,
   settings: VisualisationSettings,
 ): string => [
   'digraph  {',
   'rankdir="BT";',
-  mapBundleToDots(json, settings),
+  ...(Object
+    .entries(document.bundle || {})
+    .filter(([id]) => !settings.hidden.includes(id))
+    .map(([bundleID, bundle]) => [
+      `subgraph "cluster_${bundleID}" {`,
+      `label="${bundleID}";`,
+      mapBundleToDots(bundle, settings),
+      '}',
+    ])).flat(),
+  mapBundleToDots(document, settings),
   '}',
 ].join('\n');
