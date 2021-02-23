@@ -29,9 +29,9 @@ test('queries.document.getNodeValue', () => {
 test('queries.document.getAttributeValue', () => {
   const startedAtTimeAttribute = ATTRIBUTE_DEFINITIONS.find(({ name }) => name === 'Started At Time')!;
   const endedAtTimeAttribute = ATTRIBUTE_DEFINITIONS.find(({ name }) => name === 'Ended At Time')!;
-  expect(queries.document.getAttributeValue(startedAtTimeAttribute, 'prefix1:Activity')(testDocument1))
+  expect(queries.document.getAttributeValue('activity', 'prefix1:Activity', startedAtTimeAttribute)(testDocument1))
     .toBe(date1);
-  expect(queries.document.getAttributeValue(endedAtTimeAttribute, 'prefix1:Activity')(testDocument1))
+  expect(queries.document.getAttributeValue('activity', 'prefix1:Activity', endedAtTimeAttribute)(testDocument1))
     .toBe(null);
 });
 

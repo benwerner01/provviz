@@ -32,16 +32,16 @@ const queries = {
       throw new Error(`Node with identifier ${identifier} not found`);
     },
     getAttributeValue: (
-      attribute: PROVAttributeDefinition, id: string,
+      variant: NodeVariant, id: string, attribute: PROVAttributeDefinition,
     ) => (document: PROVJSONDocument): any | null => {
       const { domain, key } = attribute;
-      if (Object.keys(document[domain] || {}).includes(id)) {
-        return (document[domain]?.[id][key] || null);
+      if (Object.keys(document[variant] || {}).includes(id)) {
+        return (document[variant]?.[id][key] || null);
       }
       if (document.bundle) {
         // eslint-disable-next-line no-restricted-syntax
         for (const value of Object.values(document.bundle)) {
-          const result = queries.document.getAttributeValue(attribute, id)(value);
+          const result = queries.document.getAttributeValue(variant, id, attribute)(value);
           if (result) return result;
         }
       }
@@ -124,6 +124,14 @@ const queries = {
       }
       throw new Error(`Node with identifier ${identifier} not found`);
     },
+    getAttributeValue: (
+      variant: NodeVariant, nodeID: string, attributeKey: string,
+    ) => (document: PROVJSONDocument): AttributeValue | undefined => (
+      queries.node
+        .getAttributes(variant, nodeID)(document)
+        ?.find(([key]) => key === attributeKey)
+        ?.[1]
+    ),
     getAttributes: (
       variant: NodeVariant, nodeID: string,
     ) => (document: PROVJSONDocument): [key: string, value: AttributeValue][] | undefined => {

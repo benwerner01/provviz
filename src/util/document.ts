@@ -98,12 +98,12 @@ export const VARIANTS: Variant[] = ['activity', 'agent', 'entity', 'bundle'];
 
 export const tbdIsVariant = (tbd: string): tbd is Variant => VARIANTS.includes(tbd as Variant);
 
-export type PROVAttributeRange = 'DateTime'
+export type PROVAttributeRange = 'DateTime' | 'Color' | 'Boolean'
 
 export type PROVAttributeDefinition = {
   name: string;
   key: string;
-  domain: NodeVariant;
+  domain: NodeVariant[];
   range: PROVAttributeRange
 }
 
@@ -111,14 +111,35 @@ export const ATTRIBUTE_DEFINITIONS: PROVAttributeDefinition[] = [
   {
     name: 'Started At Time',
     key: 'prov:startedAtTime',
-    domain: 'activity',
+    domain: ['activity'],
     range: 'DateTime',
   },
   {
     name: 'Ended At Time',
     key: 'prov:endedAtTime',
-    domain: 'activity',
+    domain: ['activity'],
     range: 'DateTime',
+  },
+];
+
+export const PROVVIZ_ATTRIBUTE_DEFINITIONS: PROVAttributeDefinition[] = [
+  {
+    name: 'Override Color',
+    key: 'provviz:color',
+    domain: ['activity', 'agent', 'entity'],
+    range: 'Color',
+  },
+  {
+    name: 'Hide',
+    key: 'provviz:hide',
+    domain: ['activity', 'agent', 'entity'],
+    range: 'Boolean',
+  },
+  {
+    name: 'Hide Attributes',
+    key: 'provviz:hideAttributes',
+    domain: ['activity', 'agent', 'entity'],
+    range: 'Boolean',
   },
 ];
 

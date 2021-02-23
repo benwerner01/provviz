@@ -222,7 +222,7 @@ test('mutations.node.setAttributeName', () => {
 test('mutations.node.setAttribute', () => {
   const startedAtTimeAttribute = ATTRIBUTE_DEFINITIONS.find(({ name }) => name === 'Started At Time')!;
   const updatedDate = (new Date()).toISOString();
-  expect(mutations.node.setAttribute('prefix1:Activity', startedAtTimeAttribute, updatedDate)(testDocument1))
+  expect(mutations.node.setAttribute('activity', 'prefix1:Activity', startedAtTimeAttribute, updatedDate)(testDocument1))
     .toEqual({
       ...testDocument1,
       activity: {

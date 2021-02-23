@@ -4,11 +4,6 @@ import { RelationName } from '../../util/document';
 
 const defaultTheme = createMuiTheme();
 
-type PaletteOverride = {
-  nodeID: string;
-  color: string;
-}
-
 export type ProvenanceView = 'Responsibility' | 'Data Flow' | 'Proccess Flow'
 
 export const PROVENANCE_VIEW_NAMES: ProvenanceView[] = ['Proccess Flow', 'Data Flow', 'Responsibility'];
@@ -44,11 +39,8 @@ export type VisualisationSettings = {
     activity: string;
     entity: string;
     bundle: string;
-    overrides: PaletteOverride[];
   }
-  hidden: string[];
   hideAllNodeAttributes: boolean;
-  hideAllAttributesForNode: string[];
   view: ProvenanceView | null;
 }
 
@@ -63,11 +55,8 @@ export const defaultSettings: VisualisationSettings = {
     activity: '#9fb1fc',
     entity: '#fffc87',
     bundle: defaultTheme.palette.grey['300'],
-    overrides: [],
   },
-  hidden: [],
   hideAllNodeAttributes: false,
-  hideAllAttributesForNode: [],
   view: null,
 };
 

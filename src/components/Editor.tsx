@@ -294,6 +294,8 @@ const Editor: React.FC<EditorProps> = ({
               <>
                 {currentTabName === 'Settings' && <SettingsTab />}
               </>
+            ) : currentTabVariant === 'bundle' ? (
+              <></>
             ) : (
               <NodeTab
                 key={currentTabIndex}

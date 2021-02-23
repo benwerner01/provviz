@@ -270,18 +270,18 @@ const mutations = {
       return updatedDocument;
     },
     setAttribute: (
-      id: string, attribute: PROVAttributeDefinition, value: any,
+      variant: NodeVariant, id: string, attribute: PROVAttributeDefinition, value: any,
     ) => (document: PROVJSONDocument): PROVJSONDocument => {
-      const { domain, key } = attribute;
+      const { key } = attribute;
 
       const updatedDocument = mutations.bundle.find(
-        (b) => Object.keys(b[domain] || {}).includes(id),
+        (b) => Object.keys(b[variant] || {}).includes(id),
       )((bundle) => ({
         ...bundle,
-        [domain]: {
-          ...bundle[domain],
+        [variant]: {
+          ...bundle[variant],
           [id]: {
-            ...bundle[domain]?.[id],
+            ...bundle[variant]?.[id],
             [key]: value,
           },
         },
