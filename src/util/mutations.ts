@@ -389,7 +389,7 @@ const mutations = {
 
       return undefined;
     },
-    remove: (id: string) => (document: PROVJSONDocument): PROVJSONDocument => ({
+    delete: (id: string) => (document: PROVJSONDocument): PROVJSONDocument => ({
       ...document,
       bundle: Object
         .entries(document.bundle || {})

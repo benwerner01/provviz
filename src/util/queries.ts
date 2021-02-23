@@ -74,6 +74,15 @@ const queries = {
   },
   bundle: {
     getAll: ({ bundle }: PROVJSONDocument): string[] => Object.keys(bundle || {}),
+    getNodes: (bundleID: string) => (document: PROVJSONDocument) => {
+      const bundle = Object.entries(document.bundle || {})
+        .find(([id]) => id === bundleID)
+        ?.[1];
+
+      return bundle
+        ? Object.keys({ ...bundle.agent, ...bundle.activity, ...bundle.entity })
+        : undefined;
+    },
     generateName: (
       prefix: string, index: number = 0,
     ) => (document: PROVJSONDocument): string => (

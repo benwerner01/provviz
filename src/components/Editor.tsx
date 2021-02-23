@@ -20,6 +20,7 @@ import queries from '../util/queries';
 import NodeTab from './EditorTabs/NodeTab';
 import SettingsTab from './EditorTabs/SettingsTab';
 import { Variant } from '../util/document';
+import BundleTab from './EditorTabs/BundleTab';
 
 export const TABS_HEIGHT = 48 + 1;
 
@@ -295,7 +296,12 @@ const Editor: React.FC<EditorProps> = ({
                 {currentTabName === 'Settings' && <SettingsTab />}
               </>
             ) : currentTabVariant === 'bundle' ? (
-              <></>
+              <BundleTab
+                key={currentTabIndex}
+                id={tabs[currentTabIndex].name}
+                onIDChange={handleTabIDChange(currentTabIndex)}
+                onDelete={handleCloseTab(currentTabVariant, currentTabName)}
+              />
             ) : (
               <NodeTab
                 key={currentTabIndex}

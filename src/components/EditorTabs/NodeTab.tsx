@@ -24,12 +24,6 @@ import CustomAttributes from '../CustomAttributes';
 import DefinedAttribute from '../DefinedAttribute';
 
 const useStyles = makeStyles((theme) => ({
-  formControl: {
-    display: 'block',
-  },
-  formControlLabel: {
-    marginLeft: 0,
-  },
   deleteButton: {
     marginRight: theme.spacing(1),
     backgroundColor: palette.danger.main,

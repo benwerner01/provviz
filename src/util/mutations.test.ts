@@ -268,8 +268,8 @@ test('mutations.relation.delete', () => {
 
 // Bundle
 
-test('mutations.bundle.remove', () => {
-  expect(mutations.bundle.remove('prefix1:Bundle')(testDocument1))
+test('mutations.bundle.delete', () => {
+  expect(mutations.bundle.delete('prefix1:Bundle')(testDocument1))
     .toEqual({
       ...testDocument1,
       bundle: {

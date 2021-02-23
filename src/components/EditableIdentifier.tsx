@@ -75,20 +75,6 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
   const debouncedUpdateIdentifier = useCallback(debounce((prevID: string, updatedID: string) => {
     if (onChange) onChange(updatedID);
     setDocument(mutations.updateIdentifier(prevID, updatedID));
-    if (visualisationSettings.hidden.includes(prevID)) {
-      setVisualisationSettings((prev) => ({
-        ...prev, hidden: [...prev.hidden.filter((id) => id !== prevID), updatedID],
-      }));
-    }
-    if (visualisationSettings.hideAllAttributesForNode.includes(prevID)) {
-      setVisualisationSettings((prev) => ({
-        ...prev,
-        hideAllAttributesForNode: [
-          ...prev.hideAllAttributesForNode.filter((id) => id !== prevID),
-          updatedID,
-        ],
-      }));
-    }
   }, 200), [document, setDocument, visualisationSettings, setVisualisationSettings]);
 
   useEffect(() => {
