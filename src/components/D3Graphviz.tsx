@@ -134,6 +134,32 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
     setD3Clusters,
   ] = useState<Selection<SVGGElement, ClusterGroupDatum, SVGSVGElement, unknown> | undefined>();
 
+  const focusGroup = ({ key, children }: NodeGroupDatum | ClusterGroupDatum) => {
+    if (graphvizInstance && graphvizWrapper.current) {
+      const svg = select<HTMLDivElement, unknown>(graphvizWrapper.current).select<SVGSVGElement>('svg');
+      setSelectedNodeID(key);
+      const zoom = graphvizInstance.zoomBehavior();
+
+      const { center } = children.find(({ tag }) => tag === 'ellipse' || tag === 'polygon') || {};
+
+      if (zoom && center) {
+        const graph = svg.select<SVGGElement>('.graph');
+        const graphHeight = graph.node()!.getBBox().height;
+        const graphWidth = graph.node()!.getBBox().width;
+
+        const x = parseFloat(center.x);
+        const y = parseFloat(center.y);
+
+        zoom.scaleTo(svg.transition() as any, 1);
+        zoom.translateTo(
+          svg.transition() as any,
+          width / 2 - graphWidth / 2 + x,
+          height / 2 - graphHeight / 4 + y,
+        );
+      }
+    }
+  };
+
   useEffect(() => {
     wasmFolder(wasmFolderURL);
 
@@ -163,13 +189,12 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
         .renderDot(mapDocumentToDots(document, visualisationSettings))
         .on('end', () => {
           const svg = select(graphvizWrapper.current).select<SVGSVGElement>('svg');
-
           setD3Nodes(svg
             .selectAll<SVGGElement, NodeGroupDatum>('.node')
             .filter(({ key }) => queries.document.hasNode(key)(document)));
           setD3Clusters(svg
             .selectAll<SVGGElement, ClusterGroupDatum>('.cluster')
-            .filter(({ key }) => queries.document.hasNode(key.slice(8))(document)));
+            .filter(({ key }) => queries.document.hasBundle(key.slice(8))(document)));
           setD3Edges(svg.selectAll<SVGGElement, EdgeGroupDatum>('.edge'));
 
           const svgElement = svg.node();
@@ -181,8 +206,6 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
 
   useEffect(() => {
     if (graphvizWrapper.current && graphvizInstance && d3Nodes && d3Edges && d3Clusters) {
-      const svg = select<HTMLDivElement, unknown>(graphvizWrapper.current).select<SVGSVGElement>('svg');
-
       if (selectedNodeID) {
         const selectedNodeGroup = d3Nodes.filter(({ key }) => selectedNodeID === key);
         const selectedClusterGroup = d3Clusters
@@ -210,30 +233,12 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
         nodeGroup.classed('hover', true);
       });
 
-      d3Nodes.on('mouseout', function mouseout({ key }) {
+      d3Nodes.on('mouseout', function mouseout() {
         const nodeGroup = select(this);
         nodeGroup.classed('hover', false);
       });
 
-      d3Nodes.on('click', ({ key, children }) => {
-        setSelectedNodeID(key);
-        const zoom = graphvizInstance.zoomBehavior();
-
-        const { center } = children.find(({ tag }) => tag === 'ellipse' || tag === 'polygon') || {};
-
-        if (zoom && center) {
-          const graph = svg.select<SVGGElement>('.graph');
-          const graphHeight = graph.node()!.getBBox().height;
-          const graphWidth = graph.node()!.getBBox().width;
-
-          const { x, y } = center;
-          const translateToX = parseFloat(x) + graphWidth / 2;
-          const translateToY = parseFloat(y) + height / 2;
-
-          // zoom.scaleTo(svg.transition(), 1);
-          // zoom.translateTo(svg.transition(), translateToX, translateToY);
-        }
-      });
+      d3Nodes.on('click', focusGroup);
 
       if (!d3Clusters.empty()) {
         d3Clusters.call((d3Cluster) => {
@@ -243,7 +248,7 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
           d3Cluster.select('text')
             .on('mouseover', () => d3Cluster.classed('hover', true))
             .on('mouseout', () => d3Cluster.classed('hover', false))
-            .on('click', () => setSelectedNodeID(key));
+            .on('click', (args) => focusGroup({ ...args, key }));
         });
       }
     }
