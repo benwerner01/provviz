@@ -134,31 +134,43 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
     setD3Clusters,
   ] = useState<Selection<SVGGElement, ClusterGroupDatum, SVGSVGElement, unknown> | undefined>();
 
-  const focusGroup = ({ key, children }: NodeGroupDatum | ClusterGroupDatum) => {
-    if (graphvizInstance && graphvizWrapper.current) {
-      const svg = select<HTMLDivElement, unknown>(graphvizWrapper.current).select<SVGSVGElement>('svg');
-      setSelectedNodeID(key);
-      const zoom = graphvizInstance.zoomBehavior();
+  useEffect(() => {
+    if (selectedNodeID && d3Nodes && d3Clusters) {
+      const selectedNode = d3Nodes.filter(({ key }) => key === selectedNodeID);
+      const selectedCluster = d3Clusters.filter(({ key }) => key === `cluster_${selectedNodeID}`);
 
-      const { center } = children.find(({ tag }) => tag === 'ellipse' || tag === 'polygon') || {};
+      const datum = selectedCluster.empty()
+        ? selectedNode.empty()
+          ? undefined
+          : selectedNode.datum()
+        : d3Clusters.datum();
 
-      if (zoom && center) {
-        const graph = svg.select<SVGGElement>('.graph');
-        const graphHeight = graph.node()!.getBBox().height;
-        const graphWidth = graph.node()!.getBBox().width;
+      const { children } = datum || {};
 
-        const x = parseFloat(center.x);
-        const y = parseFloat(center.y);
+      if (children && graphvizInstance && graphvizWrapper.current) {
+        const svg = select<HTMLDivElement, unknown>(graphvizWrapper.current).select<SVGSVGElement>('svg');
+        const zoom = graphvizInstance.zoomBehavior();
 
-        zoom.scaleTo(svg.transition() as any, 1);
-        zoom.translateTo(
-          svg.transition() as any,
-          width / 2 - graphWidth / 2 + x,
-          height / 2 - graphHeight / 4 + y,
-        );
+        const { center } = children.find(({ tag }) => tag === 'ellipse' || tag === 'polygon') || {};
+
+        if (zoom && center) {
+          const graph = svg.select<SVGGElement>('.graph');
+          const graphHeight = graph.node()!.getBBox().height;
+          const graphWidth = graph.node()!.getBBox().width;
+
+          const x = parseFloat(center.x);
+          const y = parseFloat(center.y);
+
+          zoom.scaleTo(svg.transition() as any, 1);
+          zoom.translateTo(
+            svg.transition() as any,
+            width / 2 - graphWidth / 2 + x,
+            height / 2 - graphHeight / 4 + y,
+          );
+        }
       }
     }
-  };
+  }, [selectedNodeID, d3Nodes, d3Clusters]);
 
   useEffect(() => {
     wasmFolder(wasmFolderURL);
@@ -238,7 +250,7 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
         nodeGroup.classed('hover', false);
       });
 
-      d3Nodes.on('click', focusGroup);
+      d3Nodes.on('click', ({ key }) => setSelectedNodeID(key));
 
       if (!d3Clusters.empty()) {
         d3Clusters.call((d3Cluster) => {
@@ -248,7 +260,7 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
           d3Cluster.select('text')
             .on('mouseover', () => d3Cluster.classed('hover', true))
             .on('mouseout', () => d3Cluster.classed('hover', false))
-            .on('click', (args) => focusGroup({ ...args, key }));
+            .on('click', () => setSelectedNodeID(key));
         });
       }
     }
