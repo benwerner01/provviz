@@ -18,6 +18,7 @@ import { AttributeValue, ATTRIBUTE_DEFINITIONS, NodeVariant } from '../util/docu
 import queries from '../util/queries';
 import DocumentContext from './contexts/DocumentContext';
 import mutations from '../util/mutations';
+import PrefixSelect from './Select/PrefixSelect';
 
 const useCustomAttributeStyles = makeStyles((theme) => ({
   wrapper: {
@@ -120,16 +121,27 @@ const CustomAttribute: React.FC<CustomAttributeProps> = ({
   const selectLabelClasses = { root: classes.selectLabelRoot };
   const selectFormControlClasses = { root: classes.selectFormControlRoot };
 
+  const prefix = name.includes(':') ? name.split(':')[0] : '';
+  const attributeName = name.includes(':') ? name.split(':').slice(1).join('') : name;
+
   return (
     <Box flexGrow={1} display="flex" className={classes.wrapper}>
+      <PrefixSelect
+        prefix={prefix}
+        additionalPrefixes={['prov']}
+        onChange={(updatedPrefix) => onNameChange(updatedPrefix === ''
+          ? attributeName
+          : `${updatedPrefix}:${attributeName}`)}
+        nullable
+      />
       <TextField
         className={classes.nameTextField}
         classes={textFieldClasses}
         InputProps={{ classes: textFieldInputClasses }}
         variant="outlined"
         label="Name"
-        value={name}
-        onChange={({ target }) => onNameChange(target.value)}
+        value={attributeName}
+        onChange={({ target }) => onNameChange(`${prefix}:${target.value}`)}
       />
       {valueType === 'boolean' ? (
         <FormControl className={classes.valueTextField} classes={selectFormControlClasses} variant="outlined">
@@ -342,7 +354,7 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
       {attributes.map(({
         key, prevName, name, value,
       }) => (
-        <Box key={key} display="flex" alignItems="center">
+        <Box key={key} display="flex" alignItems="flex-start">
           <CustomAttribute
             name={name}
             value={value}
