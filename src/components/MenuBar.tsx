@@ -22,6 +22,7 @@ import mutations from '../util/mutations';
 import DocumentContext from './contexts/DocumentContext';
 import VisualisationContext from './contexts/VisualisationContext';
 import { Variant, VARIANTS } from '../util/document';
+import SearchTextField from './TextField/SearchTextField';
 
 export const MENU_BAR_HEIGHT = 48;
 
@@ -90,6 +91,13 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: Color(bundleColor).lighten(0.1).hex(),
     },
   }),
+  iconButton: {
+    padding: theme.spacing(1),
+  },
+  collapseIconButtons: {
+    transition: theme.transitions.create('max-width'),
+    overflow: 'hidden',
+  },
 }));
 
 export type View = 'Graph' | 'Tree'
@@ -98,8 +106,13 @@ type MenuBarProps = {
   displaySettings: () => void;
   setSelectedNodeID: (id: string) => void;
   collapseButtons: boolean;
+  collapseIconButtons: boolean;
   currentView: View;
   setCurrentView: (newCurrentView: View) => void;
+  searching: boolean;
+  setSearching: (searching: boolean) => void;
+  searchString: string;
+  setSearchString: (searchString: string) => void;
   downloadVisualisation: () => void;
 }
 
@@ -110,6 +123,11 @@ const MenuBar: React.FC<MenuBarProps> = ({
   setCurrentView,
   downloadVisualisation,
   collapseButtons,
+  collapseIconButtons,
+  searching,
+  setSearching,
+  searchString,
+  setSearchString,
 }) => {
   const buttonGroupRef = React.useRef<HTMLDivElement>(null);
   const { document, setDocument } = useContext(DocumentContext);
@@ -214,30 +232,41 @@ const MenuBar: React.FC<MenuBarProps> = ({
           ))}
         </Box>
       )}
-      <Box>
-        <Tooltip
-          arrow
-          title="Download Visualisation"
-          aria-label="download-visualisation"
-        >
-          <IconButton onClick={downloadVisualisation}>
-            <GetAppIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip
-          arrow
-          title={currentView === 'Graph' ? 'Tree View' : 'Graph View'}
-          aria-label={currentView === 'Graph' ? 'tree-view' : 'graph-view'}
-        >
-          <IconButton onClick={() => setCurrentView(currentView === 'Graph' ? 'Tree' : 'Graph')}>
-            <AccountTreeIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip arrow title="Settings" aria-label="settings">
-          <IconButton onClick={displaySettings}>
-            <SettingsIcon />
-          </IconButton>
-        </Tooltip>
+      <Box display="flex" alignItems="center">
+        <SearchTextField
+          open={searching}
+          setOpen={setSearching}
+          searchString={searchString}
+          setSearchString={setSearchString}
+        />
+        <Box display="flex" className={classes.collapseIconButtons} style={{ maxWidth: collapseIconButtons ? 0 : 300 }}>
+          <Tooltip
+            arrow
+            title="Download Visualisation"
+            aria-label="download-visualisation"
+          >
+            <IconButton className={classes.iconButton} onClick={downloadVisualisation}>
+              <GetAppIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip
+            arrow
+            title={currentView === 'Graph' ? 'Tree View' : 'Graph View'}
+            aria-label={currentView === 'Graph' ? 'tree-view' : 'graph-view'}
+          >
+            <IconButton
+              className={classes.iconButton}
+              onClick={() => setCurrentView(currentView === 'Graph' ? 'Tree' : 'Graph')}
+            >
+              <AccountTreeIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip arrow title="Settings" aria-label="settings">
+            <IconButton className={classes.iconButton} onClick={displaySettings}>
+              <SettingsIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
     </Box>
   );

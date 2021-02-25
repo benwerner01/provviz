@@ -16,6 +16,7 @@ type TreeViewProps = {
   height: number;
   selectedNodeID: string | undefined;
   setSelectedNodeID: (id: string | undefined) => void;
+  searchString: string;
 }
 
 type TreeViewSylesProps = {
@@ -79,35 +80,46 @@ const isBundleExpanded = (treeData: TreeItem[], bundleID: string) => {
   return false;
 };
 
+const filterKey = (searchString: string) => (key: string) => (
+  searchString === ''
+  || key.toLowerCase().includes(searchString.toLowerCase())
+);
+
 const mapBundleToTreeData = ({
   activity, agent, entity,
-}: PROVJSONBundle, prevTreeData?: TreeItem[]): TreeItem[] => [
-  ...(activity ? Object.keys(activity).map((key) => ({
-    title: <Typography variant="body1">{key}</Typography>,
-    variant: 'activity',
-    key,
-  })) : []),
-  ...(agent ? Object.keys(agent).map((key) => ({
-    title: <Typography variant="body1">{key}</Typography>,
-    variant: 'agent',
-    key,
-  })) : []),
-  ...(entity ? Object.keys(entity).map((key) => ({
-    title: <Typography variant="body1">{key}</Typography>,
-    variant: 'entity',
-    key,
-  })) : []),
+}: PROVJSONBundle, searchString: string): TreeItem[] => [
+  ...Object.keys(activity || {})
+    .filter(filterKey(searchString))
+    .map((key) => ({
+      title: <Typography variant="body1">{key}</Typography>,
+      variant: 'activity',
+      key,
+    })),
+  ...Object.keys(agent || {})
+    .filter(filterKey(searchString))
+    .map((key) => ({
+      title: <Typography variant="body1">{key}</Typography>,
+      variant: 'agent',
+      key,
+    })),
+  ...Object.keys(entity || {})
+    .filter(filterKey(searchString))
+    .map((key) => ({
+      title: <Typography variant="body1">{key}</Typography>,
+      variant: 'entity',
+      key,
+    })),
 ].flat();
 
 const mapDocumentToTreeData = ({
   bundle, ...remaining
-}: PROVJSONDocument, prevTreeData?: TreeItem[]): TreeItem[] => [
-  ...mapBundleToTreeData(remaining, prevTreeData),
+}: PROVJSONDocument, searchString: string, prevTreeData?: TreeItem[]): TreeItem[] => [
+  ...mapBundleToTreeData(remaining, searchString),
   ...(bundle ? Object.keys(bundle).map((key) => ({
     title: <Typography variant="body1">{key}</Typography>,
     variant: 'bundle',
     expanded: prevTreeData ? isBundleExpanded(prevTreeData, key) : false,
-    children: mapBundleToTreeData(bundle[key], prevTreeData),
+    children: mapBundleToTreeData(bundle[key], searchString),
     key,
   })) : []),
 ].flat();
@@ -162,7 +174,7 @@ const getRemovedFromDocument = (
 ].flat();
 
 const TreeView: React.FC<TreeViewProps> = ({
-  width, height, selectedNodeID, setSelectedNodeID,
+  width, height, selectedNodeID, setSelectedNodeID, searchString,
 }) => {
   const { document, setDocument } = useContext(DocumentContext);
   const { visualisationSettings } = useContext(VisualisationContext);
@@ -175,11 +187,13 @@ const TreeView: React.FC<TreeViewProps> = ({
     agentColor: agent, activityColor: activity, entityColor: entity, bundleColor: bundle,
   });
 
-  const [treeData, setTreeData] = useState<TreeItem[]>(mapDocumentToTreeData(document));
+  const [treeData, setTreeData] = useState<TreeItem[]>(
+    mapDocumentToTreeData(document, searchString),
+  );
 
   useEffect(() => {
-    setTreeData((prevTreeData) => mapDocumentToTreeData(document, prevTreeData));
-  }, [document]);
+    setTreeData((prevTreeData) => mapDocumentToTreeData(document, searchString, prevTreeData));
+  }, [document, searchString]);
 
   const handleChange = (updatedTreeData: TreeItem[]) => {
     setTreeData(updatedTreeData);

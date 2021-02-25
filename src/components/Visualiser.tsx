@@ -57,6 +57,12 @@ const Visualiser: React.FC<VisualiserProps> = ({
 
   const [selectedNodeID, setSelectedNodeID] = useState<string | undefined>();
   const [displaySettings, setDisplaySettings] = useState<boolean>(false);
+  const [searching, setSearching] = useState<boolean>(false);
+  const [searchString, setSearchString] = useState<string>('');
+
+  useEffect(() => {
+    if (searching) setCurrentView('Tree');
+  }, [searching]);
 
   useEffect(() => {
     if (controllingState && onChange !== null) {
@@ -125,11 +131,16 @@ const Visualiser: React.FC<VisualiserProps> = ({
               setDisplaySettings(true);
               setDisplayEditorContent(true);
             }}
-            collapseButtons={width < 650}
+            collapseButtons={width < (searching ? 800 : 650)}
+            collapseIconButtons={width < 650 && searching}
             setSelectedNodeID={handleSelectedNodeIDChange}
             currentView={currentView}
             setCurrentView={setCurrentView}
             downloadVisualisation={downloadVisualisation}
+            searching={searching}
+            setSearching={setSearching}
+            searchString={searchString}
+            setSearchString={setSearchString}
           />
           {currentView === 'Graph' && (
           <D3Graphviz
@@ -154,6 +165,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
                 - (displayEditorContent ? editorContentHeight : 0))}
               selectedNodeID={selectedNodeID}
               setSelectedNodeID={handleSelectedNodeIDChange}
+              searchString={searchString}
             />
           )}
           <Editor
