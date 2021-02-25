@@ -10,12 +10,13 @@ import { PROVJSONBundle, PROVJSONDocument, tbdIsNodeVariant } from '../util/docu
 import queries from '../util/queries';
 import mutations from '../util/mutations';
 import VisualisationContext from './contexts/VisualisationContext';
+import { Selection } from './Visualiser';
 
 type TreeViewProps = {
   width: number;
   height: number;
-  selectedNodeID: string | undefined;
-  setSelectedNodeID: (id: string | undefined) => void;
+  selected: Selection | undefined;
+  setSelected: (selected: Selection | undefined) => void;
   searchString: string;
 }
 
@@ -174,7 +175,7 @@ const getRemovedFromDocument = (
 ].flat();
 
 const TreeView: React.FC<TreeViewProps> = ({
-  width, height, selectedNodeID, setSelectedNodeID, searchString,
+  width, height, selected, setSelected, searchString,
 }) => {
   const { document, setDocument } = useContext(DocumentContext);
   const { visualisationSettings } = useContext(VisualisationContext);
@@ -236,9 +237,13 @@ const TreeView: React.FC<TreeViewProps> = ({
           className: [
             classes.node,
             tbdIsNodeVariant(node.variant) ? classes[node.variant] : [],
-            selectedNodeID === node.key ? classes.selectedNode : [],
+            (
+              selected
+              && selected.variant === node.variant
+              && selected.id === node.key
+            ) ? classes.selectedNode : [],
           ].flat().join(' '),
-          onClick: () => setSelectedNodeID(node.key),
+          onClick: () => setSelected({ variant: node.variant, id: node.key }),
         })}
       />
     </Box>

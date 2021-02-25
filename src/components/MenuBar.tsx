@@ -23,6 +23,7 @@ import DocumentContext from './contexts/DocumentContext';
 import VisualisationContext from './contexts/VisualisationContext';
 import { Variant, VARIANTS } from '../util/document';
 import SearchTextField from './TextField/SearchTextField';
+import { Selection } from './Visualiser';
 
 export const MENU_BAR_HEIGHT = 48;
 
@@ -104,7 +105,7 @@ export type View = 'Graph' | 'Tree'
 
 type MenuBarProps = {
   displaySettings: () => void;
-  setSelectedNodeID: (id: string) => void;
+  setSelected: (selected: Selection) => void;
   collapseButtons: boolean;
   collapseIconButtons: boolean;
   currentView: View;
@@ -118,7 +119,7 @@ type MenuBarProps = {
 
 const MenuBar: React.FC<MenuBarProps> = ({
   displaySettings,
-  setSelectedNodeID,
+  setSelected,
   currentView,
   setCurrentView,
   downloadVisualisation,
@@ -149,7 +150,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
       ? queries.bundle.generateName(prefix)(document)
       : queries.node.generateName(variant, prefix)(document);
     setDocument(mutations.document.create(variant, prefix, name));
-    setSelectedNodeID(`${prefix}:${name}`);
+    setSelected({ variant, id: `${prefix}:${name}` });
   };
 
   const buttonClasses = { root: classes.buttonRoot, label: classes.buttonLabel };

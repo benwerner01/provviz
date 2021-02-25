@@ -16,17 +16,17 @@ import Tab from '@material-ui/core/Tab';
 import Tooltip from '@material-ui/core/Tooltip';
 import { Fade, useTheme } from '@material-ui/core';
 import DocumentContext from './contexts/DocumentContext';
-import queries from '../util/queries';
 import NodeTab from './EditorTabs/NodeTab';
 import SettingsTab from './EditorTabs/SettingsTab';
 import { Variant } from '../util/document';
 import BundleTab from './EditorTabs/BundleTab';
+import { Selection } from './Visualiser';
 
 export const TABS_HEIGHT = 48 + 1;
 
 type TapType = {
-  name: string;
-  variant: 'default' | Variant;
+  id: string;
+  variant: Variant;
 }
 
 const defaultTabs: TapType[] = [];
@@ -83,8 +83,8 @@ type EditorProps = {
   setDisplaySettings: (updated: boolean) => void;
   contentHeight: number;
   setContentHeight: Dispatch<SetStateAction<number>>;
-  selectedNodeID: string | undefined;
-  setSelectedNodeID: (id: string | undefined) => void;
+  selected: Selection | undefined;
+  setSelected: (selected: Selection | undefined) => void;
   display: boolean;
   setDisplay: (display: boolean) => void;
   open: boolean;
@@ -96,14 +96,13 @@ const Editor: React.FC<EditorProps> = ({
   setDisplaySettings,
   contentHeight,
   setContentHeight,
-  selectedNodeID,
-  setSelectedNodeID,
+  selected,
+  setSelected,
   open,
   setOpen,
   display,
   setDisplay,
 }) => {
-  const { document } = useContext(DocumentContext);
   const classes = useStyles();
   const theme = useTheme();
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -114,9 +113,7 @@ const Editor: React.FC<EditorProps> = ({
   const [dragging, setDragging] = useState<boolean>(false);
 
   const handleMouseUp = () => {
-    if (dragging) {
-      setDragging(false);
-    }
+    if (dragging) setDragging(false);
   };
 
   const handleMouseMove = (e: MouseEvent) => {
@@ -143,75 +140,66 @@ const Editor: React.FC<EditorProps> = ({
   }, [tabs]);
 
   useEffect(() => {
-    if (selectedNodeID) {
-      const existingTabIndex = tabs.findIndex(({ name }) => name === selectedNodeID);
+    if (selected) {
+      const existingTabIndex = tabs.findIndex(({ id, variant }) => (
+        variant === selected.variant
+        && id === selected.id));
 
       if (existingTabIndex < 0) {
-        const variant: Variant | undefined = queries.document.hasEntity(selectedNodeID)(document)
-          ? 'entity'
-          : queries.document.hasActivity(selectedNodeID)(document)
-            ? 'activity'
-            : queries.document.hasAgent(selectedNodeID)(document)
-              ? 'agent'
-              : queries.document.hasBundle(selectedNodeID)(document)
-                ? 'bundle' : undefined;
-
-        if (!variant) throw new Error(`Could not find variant of selected node with identifier ${selectedNodeID}`);
-        const updatedTabs = [...tabs, { name: selectedNodeID, variant }];
+        const updatedTabs = [...tabs, selected];
         setTabs(updatedTabs);
-        setCurrentTabIndex(updatedTabs.length - 1);
+        setCurrentTabIndex(updatedTabs.length - 1 - (displaySettings ? 1 : 0));
       } else {
-        setCurrentTabIndex(existingTabIndex);
+        setCurrentTabIndex(existingTabIndex - (displaySettings ? 1 : 0));
       }
     }
-  }, [selectedNodeID]);
+  }, [selected]);
 
   useEffect(() => {
-    const existingSettingsTabIndex = tabs.findIndex(({ variant, name }) => variant === 'default' && name === 'Settings');
-    if (displaySettings) {
-      if (existingSettingsTabIndex < 0) {
-        setTabs((prev) => [{ name: 'Settings', variant: 'default' }, ...prev]);
-        setCurrentTabIndex(0);
-      } else {
-        setCurrentTabIndex(existingSettingsTabIndex);
-      }
-    }
+    if (displaySettings) setCurrentTabIndex(0);
   }, [displaySettings]);
 
   const handleCloseTab = (
-    variant: string, name: string,
+    variant: string, id: string,
   ) => (e?: React.MouseEvent<HTMLElement, MouseEvent>) => {
     if (e) e.stopPropagation();
-    const tabIndex = tabs.findIndex((t) => t.name === name);
-    if (variant === 'default' && name === 'Settings') setDisplaySettings(false);
+    const tabIndex = tabs.findIndex((t) => t.id === id);
     if (tabIndex >= 0) {
       const updatedTabs = [...tabs.slice(0, tabIndex), ...tabs.slice(tabIndex + 1, tabs.length)];
       setTabs(updatedTabs);
       if (
-        currentTabIndex >= tabIndex
-        && currentTabIndex !== 0) {
+        displaySettings
+        || (currentTabIndex >= tabIndex && currentTabIndex !== 0)
+      ) {
         setCurrentTabIndex(currentTabIndex - 1);
       }
-      if (updatedTabs.length === 0) {
+      if (!displaySettings && updatedTabs.length === 0) {
         setCurrentTabIndex(-1);
         setOpen(false);
       }
+      if (selected && selected.variant === variant && selected.id === id) setSelected(undefined);
     }
   };
 
   const handleTabIDChange = (tabIndex: number) => (updatedID: string) => {
-    const prevID = tabs[tabIndex].name;
+    const prevID = tabs[tabIndex].id;
     const { variant } = tabs[tabIndex];
     setTabs([
       ...tabs.slice(0, tabIndex),
-      { name: updatedID, variant },
+      { id: updatedID, variant },
       ...tabs.slice(tabIndex + 1, tabs.length),
     ]);
-    if (selectedNodeID === prevID) setSelectedNodeID(updatedID);
+    if (selected && selected.variant === variant && selected.id === prevID) {
+      setSelected({ variant, id: updatedID });
+    }
   };
 
-  const currentTabVariant = currentTabIndex < 0 ? undefined : tabs[currentTabIndex].variant;
-  const currentTabName = currentTabIndex < 0 ? undefined : tabs[currentTabIndex].name;
+  const currentTabVariant = (currentTabIndex < 0 || (displaySettings && currentTabIndex === 0))
+    ? undefined
+    : tabs[currentTabIndex - (displaySettings ? 1 : 0)].variant;
+  const currentTabID = (currentTabIndex < 0 || (displaySettings && currentTabIndex === 0))
+    ? undefined
+    : tabs[currentTabIndex - (displaySettings ? 1 : 0)].id;
 
   return (
     <div
@@ -230,22 +218,45 @@ const Editor: React.FC<EditorProps> = ({
           variant="scrollable"
           scrollButtons="auto"
         >
-          {tabs.map(({ name, variant }) => (
+          {displaySettings && (
             <Tab
               classes={{ root: classes.tabRoot }}
               onClick={() => {
-                setSelectedNodeID(name);
+                setCurrentTabIndex(0);
                 setOpen(true);
               }}
-              key={name}
-              label={(variant === 'default' && name === 'Namespace')
-                ? name
-                : (
-                  <Box display="flex" alignItems="center">
-                    <Typography className={classes.tabLabel}>{name}</Typography>
-                    <Box display="flex" alignItems="center" onClick={handleCloseTab(variant, name)} ml={1}><CloseIcon /></Box>
+              label={(
+                <Box display="flex" alignItems="center">
+                  <Typography className={classes.tabLabel}>Settings</Typography>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    onClick={() => {
+                      if (tabs.length === 0) setCurrentTabIndex(-1);
+                      setDisplaySettings(false);
+                    }}
+                    ml={1}
+                  >
+                    <CloseIcon />
                   </Box>
-                )}
+                </Box>
+            )}
+            />
+          )}
+          {tabs.map(({ id, variant }) => (
+            <Tab
+              classes={{ root: classes.tabRoot }}
+              onClick={() => {
+                setSelected({ variant, id });
+                setOpen(true);
+              }}
+              key={`${id}-${variant}`}
+              label={(
+                <Box display="flex" alignItems="center">
+                  <Typography className={classes.tabLabel}>{id}</Typography>
+                  <Box display="flex" alignItems="center" onClick={handleCloseTab(variant, id)} ml={1}><CloseIcon /></Box>
+                </Box>
+              )}
             />
           ))}
         </Tabs>
@@ -286,27 +297,27 @@ const Editor: React.FC<EditorProps> = ({
           py={2}
           px={4}
         >
-          {(currentTabName && currentTabVariant) && (currentTabVariant === 'default'
-            ? (
-              <>
-                {currentTabName === 'Settings' && <SettingsTab />}
-              </>
-            ) : currentTabVariant === 'bundle' ? (
-              <BundleTab
-                key={currentTabIndex}
-                id={tabs[currentTabIndex].name}
-                onIDChange={handleTabIDChange(currentTabIndex)}
-                onDelete={handleCloseTab(currentTabVariant, currentTabName)}
-              />
-            ) : (
-              <NodeTab
-                key={currentTabIndex}
-                variant={currentTabVariant}
-                id={tabs[currentTabIndex].name}
-                onIDChange={handleTabIDChange(currentTabIndex)}
-                onDelete={handleCloseTab(currentTabVariant, currentTabName)}
-              />
-            ))}
+          {(displaySettings && currentTabIndex === 0)
+            ? <SettingsTab />
+            : (
+              currentTabVariant
+              && currentTabID
+              && (currentTabVariant === 'bundle' ? (
+                <BundleTab
+                  key={currentTabIndex}
+                  id={tabs[currentTabIndex - (displaySettings ? 1 : 0)].id}
+                  onIDChange={handleTabIDChange(displaySettings ? 1 : 0)}
+                  onDelete={handleCloseTab(currentTabVariant, currentTabID)}
+                />
+              ) : (
+                <NodeTab
+                  key={currentTabIndex}
+                  variant={currentTabVariant}
+                  id={tabs[currentTabIndex - (displaySettings ? 1 : 0)].id}
+                  onIDChange={handleTabIDChange(displaySettings ? 1 : 0)}
+                  onDelete={handleCloseTab(currentTabVariant, currentTabID)}
+                />
+              )))}
         </Box>
       </Collapse>
     </div>

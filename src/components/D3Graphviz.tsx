@@ -9,6 +9,7 @@ import { mapDocumentToDots } from '../util/dot';
 import DocumentContext from './contexts/DocumentContext';
 import VisualisationContext from './contexts/VisualisationContext';
 import queries from '../util/queries';
+import { Selection as PROVVizSelection } from './Visualiser';
 
 interface Datum {
   attributes: {
@@ -105,13 +106,13 @@ type GraphvizProps = {
   width: number;
   height: number;
   wasmFolderURL: string;
-  selectedNodeID: string | undefined;
-  setSelectedNodeID: (id: string | undefined) => void;
+  selected: PROVVizSelection | undefined;
+  setSelected: (selected: PROVVizSelection) => void;
   setSVGElement: (svg: SVGSVGElement) => void;
 }
 
 const D3Graphviz: React.FC<GraphvizProps> = ({
-  width, height, wasmFolderURL, selectedNodeID, setSelectedNodeID, setSVGElement,
+  width, height, wasmFolderURL, selected, setSelected, setSVGElement,
 }) => {
   const { document } = useContext(DocumentContext);
   const { visualisationSettings } = useContext(VisualisationContext);
@@ -135,15 +136,12 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
   ] = useState<Selection<SVGGElement, ClusterGroupDatum, SVGSVGElement, unknown> | undefined>();
 
   useEffect(() => {
-    if (selectedNodeID && d3Nodes && d3Clusters) {
-      const selectedNode = d3Nodes.filter(({ key }) => key === selectedNodeID);
-      const selectedCluster = d3Clusters.filter(({ key }) => key === `cluster_${selectedNodeID}`);
+    if (selected && d3Nodes && d3Clusters) {
+      const d3Selected = selected.variant === 'bundle'
+        ? d3Clusters.filter(({ key }) => key === `cluster_${selected.id}`)
+        : d3Nodes.filter(({ key }) => key === selected.id);
 
-      const datum = selectedCluster.empty()
-        ? selectedNode.empty()
-          ? undefined
-          : selectedNode.datum()
-        : d3Clusters.datum();
+      const datum = d3Selected.empty() ? undefined : d3Selected.datum();
 
       const { children } = datum || {};
 
@@ -170,7 +168,7 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
         }
       }
     }
-  }, [selectedNodeID, d3Nodes, d3Clusters]);
+  }, [selected, d3Nodes, d3Clusters]);
 
   useEffect(() => {
     wasmFolder(wasmFolderURL);
@@ -218,26 +216,29 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
 
   useEffect(() => {
     if (graphvizWrapper.current && graphvizInstance && d3Nodes && d3Edges && d3Clusters) {
-      if (selectedNodeID) {
-        const selectedNodeGroup = d3Nodes.filter(({ key }) => selectedNodeID === key);
-        const selectedClusterGroup = d3Clusters
-          .filter(({ key }) => selectedNodeID === key.slice(8));
+      if (selected) {
+        const d3Selected = selected.variant === 'bundle'
+          ? d3Clusters.filter(({ key }) => selected.id === key.slice(8))
+          : d3Nodes.filter(({ key }) => selected.id === key);
 
-        selectedNodeGroup.classed('selected', true);
-        selectedClusterGroup.classed('selected', true);
+        d3Selected.classed('selected', true);
 
-        const selectedEdges = d3Edges.filter(({ key }) => key.startsWith(`${selectedNodeID}->`));
-        selectedEdges.classed('selected', true);
+        if (selected.variant !== 'bundle') {
+          d3Edges.filter(({ key }) => key.startsWith(`${selected.id}->`)).classed('selected', true);
+        }
       }
 
-      const deselectedNodeGroups = d3Nodes.filter(({ key }) => selectedNodeID !== key);
+      const deselectedNodeGroups = d3Nodes
+        .filter(({ key }) => !selected || selected.variant === 'bundle' || selected.id !== key);
       const deselectedClusterGroups = d3Clusters
-        .filter(({ key }) => selectedNodeID !== key.slice(8));
+        .filter(({ key }) => !selected || selected.variant !== 'bundle' || selected.id !== key.slice(8));
 
       if (deselectedNodeGroups) deselectedNodeGroups.classed('selected', false);
       if (deselectedClusterGroups) deselectedClusterGroups.classed('selected', false);
 
-      const deselectedEdges = d3Edges.filter(({ key }) => !key.startsWith(`${selectedNodeID}->`));
+      const deselectedEdges = d3Edges
+        .filter(({ key }) => !selected || selected.variant === 'bundle' || !key.startsWith(`${selected.id}->`));
+
       deselectedEdges.classed('selected', false);
 
       d3Nodes.on('mouseover', function mouseover() {
@@ -250,7 +251,10 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
         nodeGroup.classed('hover', false);
       });
 
-      d3Nodes.on('click', ({ key }) => setSelectedNodeID(key));
+      d3Nodes.on('click', ({ key }) => {
+        const variant = queries.node.getVariant(key)(document);
+        setSelected({ id: key, variant });
+      });
 
       if (!d3Clusters.empty()) {
         d3Clusters.call((d3Cluster) => {
@@ -260,11 +264,11 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
           d3Cluster.select('text')
             .on('mouseover', () => d3Cluster.classed('hover', true))
             .on('mouseout', () => d3Cluster.classed('hover', false))
-            .on('click', () => setSelectedNodeID(key));
+            .on('click', () => setSelected({ id: key, variant: 'bundle' }));
         });
       }
     }
-  }, [d3Nodes, d3Edges, d3Clusters, selectedNodeID]);
+  }, [d3Nodes, d3Edges, d3Clusters, selected]);
 
   return (
     <div

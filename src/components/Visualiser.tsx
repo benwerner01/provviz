@@ -2,7 +2,7 @@ import React, { SetStateAction, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import download from 'downloadjs';
-import { PROVJSONDocument, tbdIsPROVJSONBundle } from '../util/document';
+import { PROVJSONDocument, tbdIsPROVJSONBundle, Variant } from '../util/document';
 import DocumentContext from './contexts/DocumentContext';
 import Editor, { TABS_HEIGHT } from './Editor';
 import D3Graphviz from './D3Graphviz';
@@ -21,6 +21,11 @@ export type VisualiserProps = {
   width: number;
   height: number;
   wasmFolderURL: string;
+}
+
+export type Selection = {
+  variant: Variant;
+  id: string;
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -55,7 +60,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
   const [currentView, setCurrentView] = useState<View>('Graph');
   const [editorContentHeight, setEditorContentHeight] = useState<number>(400);
 
-  const [selectedNodeID, setSelectedNodeID] = useState<string | undefined>();
+  const [selected, setSelected] = useState<Selection | undefined>();
   const [displaySettings, setDisplaySettings] = useState<boolean>(false);
   const [searching, setSearching] = useState<boolean>(false);
   const [searchString, setSearchString] = useState<string>('');
@@ -97,9 +102,9 @@ const Visualiser: React.FC<VisualiserProps> = ({
     }
   };
 
-  const handleSelectedNodeIDChange = (id: string | undefined) => {
-    if (id && !displayEditorContent) setDisplayEditorContent(true);
-    setSelectedNodeID(id);
+  const handleSelectedChange = (updatedSelected: Selection | undefined) => {
+    if (updatedSelected && !displayEditorContent) setDisplayEditorContent(true);
+    setSelected(updatedSelected);
   };
 
   const handleVisualisationSettings = (
@@ -133,7 +138,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
             }}
             collapseButtons={width < (searching ? 800 : 650)}
             collapseIconButtons={width < 650 && searching}
-            setSelectedNodeID={handleSelectedNodeIDChange}
+            setSelected={handleSelectedChange}
             currentView={currentView}
             setCurrentView={setCurrentView}
             downloadVisualisation={downloadVisualisation}
@@ -144,8 +149,8 @@ const Visualiser: React.FC<VisualiserProps> = ({
           />
           {currentView === 'Graph' && (
           <D3Graphviz
-            selectedNodeID={selectedNodeID}
-            setSelectedNodeID={handleSelectedNodeIDChange}
+            selected={selected}
+            setSelected={setSelected}
             width={width}
             wasmFolderURL={wasmFolderURL}
             setSVGElement={setSVGElement}
@@ -163,8 +168,8 @@ const Visualiser: React.FC<VisualiserProps> = ({
                 - MENU_BAR_HEIGHT
                 - (displayEditor ? TABS_HEIGHT : 0)
                 - (displayEditorContent ? editorContentHeight : 0))}
-              selectedNodeID={selectedNodeID}
-              setSelectedNodeID={handleSelectedNodeIDChange}
+              selected={selected}
+              setSelected={setSelected}
               searchString={searchString}
             />
           )}
@@ -173,8 +178,8 @@ const Visualiser: React.FC<VisualiserProps> = ({
             setDisplaySettings={setDisplaySettings}
             contentHeight={editorContentHeight}
             setContentHeight={setEditorContentHeight}
-            selectedNodeID={selectedNodeID}
-            setSelectedNodeID={handleSelectedNodeIDChange}
+            selected={selected}
+            setSelected={handleSelectedChange}
             display={displayEditor}
             setDisplay={setDisplayEditor}
             open={displayEditorContent}
