@@ -103,6 +103,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
   };
 
   const handleSelectedChange = (updatedSelected: Selection | undefined) => {
+    console.log(updatedSelected);
     if (updatedSelected && !displayEditorContent) setDisplayEditorContent(true);
     setSelected(updatedSelected);
   };
@@ -150,7 +151,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
           {currentView === 'Graph' && (
           <D3Graphviz
             selected={selected}
-            setSelected={setSelected}
+            setSelected={handleSelectedChange}
             width={width}
             wasmFolderURL={wasmFolderURL}
             setSVGElement={setSVGElement}
@@ -169,7 +170,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
                 - (displayEditor ? TABS_HEIGHT : 0)
                 - (displayEditorContent ? editorContentHeight : 0))}
               selected={selected}
-              setSelected={setSelected}
+              setSelected={handleSelectedChange}
               searchString={searchString}
             />
           )}
