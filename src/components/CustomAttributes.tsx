@@ -14,7 +14,9 @@ import debounce from 'lodash.debounce';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Collapse from '@material-ui/core/Collapse';
-import { AttributeValue, ATTRIBUTE_DEFINITIONS, NodeVariant } from '../util/document';
+import {
+  AttributeValue, ATTRIBUTE_DEFINITIONS, NodeVariant, PROVVIZ_ATTRIBUTE_DEFINITIONS,
+} from '../util/document';
 import queries from '../util/queries';
 import DocumentContext from './contexts/DocumentContext';
 import mutations from '../util/mutations';
@@ -231,6 +233,10 @@ const feshAttributeKey = () => {
   return counter.toString();
 };
 
+const filterDefinedAttributes = ([key]: [name: string, value: AttributeValue]) => [
+  ...ATTRIBUTE_DEFINITIONS,
+  ...PROVVIZ_ATTRIBUTE_DEFINITIONS].find((a) => a.key === key) === undefined;
+
 const mapDocumentAttributeEntryToAttribute = (
   [name, value]: [name: string, value: AttributeValue],
 ): Attribute => ({
@@ -256,7 +262,7 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
   const [creatingValue, setCreatingValue] = useState<AttributeValue>('');
   const [attributes, setAttributes] = useState<Attribute[]>(
     queries.node.getAttributes(nodeVariant, nodeID)(document)
-      ?.filter(([key]) => ATTRIBUTE_DEFINITIONS.find((a) => a.key === key) === undefined)
+      ?.filter(filterDefinedAttributes)
       .map(mapDocumentAttributeEntryToAttribute) || [],
   );
 
@@ -271,7 +277,7 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
     if (newAttributes) {
       resetCreating();
       setAttributes(newAttributes
-        .filter(([key]) => ATTRIBUTE_DEFINITIONS.find((a) => a.key === key) === undefined)
+        .filter(filterDefinedAttributes)
         .map(mapDocumentAttributeEntryToAttribute));
     }
   }, [document, nodeID]);
