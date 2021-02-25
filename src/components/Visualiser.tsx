@@ -15,7 +15,9 @@ export const MIN_WIDTH = 350;
 export type VisualiserProps = {
   documentName?: string;
   document: object;
-  onChange: ((newDocumnet: object) => void) | null;
+  onChange: ((updatedDocument: object) => void) | null;
+  initialSettings?: VisualisationSettings;
+  onSettingsChange?: (updatedSettings: VisualisationSettings) => void;
   width: number;
   height: number;
   wasmFolderURL: string;
@@ -35,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Visualiser: React.FC<VisualiserProps> = ({
-  wasmFolderURL, width, height, documentName, document, onChange,
+  wasmFolderURL, width, height, documentName, document, onChange, initialSettings, onSettingsChange,
 }) => {
   if (!tbdIsPROVJSONBundle(document)) throw new Error('Could not parse PROV JSON Document');
   const classes = useStyles();
@@ -45,7 +47,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
 
   const [
     visualisationSettings,
-    setVisualisationSettings] = useState<VisualisationSettings>(defaultSettings);
+    setVisualisationSettings] = useState<VisualisationSettings>(initialSettings || defaultSettings);
 
   const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(document);
   const [displayEditor, setDisplayEditor] = useState<boolean>(false);
@@ -65,6 +67,10 @@ const Visualiser: React.FC<VisualiserProps> = ({
       setControllingState(true);
     }
   }, [controllingState, onChange]);
+
+  useEffect(() => {
+    setVisualisationSettings(initialSettings || defaultSettings);
+  }, [documentName]);
 
   const contextDocument = controllingState ? localDocument : document;
 
@@ -90,11 +96,26 @@ const Visualiser: React.FC<VisualiserProps> = ({
     setSelectedNodeID(id);
   };
 
+  const handleVisualisationSettings = (
+    action: SetStateAction<VisualisationSettings>,
+  ) => {
+    setVisualisationSettings(action);
+    if (onSettingsChange) {
+      if (typeof action === 'function') onSettingsChange(action(visualisationSettings));
+      else onSettingsChange(action);
+    }
+  };
+
   return (
     <DocumentContext.Provider
       value={{ document: contextDocument, setDocument: contextSetDocument }}
     >
-      <VisualisationContext.Provider value={{ visualisationSettings, setVisualisationSettings }}>
+      <VisualisationContext.Provider
+        value={{
+          visualisationSettings,
+          setVisualisationSettings: handleVisualisationSettings,
+        }}
+      >
         <Box
           className={classes.wrapper}
           style={{ width, height }}
