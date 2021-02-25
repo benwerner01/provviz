@@ -129,11 +129,11 @@ const Editor: React.FC<EditorProps> = ({
   };
 
   useEffect(() => {
-    window.addEventListener('mouseup', handleMouseUp);
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('pointerup', handleMouseUp);
+    window.addEventListener('pointermove', handleMouseMove);
     return () => {
-      window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('pointerup', handleMouseUp);
+      window.removeEventListener('pointermove', handleMouseMove);
     };
   }, [dragging]);
 
@@ -210,10 +210,6 @@ const Editor: React.FC<EditorProps> = ({
     if (selectedNodeID === prevID) setSelectedNodeID(updatedID);
   };
 
-  const handleDragHandleMouseDown = () => {
-    setDragging(true);
-  };
-
   const currentTabVariant = currentTabIndex < 0 ? undefined : tabs[currentTabIndex].variant;
   const currentTabName = currentTabIndex < 0 ? undefined : tabs[currentTabIndex].name;
 
@@ -261,7 +257,7 @@ const Editor: React.FC<EditorProps> = ({
             placement="top"
           >
             <IconButton
-              onMouseDown={handleDragHandleMouseDown}
+              onPointerDown={() => setDragging(true)}
               disableFocusRipple
               disableRipple
             >
