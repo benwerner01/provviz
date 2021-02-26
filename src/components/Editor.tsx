@@ -135,9 +135,9 @@ const Editor: React.FC<EditorProps> = ({
   }, [dragging]);
 
   useEffect(() => {
-    if (tabs.length === 0) setDisplay(false);
+    if (tabs.length === 0 && !displaySettings) setDisplay(false);
     else setDisplay(true);
-  }, [tabs]);
+  }, [tabs, displaySettings]);
 
   useEffect(() => {
     if (selected) {
@@ -202,12 +202,16 @@ const Editor: React.FC<EditorProps> = ({
     }
   };
 
-  const currentTabVariant = (currentTabIndex < 0 || (displaySettings && currentTabIndex === 0))
+  const adjustedTabIndex = currentTabIndex - (displaySettings ? 1 : 0);
+
+  const currentTab = (
+    adjustedTabIndex < 0
+    || (displaySettings && currentTabIndex === 0))
     ? undefined
-    : tabs[currentTabIndex - (displaySettings ? 1 : 0)].variant;
-  const currentTabID = (currentTabIndex < 0 || (displaySettings && currentTabIndex === 0))
-    ? undefined
-    : tabs[currentTabIndex - (displaySettings ? 1 : 0)].id;
+    : tabs[adjustedTabIndex];
+
+  const currentTabVariant = currentTab?.variant;
+  const currentTabID = currentTab?.id;
 
   return (
     <div
@@ -240,8 +244,12 @@ const Editor: React.FC<EditorProps> = ({
                   <Box
                     display="flex"
                     alignItems="center"
-                    onClick={() => {
-                      if (tabs.length === 0) setCurrentTabIndex(-1);
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (tabs.length === 0) {
+                        setOpen(false);
+                        setCurrentTabIndex(-1);
+                      }
                       setDisplaySettings(false);
                     }}
                     ml={1}
@@ -292,7 +300,7 @@ const Editor: React.FC<EditorProps> = ({
           placement="top"
         >
           <IconButton
-            onClick={() => tabs.length > 0 && setOpen(!open)}
+            onClick={() => (tabs.length > 0 || displaySettings) && setOpen(!open)}
             className={classes.displayEditorIconButton}
           >
             <ExpandLessIcon style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }} />
