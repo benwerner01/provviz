@@ -103,7 +103,6 @@ const Visualiser: React.FC<VisualiserProps> = ({
   };
 
   const handleSelectedChange = (updatedSelected: Selection | undefined) => {
-    console.log(updatedSelected);
     if (updatedSelected && !displayEditorContent) setDisplayEditorContent(true);
     setSelected(updatedSelected);
   };

@@ -202,8 +202,6 @@ const Editor: React.FC<EditorProps> = ({
     }
   };
 
-  console.log('currentTabIndex: ', currentTabIndex);
-
   const currentTabVariant = (currentTabIndex < 0 || (displaySettings && currentTabIndex === 0))
     ? undefined
     : tabs[currentTabIndex - (displaySettings ? 1 : 0)].variant;
