@@ -148,9 +148,9 @@ const Editor: React.FC<EditorProps> = ({
       if (existingTabIndex < 0) {
         const updatedTabs = [...tabs, selected];
         setTabs(updatedTabs);
-        setCurrentTabIndex(updatedTabs.length - 1 - (displaySettings ? 1 : 0));
+        setCurrentTabIndex(updatedTabs.length - 1 + (displaySettings ? 1 : 0));
       } else {
-        setCurrentTabIndex(existingTabIndex - (displaySettings ? 1 : 0));
+        setCurrentTabIndex(existingTabIndex + (displaySettings ? 1 : 0));
       }
     }
   }, [selected]);
@@ -160,7 +160,7 @@ const Editor: React.FC<EditorProps> = ({
   }, [displaySettings]);
 
   const handleCloseTab = (
-    variant: string, id: string,
+    id: string,
   ) => (e?: React.MouseEvent<HTMLElement, MouseEvent>) => {
     if (e) e.stopPropagation();
     const tabIndex = tabs.findIndex((t) => t.id === id);
@@ -171,13 +171,21 @@ const Editor: React.FC<EditorProps> = ({
         displaySettings
         || (currentTabIndex >= tabIndex && currentTabIndex !== 0)
       ) {
-        setCurrentTabIndex(currentTabIndex - 1);
+        const updatedIndex = currentTabIndex - 1;
+        setCurrentTabIndex(updatedIndex);
+        setSelected(displaySettings
+          ? updatedIndex >= 1
+            ? updatedTabs[updatedIndex - 1]
+            : undefined
+          : updatedIndex >= 0
+            ? updatedTabs[updatedIndex]
+            : undefined);
       }
       if (!displaySettings && updatedTabs.length === 0) {
         setCurrentTabIndex(-1);
         setOpen(false);
+        setSelected(undefined);
       }
-      if (selected && selected.variant === variant && selected.id === id) setSelected(undefined);
     }
   };
 
@@ -193,6 +201,8 @@ const Editor: React.FC<EditorProps> = ({
       setSelected({ variant, id: updatedID });
     }
   };
+
+  console.log('currentTabIndex: ', currentTabIndex);
 
   const currentTabVariant = (currentTabIndex < 0 || (displaySettings && currentTabIndex === 0))
     ? undefined
@@ -223,6 +233,7 @@ const Editor: React.FC<EditorProps> = ({
               classes={{ root: classes.tabRoot }}
               onClick={() => {
                 setCurrentTabIndex(0);
+                setSelected(undefined);
                 setOpen(true);
               }}
               label={(
@@ -254,7 +265,7 @@ const Editor: React.FC<EditorProps> = ({
               label={(
                 <Box display="flex" alignItems="center">
                   <Typography className={classes.tabLabel}>{id}</Typography>
-                  <Box display="flex" alignItems="center" onClick={handleCloseTab(variant, id)} ml={1}><CloseIcon /></Box>
+                  <Box display="flex" alignItems="center" onClick={handleCloseTab(id)} ml={1}><CloseIcon /></Box>
                 </Box>
               )}
             />
@@ -307,7 +318,7 @@ const Editor: React.FC<EditorProps> = ({
                   key={currentTabIndex}
                   id={tabs[currentTabIndex - (displaySettings ? 1 : 0)].id}
                   onIDChange={handleTabIDChange(displaySettings ? 1 : 0)}
-                  onDelete={handleCloseTab(currentTabVariant, currentTabID)}
+                  onDelete={handleCloseTab(currentTabID)}
                 />
               ) : (
                 <NodeTab
@@ -315,7 +326,7 @@ const Editor: React.FC<EditorProps> = ({
                   variant={currentTabVariant}
                   id={tabs[currentTabIndex - (displaySettings ? 1 : 0)].id}
                   onIDChange={handleTabIDChange(displaySettings ? 1 : 0)}
-                  onDelete={handleCloseTab(currentTabVariant, currentTabID)}
+                  onDelete={handleCloseTab(currentTabID)}
                 />
               )))}
         </Box>
