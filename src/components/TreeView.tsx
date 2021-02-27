@@ -66,6 +66,9 @@ const useStyles = makeStyles((theme) => ({
       color: Color(bundleColor).isLight() ? theme.palette.common.black : theme.palette.common.white,
     },
   }),
+  messageTypography: {
+    margin: theme.spacing(2),
+  },
 }));
 
 // Whether or not a bundle is expanded in the Tree Data
@@ -226,26 +229,34 @@ const TreeView: React.FC<TreeViewProps> = ({
       style={{ maxHeight: height, transition: 'max-height 0.3s' }}
       height="100%"
     >
-      <SortableTree
-        treeData={treeData}
-        onChange={handleChange}
-        canDrop={({ node, nextParent }) => !(
-          node.variant === 'bundle'
+      {treeData.length === 0
+        ? (
+          <Typography className={classes.messageTypography}>
+            <i>{searchString === '' ? 'Empty Document' : 'No Search Results' }</i>
+          </Typography>
+        )
+        : (
+          <SortableTree
+            treeData={treeData}
+            onChange={handleChange}
+            canDrop={({ node, nextParent }) => !(
+              node.variant === 'bundle'
           && nextParent?.variant === 'bundle')}
-        canNodeHaveChildren={({ variant }) => variant === 'bundle'}
-        generateNodeProps={({ node }) => ({
-          className: [
-            classes.node,
-            tbdIsNodeVariant(node.variant) ? classes[node.variant] : [],
-            (
-              selected
+            canNodeHaveChildren={({ variant }) => variant === 'bundle'}
+            generateNodeProps={({ node }) => ({
+              className: [
+                classes.node,
+                tbdIsNodeVariant(node.variant) ? classes[node.variant] : [],
+                (
+                  selected
               && selected.variant === node.variant
               && selected.id === node.key
-            ) ? classes.selectedNode : [],
-          ].flat().join(' '),
-          onClick: () => setSelected({ variant: node.variant, id: node.key }),
-        })}
-      />
+                ) ? classes.selectedNode : [],
+              ].flat().join(' '),
+              onClick: () => setSelected({ variant: node.variant, id: node.key }),
+            })}
+          />
+        )}
     </Box>
   );
 };
