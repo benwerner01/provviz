@@ -46,7 +46,7 @@ export const testDocument1: PROVJSONDocument = {
         'nestedPrefix1:nestedEntity': { },
       },
     },
-    'prefix1:Bundle 1': {
+    'prefix1:Bundle1': {
     },
   },
 };

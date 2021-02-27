@@ -89,12 +89,12 @@ test('queries.document.hasBundle', () => {
 
 test('queries.bundle.getAll', () => {
   expect(queries.bundle.getAll(testDocument1))
-    .toEqual(['prefix1:Bundle', 'prefix1:Bundle 1']);
+    .toEqual(['prefix1:Bundle', 'prefix1:Bundle1']);
 });
 
 test('queries.bundle.generateName', () => {
   expect(queries.bundle.generateName('prefix1')(testDocument1))
-    .toBe('Bundle 2');
+    .toBe('Bundle2');
 });
 
 test('queries.bundle.getLocalNodeValue', () => {
@@ -111,7 +111,7 @@ test('queries.node.getAll', () => {
 
 test('queries.node.generateName', () => {
   expect(queries.node.generateName('agent', 'prefix1')(testDocument1))
-    .toEqual('Agent 1');
+    .toEqual('Agent1');
 });
 
 test('queries.node.getFullName', () => {
