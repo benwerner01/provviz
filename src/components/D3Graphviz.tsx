@@ -1,7 +1,9 @@
 import React, {
   useState, useEffect, useRef, useContext,
 } from 'react';
-import { select, BaseType, Selection } from 'd3';
+import {
+  select, BaseType, Selection, ZoomBehavior,
+} from 'd3';
 import { wasmFolder } from '@hpcc-js/wasm';
 import { Graphviz, graphviz } from 'd3-graphviz';
 import { makeStyles } from '@material-ui/core/styles';
@@ -159,7 +161,7 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
           const x = parseFloat(center.x);
           const y = parseFloat(center.y);
 
-          zoom.scaleTo(svg.transition() as any, 1);
+          zoom.scaleTo(svg as any, 1);
           zoom.translateTo(
             svg.transition() as any,
             width / 2 - graphWidth / 2 + x,
