@@ -86,9 +86,9 @@ const queries = {
     generateName: (
       prefix: string, index: number = 0,
     ) => (document: PROVJSONDocument): string => (
-      queries.document.hasBundle(`${prefix}:Bundle${index > 0 ? ` ${index}` : ''}`)(document)
+      queries.document.hasBundle(`${prefix}:Bundle${index > 0 ? index : ''}`)(document)
         ? queries.bundle.generateName(prefix, index + 1)(document)
-        : `Bundle${index > 0 ? ` ${index}` : ''}`),
+        : `Bundle${index > 0 ? index : ''}`),
     getLocalNodeValue: (identifier: string) => ({
       agent, activity, entity,
     }: PROVJSONBundle) => Object
@@ -117,9 +117,9 @@ const queries = {
     generateName: (
       variant: NodeVariant, prefix: string, index: number = 0,
     ) => (document: PROVJSONBundle): string => (
-      queries.document.hasNode(`${prefix}:${variant.charAt(0).toUpperCase()}${variant.slice(1)}${index > 0 ? ` ${index}` : ''}`)(document)
+      queries.document.hasNode(`${prefix}:${variant.charAt(0).toUpperCase()}${variant.slice(1)}${index > 0 ? index : ''}`)(document)
         ? queries.node.generateName(variant, prefix, index + 1)(document)
-        : `${variant.charAt(0).toUpperCase()}${variant.slice(1)}${index > 0 ? ` ${index}` : ''}`),
+        : `${variant.charAt(0).toUpperCase()}${variant.slice(1)}${index > 0 ? index : ''}`),
     getFullName: (identifier: string) => ({ prefix }: PROVJSONBundle) => (
       `${(prefix || {})[identifier.split(':')[0]]}${identifier.split(':')[1]}`
     ),
