@@ -323,7 +323,7 @@ const Editor: React.FC<EditorProps> = ({
                 <BundleTab
                   key={currentTabIndex}
                   id={tabs[currentTabIndex - (displaySettings ? 1 : 0)].id}
-                  onIDChange={handleTabIDChange(displaySettings ? 1 : 0)}
+                  onIDChange={handleTabIDChange(currentTabIndex - (displaySettings ? 1 : 0))}
                   onDelete={handleCloseTab(currentTabID)}
                 />
               ) : (
@@ -331,7 +331,7 @@ const Editor: React.FC<EditorProps> = ({
                   key={currentTabIndex}
                   variant={currentTabVariant}
                   id={tabs[currentTabIndex - (displaySettings ? 1 : 0)].id}
-                  onIDChange={handleTabIDChange(displaySettings ? 1 : 0)}
+                  onIDChange={handleTabIDChange(currentTabIndex - (displaySettings ? 1 : 0))}
                   onDelete={handleCloseTab(currentTabID)}
                 />
               )))}
