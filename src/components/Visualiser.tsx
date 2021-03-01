@@ -133,6 +133,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
         >
           <MenuBar
             displaySettings={() => {
+              setSelected(undefined);
               setDisplaySettings(true);
               setDisplayEditorContent(true);
             }}
