@@ -5,12 +5,15 @@ import Box from '@material-ui/core/Box';
 import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import WarningIcon from '@material-ui/icons/Warning';
+import { Link } from '@material-ui/core';
 import DocumentContext from '../contexts/DocumentContext';
 import EditableIdentifier from '../EditableIdentifier';
 import queries from '../../util/queries';
 import mutations from '../../util/mutations';
 import Section from './Section';
 import { palette } from '../../util/theme';
+import { Selection } from '../Visualiser';
+import { NodeVariant } from '../../util/document';
 
 const useStyles = makeStyles((theme) => ({
   deleteButton: {
@@ -19,6 +22,11 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.common.white,
     '&:hover': {
       backgroundColor: palette.danger.dark,
+    },
+  },
+  link: {
+    '&:hover': {
+      cursor: 'pointer',
     },
   },
   warningIcon: {
@@ -31,12 +39,13 @@ const useStyles = makeStyles((theme) => ({
 
 type BundleTabProps = {
   id: string;
+  setSelected: (selected: Selection | undefined) => void;
   onIDChange?: (id: string) => void;
   onDelete?: () => void;
 }
 
 const BundleTab: React.FC<BundleTabProps> = ({
-  id, onIDChange, onDelete,
+  id, setSelected, onIDChange, onDelete,
 }) => {
   const classes = useStyles();
   const { document, setDocument } = useContext(DocumentContext);
@@ -48,19 +57,59 @@ const BundleTab: React.FC<BundleTabProps> = ({
     if (onDelete) onDelete();
   };
 
-  const nodes = queries.bundle.getNodes(id)(document);
+  const agents = queries.bundle.getNodes(id, 'agent')(document);
+  const entities = queries.bundle.getNodes(id, 'entity')(document);
+  const activities = queries.bundle.getNodes(id, 'activity')(document);
+  const nodes = [...(agents || []), ...(entities || []), ...(activities || [])];
+
+  const mapNodeIDToLink = (variant: NodeVariant) => (nodeID: string) => (
+    <Typography>
+      <Link
+        className={classes.link}
+        onClick={() => setSelected({ variant, id: nodeID })}
+      >
+        {nodeID}
+      </Link>
+    </Typography>
+  );
 
   const collapsableSections = [
     {
       name: 'Definition',
       initiallyOpen: false,
-      content: (
-        <>
-          <EditableIdentifier initialID={id} onChange={onIDChange} />
-        </>
-      ),
+      content: <EditableIdentifier initialID={id} onChange={onIDChange} />,
     },
-  ];
+    (agents && agents.length > 0)
+      ? {
+        name: 'Agents',
+        initiallyOpen: false,
+        content: (
+          <Box>
+            {agents.map(mapNodeIDToLink('agent'))}
+          </Box>
+        ),
+      } : [],
+    (entities && entities.length > 0)
+      ? {
+        name: 'Entities',
+        initiallyOpen: false,
+        content: (
+          <Box>
+            {entities.map(mapNodeIDToLink('entity'))}
+          </Box>
+        ),
+      } : [],
+    (activities && activities.length > 0)
+      ? {
+        name: 'Acvtivities',
+        initiallyOpen: false,
+        content: (
+          <Box>
+            {activities.map(mapNodeIDToLink('activity'))}
+          </Box>
+        ),
+      } : [],
+  ].flat();
 
   return (
     <>
@@ -72,11 +121,17 @@ const BundleTab: React.FC<BundleTabProps> = ({
       </Box>
       <Divider />
       {collapsableSections.map(({ initiallyOpen, name, content }) => (
-        <Section key={name} initiallyOpen={initiallyOpen} name={name}>{content}</Section>
+        <Section
+          key={name}
+          initiallyOpen={initiallyOpen}
+          name={name}
+        >
+          {content}
+        </Section>
       ))}
       <Box display="flex" flexWrap="wrap" alignItems="center" mt={2}>
         <Button onClick={handleDelete} className={classes.deleteButton} variant="contained">Delete</Button>
-        {nodes && nodes.length > 0 && (
+        {nodes.length > 0 && (
           <Box my={1} display="flex" flexWrap="wrap" alignItems="center">
             <Box display="flex" alignItems="center" mr={1}>
               <WarningIcon className={classes.warningIcon} />

@@ -15,7 +15,6 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Tooltip from '@material-ui/core/Tooltip';
 import { Fade, useTheme } from '@material-ui/core';
-import DocumentContext from './contexts/DocumentContext';
 import NodeTab from './EditorTabs/NodeTab';
 import SettingsTab from './EditorTabs/SettingsTab';
 import { Variant } from '../util/document';
@@ -323,6 +322,7 @@ const Editor: React.FC<EditorProps> = ({
                 <BundleTab
                   key={currentTabIndex}
                   id={tabs[currentTabIndex - (displaySettings ? 1 : 0)].id}
+                  setSelected={setSelected}
                   onIDChange={handleTabIDChange(currentTabIndex - (displaySettings ? 1 : 0))}
                   onDelete={handleCloseTab(currentTabID)}
                 />
