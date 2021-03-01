@@ -168,8 +168,8 @@ const Editor: React.FC<EditorProps> = ({
       const updatedTabs = [...tabs.slice(0, tabIndex), ...tabs.slice(tabIndex + 1, tabs.length)];
       setTabs(updatedTabs);
       if (
-        displaySettings
-        || (currentTabIndex >= tabIndex && currentTabIndex !== 0)
+        currentTabIndex !== 0
+        && currentTabIndex >= tabIndex + (displaySettings ? 1 : 0)
       ) {
         const updatedIndex = currentTabIndex - 1;
         setCurrentTabIndex(updatedIndex);
