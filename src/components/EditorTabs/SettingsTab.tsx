@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -33,6 +33,9 @@ const SettingsTab: React.FC<SettingsTabProps> = () => {
   const classes = useStyles();
   const { visualisationSettings, setVisualisationSettings } = useContext(VisualisationContext);
 
+  const [namespaceOpen, setNamespaceOpen] = useState<boolean>(false);
+  const [visualisationOpen, setVisualisationOpen] = useState<boolean>(false);
+
   const handleColorChange = (variant: NodeVariant) => (color: string) => {
     setVisualisationSettings((prev) => ({
       ...prev,
@@ -58,8 +61,18 @@ const SettingsTab: React.FC<SettingsTabProps> = () => {
 
   return (
     <>
-      <Section name="Namespace"><Namespace /></Section>
-      <Section name="Visualisation">
+      <Section
+        open={namespaceOpen}
+        toggleOpen={() => setNamespaceOpen(!namespaceOpen)}
+        name="Namespace"
+      >
+        <Namespace />
+      </Section>
+      <Section
+        open={visualisationOpen}
+        toggleOpen={() => setVisualisationOpen(!visualisationOpen)}
+        name="Visualisation"
+      >
         <FormControl className={classes.formControl}>
           <InputLabel id="provenance-view-select-label">Provenance View</InputLabel>
           <Select
