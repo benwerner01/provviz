@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
@@ -29,20 +29,22 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type SectionProps = {
-  initiallyOpen?: boolean;
   name: string;
+  open: boolean;
+  toggleOpen: () => void;
 }
 
-const Section: React.FC<SectionProps> = ({ initiallyOpen, name, children }) => {
+const Section: React.FC<SectionProps> = ({
+  name, open, toggleOpen, children,
+}) => {
   const classes = useStyles();
-  const [open, setOpen] = useState<boolean>(initiallyOpen || false);
 
   return (
     <>
       <Box display="flex" alignItems="center">
         <Button
           className={classes.headingButton}
-          onClick={() => setOpen(!open)}
+          onClick={toggleOpen}
         >
           <ArrowDropDownIcon className={classes.headingIcon} style={{ transform: `rotate(${open ? 0 : -90}deg)` }} />
           <Typography className={classes.headingTypography} variant="h5">{name}</Typography>

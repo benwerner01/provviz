@@ -39,13 +39,15 @@ const useStyles = makeStyles((theme) => ({
 
 type BundleTabProps = {
   id: string;
+  openSections: string[];
+  setOpenSections: (openSections: string[]) => void;
   setSelected: (selected: Selection | undefined) => void;
   onIDChange?: (id: string) => void;
   onDelete?: () => void;
 }
 
 const BundleTab: React.FC<BundleTabProps> = ({
-  id, setSelected, onIDChange, onDelete,
+  id, openSections, setOpenSections, setSelected, onIDChange, onDelete,
 }) => {
   const classes = useStyles();
   const { document, setDocument } = useContext(DocumentContext);
@@ -76,13 +78,13 @@ const BundleTab: React.FC<BundleTabProps> = ({
   const collapsableSections = [
     {
       name: 'Definition',
-      initiallyOpen: false,
+      open: openSections.includes('Definition'),
       content: <EditableIdentifier initialID={id} onChange={onIDChange} />,
     },
     (agents && agents.length > 0)
       ? {
         name: 'Agents',
-        initiallyOpen: false,
+        open: openSections.includes('Agents'),
         content: (
           <Box>
             {agents.map(mapNodeIDToLink('agent'))}
@@ -92,7 +94,7 @@ const BundleTab: React.FC<BundleTabProps> = ({
     (entities && entities.length > 0)
       ? {
         name: 'Entities',
-        initiallyOpen: false,
+        open: openSections.includes('Entities'),
         content: (
           <Box>
             {entities.map(mapNodeIDToLink('entity'))}
@@ -102,7 +104,7 @@ const BundleTab: React.FC<BundleTabProps> = ({
     (activities && activities.length > 0)
       ? {
         name: 'Acvtivities',
-        initiallyOpen: false,
+        open: openSections.includes('Acvtivities'),
         content: (
           <Box>
             {activities.map(mapNodeIDToLink('activity'))}
@@ -120,10 +122,13 @@ const BundleTab: React.FC<BundleTabProps> = ({
         </Typography>
       </Box>
       <Divider />
-      {collapsableSections.map(({ initiallyOpen, name, content }) => (
+      {collapsableSections.map(({ open, name, content }) => (
         <Section
           key={name}
-          initiallyOpen={initiallyOpen}
+          open={open}
+          toggleOpen={() => setOpenSections(open
+            ? openSections.filter((sectionName) => sectionName !== name)
+            : [...openSections, name])}
           name={name}
         >
           {content}

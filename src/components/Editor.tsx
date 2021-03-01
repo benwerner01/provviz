@@ -26,6 +26,7 @@ export const TABS_HEIGHT = 48 + 1;
 type TapType = {
   id: string;
   variant: Variant;
+  openSections: string[];
 }
 
 const defaultTabs: TapType[] = [];
@@ -145,7 +146,7 @@ const Editor: React.FC<EditorProps> = ({
         && id === selected.id));
 
       if (existingTabIndex < 0) {
-        const updatedTabs = [...tabs, selected];
+        const updatedTabs = [...tabs, { ...selected, openSections: [] }];
         setTabs(updatedTabs);
         setCurrentTabIndex(updatedTabs.length - 1 + (displaySettings ? 1 : 0));
       } else {
@@ -190,15 +191,23 @@ const Editor: React.FC<EditorProps> = ({
 
   const handleTabIDChange = (tabIndex: number) => (updatedID: string) => {
     const prevID = tabs[tabIndex].id;
-    const { variant } = tabs[tabIndex];
+    const { variant, openSections } = tabs[tabIndex];
     setTabs([
       ...tabs.slice(0, tabIndex),
-      { id: updatedID, variant },
+      { id: updatedID, variant, openSections },
       ...tabs.slice(tabIndex + 1, tabs.length),
     ]);
     if (selected && selected.variant === variant && selected.id === prevID) {
       setSelected({ variant, id: updatedID });
     }
+  };
+
+  const handleTabOpenSectionsChange = (tabIndex: number) => (openSections: string[]) => {
+    setTabs([
+      ...tabs.slice(0, tabIndex),
+      { ...tabs[tabIndex], openSections },
+      ...tabs.slice(tabIndex + 1, tabs.length),
+    ]);
   };
 
   const adjustedTabIndex = currentTabIndex - (displaySettings ? 1 : 0);
@@ -325,6 +334,10 @@ const Editor: React.FC<EditorProps> = ({
                   setSelected={setSelected}
                   onIDChange={handleTabIDChange(currentTabIndex - (displaySettings ? 1 : 0))}
                   onDelete={handleCloseTab(currentTabID)}
+                  openSections={tabs[currentTabIndex - (displaySettings ? 1 : 0)].openSections}
+                  setOpenSections={
+                    handleTabOpenSectionsChange(currentTabIndex - (displaySettings ? 1 : 0))
+                  }
                 />
               ) : (
                 <NodeTab
@@ -333,6 +346,10 @@ const Editor: React.FC<EditorProps> = ({
                   id={tabs[currentTabIndex - (displaySettings ? 1 : 0)].id}
                   onIDChange={handleTabIDChange(currentTabIndex - (displaySettings ? 1 : 0))}
                   onDelete={handleCloseTab(currentTabID)}
+                  openSections={tabs[currentTabIndex - (displaySettings ? 1 : 0)].openSections}
+                  setOpenSections={
+                    handleTabOpenSectionsChange(currentTabIndex - (displaySettings ? 1 : 0))
+                  }
                 />
               )))}
         </Box>

@@ -43,12 +43,14 @@ const useStyles = makeStyles((theme) => ({
 type NodeTabProps = {
   variant: NodeVariant;
   id: string;
+  openSections: string[];
+  setOpenSections: (openSections: string[]) => void;
   onIDChange?: (id: string) => void;
   onDelete?: () => void;
 }
 
 const NodeTab: React.FC<NodeTabProps> = ({
-  variant, id, onIDChange, onDelete,
+  variant, id, onIDChange, onDelete, openSections, setOpenSections,
 }) => {
   const classes = useStyles();
   const { document, setDocument } = useContext(DocumentContext);
@@ -97,7 +99,7 @@ const NodeTab: React.FC<NodeTabProps> = ({
   const collapsableSections = [
     {
       name: 'Definition',
-      initiallyOpen: false,
+      open: openSections.includes('Definition'),
       content: (
         <>
           <EditableIdentifier initialID={id} onChange={onIDChange} />
@@ -116,11 +118,12 @@ const NodeTab: React.FC<NodeTabProps> = ({
     },
     {
       name: 'Attributes',
-      initiallyOpen: false,
+      open: openSections.includes('Attributes'),
       content: <CustomAttributes nodeVariant={variant} nodeID={id} />,
     },
     {
       name: 'Relationships',
+      open: openSections.includes('Relationships'),
       content: RELATIONS.filter(({ domain }) => domain === variant).map(({ name, range }) => (
         <NodeAutocomplete
           key={name}
@@ -134,6 +137,7 @@ const NodeTab: React.FC<NodeTabProps> = ({
     },
     {
       name: 'Visualisation',
+      open: openSections.includes('Visualisation'),
       content: PROVVIZ_ATTRIBUTE_DEFINITIONS
         .filter(({ domain }) => domain.includes(variant))
         .map((attribute) => (
@@ -161,8 +165,17 @@ const NodeTab: React.FC<NodeTabProps> = ({
         </Typography>
       </Box>
       <Divider />
-      {collapsableSections.map(({ initiallyOpen, name, content }) => (
-        <Section key={name} initiallyOpen={initiallyOpen} name={name}>{content}</Section>
+      {collapsableSections.map(({ open, name, content }) => (
+        <Section
+          key={name}
+          open={open}
+          name={name}
+          toggleOpen={() => setOpenSections(open
+            ? openSections.filter((sectionName) => sectionName !== name)
+            : [...openSections, name])}
+        >
+          {content}
+        </Section>
       ))}
       <Box display="flex" flexWrap="wrap" alignItems="center" mt={2}>
         <Button onClick={handleDelete} className={classes.deleteButton} variant="contained">Delete</Button>
