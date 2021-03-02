@@ -1,14 +1,18 @@
-import React, { SetStateAction, useEffect, useState } from 'react';
+import React, {
+  ReactNode, SetStateAction, useEffect, useState,
+} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import download from 'downloadjs';
-import { PROVJSONDocument, tbdIsPROVJSONBundle, Variant } from '../util/document';
+import { Typography } from '@material-ui/core';
+import { PROVJSONDocument, validateDocument, Variant } from '../util/document';
 import DocumentContext from './contexts/DocumentContext';
 import Editor, { TABS_HEIGHT } from './Editor';
 import D3Graphviz from './D3Graphviz';
 import MenuBar, { MENU_BAR_HEIGHT, View } from './MenuBar';
 import TreeView from './TreeView';
 import VisualisationContext, { VisualisationSettings, defaultSettings } from './contexts/VisualisationContext';
+import { palette } from '../util/theme';
 
 export const MIN_WIDTH = 350;
 
@@ -39,12 +43,14 @@ const useStyles = makeStyles((theme) => ({
     transition: theme.transitions.create('max-height'),
     overflow: 'hidden',
   },
+  validationErrorHeading: {
+    color: palette.danger.main,
+  },
 }));
 
 const Visualiser: React.FC<VisualiserProps> = ({
   wasmFolderURL, width, height, documentName, document, onChange, initialSettings, onSettingsChange,
 }) => {
-  if (!tbdIsPROVJSONBundle(document)) throw new Error('Could not parse PROV JSON Document');
   const classes = useStyles();
   const [svgElement, setSVGElement] = useState<SVGSVGElement | undefined>();
 
@@ -59,6 +65,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
   const [displayEditorContent, setDisplayEditorContent] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<View>('Graph');
   const [editorContentHeight, setEditorContentHeight] = useState<number>(400);
+  const [validationErrors, setValidationErrors] = useState<ReactNode[]>(validateDocument(document));
 
   const [selected, setSelected] = useState<Selection | undefined>();
   const [displaySettings, setDisplaySettings] = useState<boolean>(false);
@@ -84,6 +91,10 @@ const Visualiser: React.FC<VisualiserProps> = ({
   }, [documentName]);
 
   const contextDocument = controllingState ? localDocument : document;
+
+  useEffect(() => {
+    setValidationErrors(validateDocument(contextDocument));
+  }, [contextDocument]);
 
   const contextSetDocument = controllingState
     ? setLocalDocument
@@ -148,44 +159,64 @@ const Visualiser: React.FC<VisualiserProps> = ({
             searchString={searchString}
             setSearchString={setSearchString}
           />
-          {currentView === 'Graph' && (
-          <D3Graphviz
-            selected={selected}
-            setSelected={handleSelectedChange}
-            width={width}
-            wasmFolderURL={wasmFolderURL}
-            setSVGElement={setSVGElement}
-            height={(
-              height
-              - MENU_BAR_HEIGHT
-              - (displayEditor ? TABS_HEIGHT : 0))}
-          />
-          )}
-          {currentView === 'Tree' && (
-            <TreeView
-              width={width}
-              height={(
-                height
-                - MENU_BAR_HEIGHT
-                - (displayEditor ? TABS_HEIGHT : 0)
-                - (displayEditorContent ? editorContentHeight : 0))}
-              selected={selected}
-              setSelected={handleSelectedChange}
-              searchString={searchString}
-            />
-          )}
-          <Editor
-            displaySettings={displaySettings}
-            setDisplaySettings={setDisplaySettings}
-            contentHeight={editorContentHeight}
-            setContentHeight={setEditorContentHeight}
-            selected={selected}
-            setSelected={handleSelectedChange}
-            display={displayEditor}
-            setDisplay={setDisplayEditor}
-            open={displayEditorContent}
-            setOpen={setDisplayEditorContent}
-          />
+          {validationErrors.length > 0
+            ? (
+              <Box m={1}>
+                <Typography className={classes.validationErrorHeading} variant="h5">
+                  <strong>Error Validating PROV Document</strong>
+                </Typography>
+                <Typography>
+                  <ul>
+                    {validationErrors.map((error, i) => (
+                      // eslint-disable-next-line react/no-array-index-key
+                      <li key={i}>{error}</li>
+                    ))}
+                  </ul>
+                </Typography>
+              </Box>
+            )
+            : (
+              <>
+                {currentView === 'Graph' && (
+                <D3Graphviz
+                  selected={selected}
+                  setSelected={handleSelectedChange}
+                  width={width}
+                  wasmFolderURL={wasmFolderURL}
+                  setSVGElement={setSVGElement}
+                  height={(
+                    height
+                    - MENU_BAR_HEIGHT
+                    - (displayEditor ? TABS_HEIGHT : 0))}
+                />
+                )}
+                {currentView === 'Tree' && (
+                <TreeView
+                  width={width}
+                  height={(
+                    height
+                    - MENU_BAR_HEIGHT
+                    - (displayEditor ? TABS_HEIGHT : 0)
+                    - (displayEditorContent ? editorContentHeight : 0))}
+                  selected={selected}
+                  setSelected={handleSelectedChange}
+                  searchString={searchString}
+                />
+                )}
+                <Editor
+                  displaySettings={displaySettings}
+                  setDisplaySettings={setDisplaySettings}
+                  contentHeight={editorContentHeight}
+                  setContentHeight={setEditorContentHeight}
+                  selected={selected}
+                  setSelected={handleSelectedChange}
+                  display={displayEditor}
+                  setDisplay={setDisplayEditor}
+                  open={displayEditorContent}
+                  setOpen={setDisplayEditorContent}
+                />
+              </>
+            )}
         </Box>
       </VisualisationContext.Provider>
     </DocumentContext.Provider>

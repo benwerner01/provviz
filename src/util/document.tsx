@@ -1,3 +1,7 @@
+import React, { ReactNode } from 'react';
+import Typography from '@material-ui/core/Typography';
+import { validatePROVJSONSchema } from '../lib/ajv';
+
 export type RelationName = 'wasGeneratedBy'
   | 'used'
   | 'wasInformedBy'
@@ -264,4 +268,10 @@ export interface PROVJSONDocument extends PROVJSONBundle {
   bundle?: { [bundleID: string]: PROVJSONBundle; }
 }
 
-export const tbdIsPROVJSONBundle = (tbd: object): tbd is PROVJSONBundle => true;
+export const validateDocument = (document: object): ReactNode[] => {
+  const schemaValidation = validatePROVJSONSchema(document);
+  if (schemaValidation === true) {
+    return [];
+  }
+  return schemaValidation.map(({ message }) => message);
+};
