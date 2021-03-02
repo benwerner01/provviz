@@ -45,7 +45,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.12.17",
-    "@babel/preset-env": "^7.12.17",
+    "@babel/preset-env": "^7.13.9",
+    "@babel/preset-react": "^7.12.13",
     "@babel/preset-typescript": "^7.12.17",
     "@rollup/plugin-commonjs": "^16.0.0",
     "@rollup/plugin-node-resolve": "^10.0.0",
@@ -77,6 +78,7 @@
     "postcss": "^8.2.4",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
+    "react-test-renderer": "^17.0.1",
     "rollup": "^2.33.2",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
