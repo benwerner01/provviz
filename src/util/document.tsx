@@ -1,5 +1,6 @@
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { validatePROVJSONSchema } from '../lib/ajv';
+import queries from './queries';
 
 export type RelationName = 'wasGeneratedBy'
   | 'used'
@@ -267,10 +268,91 @@ export interface PROVJSONDocument extends PROVJSONBundle {
   bundle?: { [bundleID: string]: PROVJSONBundle; }
 }
 
-export const validateDocument = (document: object): ReactNode[] => {
+export const validateDocument = (document: PROVJSONDocument): ReactNode[] => {
   const schemaValidation = validatePROVJSONSchema(document);
   if (schemaValidation === true) {
-    return [];
+    return [
+      ...(['agent', 'entity', 'activity'] as NodeVariant[]).map((variant) => {
+        const nodes = queries.node.getAll(variant)(document);
+        return RELATIONS.map(({
+          name, domain, domainKey, range, rangeKey,
+        }) => {
+          if (
+            domain === variant
+            || range === variant
+          ) {
+            return [
+              ...Object.entries(document[name] || {})
+                .map(([id, value]) => [
+                  (domain === variant && !nodes.includes(value[domainKey]))
+                    ? (
+                      <>
+                        <i>{name}</i>
+                        {' relation with ID '}
+                        <strong>{`"${id}"`}</strong>
+                        {' references undefined '}
+                        <i>{variant}</i>
+                        {' '}
+                        <strong>{`"${value[domainKey]}"`}</strong>
+                      </>
+                    )
+                    : [],
+                  (range === variant && !nodes.includes(value[rangeKey]))
+                    ? (
+                      <>
+                        <i>{name}</i>
+                        {' relation with ID '}
+                        <strong>{`"${id}"`}</strong>
+                        {' references undefined '}
+                        <i>{variant}</i>
+                        {' '}
+                        <strong>{`"${value[rangeKey]}"`}</strong>
+                      </>
+                    )
+                    : [],
+                ].flat()).flat(),
+              ...Object.entries(document.bundle || {})
+                .map(([bundleID, bundle]) => Object.entries(bundle[name] || {})
+                  .map(([id, value]) => [
+                    (domain === variant && !nodes.includes(value[domainKey]))
+                      ? (
+                        <>
+                          {'Bundle '}
+                          <strong>{`"${bundleID}"`}</strong>
+                          {': '}
+                          <i>{name}</i>
+                          {' relation with ID '}
+                          <strong>{`${id}`}</strong>
+                          {' references undefined '}
+                          <i>{variant}</i>
+                          {' '}
+                          <strong>{`"${value[domainKey]}"`}</strong>
+                        </>
+                      )
+                      : [],
+                    (range === variant && !nodes.includes(value[rangeKey]))
+                      ? (
+                        <>
+                          {'Bundle '}
+                          <strong>{`"${bundleID}"`}</strong>
+                          {': '}
+                          <i>{name}</i>
+                          {' relation with ID '}
+                          <strong>{`"${id}"`}</strong>
+                          {' references undefined '}
+                          <i>{variant}</i>
+                          {' '}
+                          <strong>{`"${value[rangeKey]}"`}</strong>
+                        </>
+                      )
+                      : [],
+                  ].flat())).flat(),
+            ].flat();
+          }
+          return [];
+        }).flat();
+      }),
+    ].flat();
   }
   return schemaValidation.map(({ message }) => message);
 };

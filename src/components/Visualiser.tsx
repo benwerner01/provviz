@@ -165,14 +165,12 @@ const Visualiser: React.FC<VisualiserProps> = ({
                 <Typography className={classes.validationErrorHeading} variant="h5">
                   <strong>Error Validating PROV Document</strong>
                 </Typography>
-                <Typography>
-                  <ul>
-                    {validationErrors.map((error, i) => (
-                      // eslint-disable-next-line react/no-array-index-key
-                      <li key={i}>{error}</li>
-                    ))}
-                  </ul>
-                </Typography>
+                <ul>
+                  {validationErrors.map((error, i) => (
+                    // eslint-disable-next-line react/no-array-index-key
+                    <li key={i}><Typography>{error}</Typography></li>
+                  ))}
+                </ul>
               </Box>
             )
             : (
