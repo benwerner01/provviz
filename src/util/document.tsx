@@ -1,5 +1,4 @@
-import React, { ReactNode } from 'react';
-import Typography from '@material-ui/core/Typography';
+import { ReactNode } from 'react';
 import { validatePROVJSONSchema } from '../lib/ajv';
 
 export type RelationName = 'wasGeneratedBy'
