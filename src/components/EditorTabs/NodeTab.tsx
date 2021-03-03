@@ -1,10 +1,14 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import WarningIcon from '@material-ui/icons/Warning';
+import Collapse from '@material-ui/core/Collapse';
+import IconButton from '@material-ui/core/IconButton';
+import InfoIcon from '@material-ui/icons/Info';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import DocumentContext from '../contexts/DocumentContext';
 import EditableIdentifier from '../EditableIdentifier';
 import NodeAutocomplete from '../Autocomplete/NodeAutocomplete';
@@ -17,11 +21,75 @@ import {
   RELATIONS,
   PROVVIZ_ATTRIBUTE_DEFINITIONS,
   NodeVariant,
+  Relation,
 } from '../../util/document';
 import Section from './Section';
 import { palette } from '../../util/theme';
 import CustomAttributes from '../CustomAttributes';
 import DefinedAttribute from '../DefinedAttribute';
+
+const useEditableRelationStyles = makeStyles((theme) => ({
+  documenationWrapper: {
+    borderRadius: 8,
+    backgroundColor: theme.palette.primary.light,
+    color: theme.palette.common.white,
+    '& svg': {
+      color: theme.palette.common.white,
+    },
+  },
+  openDocumentationIconButton: {
+    padding: 0,
+  },
+}));
+
+type EditableRelationProps = {
+  relation: Relation;
+  value: string[];
+  domainID: string;
+  onChange: (updatedDocument: PROVJSONBundle, value: string[]) => void
+}
+
+const EditableRelation: React.FC<EditableRelationProps> = ({
+  domainID, relation, value, onChange,
+}) => {
+  const classes = useEditableRelationStyles();
+  const [displayDocumentation, setDisplayDocumentation] = useState<boolean>(false);
+
+  const {
+    documentation, range, name, url,
+  } = relation;
+
+  return (
+    <>
+      <Box mt={1} mb={1} display="flex" alignItems="center">
+        <NodeAutocomplete
+          variant={range}
+          label={name}
+          value={value}
+          exclude={[domainID]}
+          onChange={onChange}
+        />
+        <IconButton onClick={() => setDisplayDocumentation(!displayDocumentation)}>
+          <InfoIcon />
+        </IconButton>
+      </Box>
+      <Collapse in={displayDocumentation}>
+        <Box display="flex" alignItems="flex-start" justifyContent="space-between" p={1} className={classes.documenationWrapper}>
+          <Typography>{documentation}</Typography>
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            <IconButton
+              disableRipple
+              disableFocusRipple
+              className={classes.openDocumentationIconButton}
+            >
+              <OpenInNewIcon />
+            </IconButton>
+          </a>
+        </Box>
+      </Collapse>
+    </>
+  );
+};
 
 const useStyles = makeStyles((theme) => ({
   deleteButton: {
@@ -124,16 +192,17 @@ const NodeTab: React.FC<NodeTabProps> = ({
     {
       name: 'Relationships',
       open: openSections.includes('Relationships'),
-      content: RELATIONS.filter(({ domain }) => domain === variant).map(({ name, range }) => (
-        <NodeAutocomplete
-          key={name}
-          variant={range}
-          label={name}
-          value={relationRangeIncludes[name]}
-          exclude={[id]}
-          onChange={handleRelationRangeChange(name)}
-        />
-      )),
+      content: RELATIONS
+        .filter(({ domain }) => domain === variant)
+        .map((relation) => (
+          <EditableRelation
+            key={relation.name}
+            relation={relation}
+            value={relationRangeIncludes[relation.name]}
+            domainID={id}
+            onChange={handleRelationRangeChange(relation.name)}
+          />
+        )),
     },
     {
       name: 'Visualisation',

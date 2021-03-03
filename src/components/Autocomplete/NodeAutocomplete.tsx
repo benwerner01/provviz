@@ -24,8 +24,8 @@ const filter = createFilterOptions<string | NewNode>();
 
 const useAutocompleteStyles = makeStyles((theme) => ({
   root: {
+    flexGrow: 1,
     maxWidth: 500,
-    marginBottom: theme.spacing(2),
   },
   inputRoot: {
     borderRadius: 8,
