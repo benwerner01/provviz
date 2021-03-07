@@ -4,7 +4,13 @@ import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import { NodeVariant, PROVAttributeDefinition } from '../util/document';
+import InputLabel from '@material-ui/core/InputLabel';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import Box from '@material-ui/core/Box';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
+import { NodeVariant, PROVAttributeDefinition, PROVVIZ_SHAPES } from '../util/document';
 import queries from '../util/queries';
 import DocumentContext from './contexts/DocumentContext';
 import mutations from '../util/mutations';
@@ -138,6 +144,81 @@ const BooleanAttribute: React.FC<BooleanAttributeProps> = ({ variant, domainID, 
   );
 };
 
+const useShapeStyles = makeStyles((theme) => ({
+  wrapper: {
+    maxWidth: 300,
+  },
+  formControlRoot: {
+    flexGrow: 1,
+  },
+  clearIconButton: {
+    padding: theme.spacing(0.5),
+  },
+  clearIconButtonWrapper: {
+    transition: theme.transitions.create('max-width'),
+    overflow: 'hidden',
+  },
+}));
+
+type ShapeAttributeProps = {
+  variant: NodeVariant;
+  domainID: string;
+  attribute: PROVAttributeDefinition;
+}
+
+const ShapeAttribute: React.FC<ShapeAttributeProps> = ({ variant, domainID, attribute }) => {
+  const classes = useShapeStyles();
+  const { document, setDocument } = useContext(DocumentContext);
+
+  const getCurrentShape = () => {
+    const currentValue = queries.node.getAttributeValue(variant, domainID, attribute.key)(document);
+
+    return (currentValue && typeof currentValue === 'string')
+      ? currentValue
+      : undefined;
+  };
+
+  const currentShapeValue = getCurrentShape();
+
+  const onChange = (updatedShape: string) => {
+    setDocument(mutations.node.setAttribute(variant, domainID, attribute, updatedShape));
+  };
+
+  const onClear = () => {
+    if (currentShapeValue !== undefined) {
+      setDocument(mutations.node.deleteAttribute(variant, domainID, attribute.key));
+    }
+  };
+
+  return (
+    <Box className={classes.wrapper} display="flex" alignItems="flex-end">
+      <FormControl classes={{ root: classes.formControlRoot }}>
+        <InputLabel>{attribute.name}</InputLabel>
+        <Select
+          value={currentShapeValue || ''}
+          onChange={({ target }) => onChange(target.value as string)}
+        >
+          {PROVVIZ_SHAPES.map((shape) => <MenuItem key={shape} value={shape}>{shape}</MenuItem>)}
+        </Select>
+      </FormControl>
+      <Box
+        style={{
+          maxWidth: currentShapeValue === undefined ? 0 : 300,
+        }}
+        className={classes.clearIconButtonWrapper}
+      >
+        <IconButton
+          className={classes.clearIconButton}
+          onClick={onClear}
+          disabled={currentShapeValue === undefined}
+        >
+          <CloseIcon />
+        </IconButton>
+      </Box>
+    </Box>
+  );
+};
+
 type DefinedAttributeProps = {
   attribute: PROVAttributeDefinition;
   domainID: string;
@@ -154,6 +235,9 @@ const DefinedAttribute: React.FC<DefinedAttributeProps> = ({ attribute, variant,
     )}
     {attribute.range === 'Boolean' && (
       <BooleanAttribute attribute={attribute} variant={variant} domainID={domainID} />
+    )}
+    {attribute.range === 'Shape' && (
+      <ShapeAttribute attribute={attribute} variant={variant} domainID={domainID} />
     )}
   </>
 );

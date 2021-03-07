@@ -1,10 +1,10 @@
 import Color from 'color';
 import { PROVENANVE_VIEW_DEFINITIONS, VisualisationSettings } from '../components/contexts/VisualisationContext';
 import {
-  PROVJSONBundle, PROVJSONDocument, PROVVIZ_ATTRIBUTE_DEFINITIONS, RELATIONS,
+  PROVJSONBundle, PROVJSONDocument, PROVVIZ_ATTRIBUTE_DEFINITIONS, RELATIONS, tbdIsProvVizShape,
 } from './document';
 
-const NODE_SHAPE = {
+const DEFAULT_NODE_SHAPE = {
   agent: 'house',
   activity: 'box',
   entity: 'oval',
@@ -15,7 +15,9 @@ const renderAttributeValue = (value: any) => (typeof value === 'object' ? value.
 const mapNodeToDot = (variant: 'agent' | 'activity' | 'entity', settings: VisualisationSettings) => (
   [id, attributes]: [string, { [attributeKey: string]: any; }],
 ) => {
-  const shape = NODE_SHAPE[variant];
+  const shape = (attributes['provviz:shape'] && tbdIsProvVizShape(attributes['provviz:shape']))
+    ? attributes['provviz:shape']
+    : DEFAULT_NODE_SHAPE[variant];
   const fillcolor = attributes['provviz:color'] || settings.palette[variant];
   const fontcolor = Color(fillcolor).isLight() ? '#000000' : '#FFFFFF';
 
