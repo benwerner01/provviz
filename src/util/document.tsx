@@ -553,5 +553,11 @@ export const validateDocument = (document: PROVJSONDocument): ReactNode[] => {
       }),
     ].flat();
   }
-  return schemaValidation.map(({ message }) => message);
+
+  return schemaValidation.map(({ dataPath, message }) => (
+    <>
+      <strong>{`${dataPath}: `}</strong>
+      {message}
+    </>
+  ));
 };

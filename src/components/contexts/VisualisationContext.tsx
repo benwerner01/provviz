@@ -41,6 +41,7 @@ export type VisualisationSettings = {
     bundle: string;
   }
   hideAllNodeAttributes: boolean;
+  hiddenNamespaces: string[];
   view: ProvenanceView | null;
 }
 
@@ -57,6 +58,7 @@ export const defaultSettings: VisualisationSettings = {
     bundle: defaultTheme.palette.grey['300'],
   },
   hideAllNodeAttributes: false,
+  hiddenNamespaces: [],
   view: null,
 };
 

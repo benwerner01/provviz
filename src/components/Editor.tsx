@@ -1,7 +1,5 @@
 import React, {
-  Dispatch,
-  SetStateAction,
-  useContext, useEffect, useRef, useState,
+  Dispatch, SetStateAction, useEffect, useRef, useState,
 } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';

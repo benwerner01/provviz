@@ -10,11 +10,14 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import debounce from 'lodash.debounce';
 import { PROVJSONBundle } from '../util/document';
 import mutations from '../util/mutations';
 import DocumentContext from './contexts/DocumentContext';
 import { palette } from '../util/theme';
+import VisualisationContext from './contexts/VisualisationContext';
 
 const PREFIX_INPUT_WIDTH = 150;
 const PREFIX_VALUE_WIDTH = 300;
@@ -48,16 +51,18 @@ const useEditableNamespaceStyles = makeStyles((theme) => ({
     '& svg': {
       transition: theme.transitions.create('opacity'),
       opacity: 0,
-      color: palette.danger.main,
     },
-    '&:focus svg': {
-      opacity: 1,
+  },
+  deleteIconButton: {
+    '& svg': {
+      color: palette.danger.main,
     },
   },
 }));
 
 type EditableNamespaceProps = {
   initialNamespace: Namespace;
+  isHidden: boolean;
   updatePrefix: (name: string) => void;
   updateValue: (value: string) => void;
   isUniquePrefix: (name: string) => boolean;
@@ -66,11 +71,13 @@ type EditableNamespaceProps = {
 
 const EditableNamespace: React.FC<EditableNamespaceProps> = ({
   initialNamespace,
+  isHidden,
   updatePrefix,
   updateValue,
   isUniquePrefix,
   onDelete,
 }) => {
+  const { setVisualisationSettings } = useContext(VisualisationContext);
   const classes = useEditableNamespaceStyles();
 
   const [prevPrefix, setPrevPrefix] = useState<string>(initialNamespace.prefix);
@@ -113,6 +120,13 @@ const EditableNamespace: React.FC<EditableNamespaceProps> = ({
     if (!valueIsValid) setValue(prevValue);
   };
 
+  const toggleHidden = () => setVisualisationSettings((prev) => ({
+    ...prev,
+    hiddenNamespaces: prev.hiddenNamespaces.includes(prevPrefix)
+      ? prev.hiddenNamespaces.filter((p) => p !== prevPrefix)
+      : [...prev.hiddenNamespaces, prevPrefix],
+  }));
+
   return (
     <Box className={classes.wrapper} display="flex" alignItems="flex-start">
       <Box>
@@ -146,7 +160,14 @@ const EditableNamespace: React.FC<EditableNamespaceProps> = ({
           )}
         </Collapse>
       </Box>
-      <IconButton onClick={onDelete} className={classes.iconButton}><DeleteIcon /></IconButton>
+      <IconButton onClick={toggleHidden} className={classes.iconButton}>
+        {isHidden
+          ? <VisibilityIcon style={{ opacity: 1 }} />
+          : <VisibilityOffIcon />}
+      </IconButton>
+      <IconButton onClick={onDelete} className={[classes.iconButton, classes.deleteIconButton].join(' ')}>
+        <DeleteIcon />
+      </IconButton>
     </Box>
   );
 };
@@ -278,6 +299,7 @@ const namespaceHasChanged = (namespaces: Namespace[], document: PROVJSONBundle):
 );
 
 const NamespaceComponent: React.FC<NamespaceProps> = () => {
+  const { visualisationSettings, setVisualisationSettings } = useContext(VisualisationContext);
   const { document, setDocument } = useContext(DocumentContext);
 
   const [namespaces, setNamespaces] = useState<Namespace[]>(mapDocumentToNamespaces(document));
@@ -302,7 +324,14 @@ const NamespaceComponent: React.FC<NamespaceProps> = () => {
     ]);
 
     setDocument(mutations.namespace.updatePrefix(prevPrefix, prefix));
-  }, 200), [namespaces, setDocument]);
+
+    if (visualisationSettings.hiddenNamespaces.includes(prevPrefix)) {
+      setVisualisationSettings((prev) => ({
+        ...prev,
+        hiddenNamespaces: prev.hiddenNamespaces.map((p) => (p === prevPrefix ? prefix : p)),
+      }));
+    }
+  }, 200), [visualisationSettings, namespaces, setDocument]);
 
   const debouncedUpdateValue = useCallback((index: number) => debounce((value: string) => {
     const { key, prefix } = namespaces[index];
@@ -358,6 +387,7 @@ const NamespaceComponent: React.FC<NamespaceProps> = () => {
       {namespaces.map((namespace, index) => (
         <EditableNamespace
           key={namespace.key}
+          isHidden={visualisationSettings.hiddenNamespaces.includes(namespace.prefix)}
           initialNamespace={namespace}
           onDelete={handleDelete(index)}
           updatePrefix={debouncedUpdatePrefix(index)}

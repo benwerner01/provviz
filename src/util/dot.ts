@@ -75,14 +75,16 @@ const mapBundleToDots = (
     ))).flat(),
 ].join('\n');
 
-const getAllHiddenNodes = ({
+const getAllHiddenNodes = (settings: VisualisationSettings) => ({
   agent, activity, entity, bundle,
 }: PROVJSONDocument): string[] => [
   ...Object.entries({ ...agent, ...activity, ...entity })
-    .filter(([_, attributes]) => attributes['provviz:hide'] === true)
+    .filter(([id, attributes]) => (
+      attributes['provviz:hide'] === true
+      || settings.hiddenNamespaces.findIndex((prefix) => id.split(':')[0] === prefix) >= 0))
     .map(([id]) => id),
   ...Object.values(bundle || {})
-    .map(getAllHiddenNodes)
+    .map(getAllHiddenNodes(settings))
     .flat(),
 ];
 
@@ -90,7 +92,7 @@ export const mapDocumentToDots = (
   document: PROVJSONDocument,
   settings: VisualisationSettings,
 ): string => {
-  const hiddenNodes = getAllHiddenNodes(document);
+  const hiddenNodes = getAllHiddenNodes(settings)(document);
   return [
     'digraph  {',
     'rankdir="BT";',
