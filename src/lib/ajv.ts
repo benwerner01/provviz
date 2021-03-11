@@ -13,7 +13,25 @@ const schema = {
   type: 'object',
   additionalProperties: false,
   properties: {
-    prefix: { type: 'object', patternProperties: { '^[a-zA-Z0-9_\\-]+$': { type: 'string', format: 'uri' } } }, entity: { type: 'object', additionalProperties: { $ref: '#/definitions/entity' } }, activity: { type: 'object', additionalProperties: { $ref: '#/definitions/activity' } }, agent: { type: 'object', additionalProperties: { $ref: '#/definitions/agent' } }, wasGeneratedBy: { type: 'object', additionalProperties: { $ref: '#/definitions/generation' } }, used: { type: 'object', additionalProperties: { $ref: '#/definitions/usage' } }, wasInformedBy: { type: 'object', additionalProperties: { $ref: '#/definitions/communication' } }, wasStartedBy: { type: 'object', additionalProperties: { $ref: '#/definitions/start' } }, wasEndedby: { type: 'object', additionalProperties: { $ref: '#/definitions/end' } }, wasInvalidatedBy: { type: 'object', additionalProperties: { $ref: '#/definitions/invalidation' } }, wasDerivedFrom: { type: 'object', additionalProperties: { $ref: '#/definitions/derivation' } }, wasAttributedTo: { type: 'object', additionalProperties: { $ref: '#/definitions/attribution' } }, wasAssociatedWith: { type: 'object', additionalProperties: { $ref: '#/definitions/association' } }, actedOnBehalfOf: { type: 'object', additionalProperties: { $ref: '#/definitions/delegation' } }, wasInfluencedBy: { type: 'object', additionalProperties: { $ref: '#/definitions/influence' } }, specializationOf: { type: 'object', additionalProperties: { $ref: '#/definitions/specialization' } }, alternateOf: { type: 'object', additionalProperties: { $ref: '#/definitions/alternate' } }, hadMember: { type: 'object', additionalProperties: { $ref: '#/definitions/membership' } }, bundle: { type: 'object', additionalProperties: { $ref: '#/definitions/bundle' } },
+    prefix: { type: 'object', patternProperties: { '^[a-zA-Z0-9_\\-]+$': { type: 'string', format: 'uri' } } },
+    entity: { type: 'object', additionalProperties: { $ref: '#/definitions/entity' } },
+    activity: { type: 'object', additionalProperties: { $ref: '#/definitions/activity' } },
+    agent: { type: 'object', additionalProperties: { $ref: '#/definitions/agent' } },
+    wasGeneratedBy: { type: 'object', additionalProperties: { $ref: '#/definitions/generation' } },
+    used: { type: 'object', additionalProperties: { $ref: '#/definitions/usage' } },
+    wasInformedBy: { type: 'object', additionalProperties: { $ref: '#/definitions/communication' } },
+    wasStartedBy: { type: 'object', additionalProperties: { $ref: '#/definitions/start' } },
+    wasEndedby: { type: 'object', additionalProperties: { $ref: '#/definitions/end' } },
+    wasInvalidatedBy: { type: 'object', additionalProperties: { $ref: '#/definitions/invalidation' } },
+    wasDerivedFrom: { type: 'object', additionalProperties: { $ref: '#/definitions/derivation' } },
+    wasAttributedTo: { type: 'object', additionalProperties: { $ref: '#/definitions/attribution' } },
+    wasAssociatedWith: { type: 'object', additionalProperties: { $ref: '#/definitions/association' } },
+    actedOnBehalfOf: { type: 'object', additionalProperties: { $ref: '#/definitions/delegation' } },
+    wasInfluencedBy: { type: 'object', additionalProperties: { $ref: '#/definitions/influence' } },
+    specializationOf: { type: 'object', additionalProperties: { $ref: '#/definitions/specialization' } },
+    alternateOf: { type: 'object', additionalProperties: { $ref: '#/definitions/alternate' } },
+    hadMember: { type: 'object', additionalProperties: { $ref: '#/definitions/membership' } },
+    bundle: { type: 'object', additionalProperties: { $ref: '#/definitions/bundle' } },
   },
   definitions: {
     typedLiteral: {
@@ -36,50 +54,54 @@ const schema = {
     generation: {
       type: 'object',
       title: 'generation/usage',
-      properties: { 'prov:entity': { type: 'string', format: 'uri' }, 'prov:activity': { type: 'string', format: 'uri' }, 'prov:time': { type: 'string', format: 'date-time' } },
+      properties: {
+        'prov:entity': { type: 'string' },
+        'prov:activity': { type: 'string' },
+        'prov:time': { type: 'string', format: 'date-time' },
+      },
       required: ['prov:entity'],
       additionalProperties: { $ref: '#/definitions/attributeValues' },
     },
     usage: { $ref: '#/definitions/generation' },
     communication: {
-      type: 'object', title: 'communication', properties: { 'prov:informant': { type: 'string', format: 'uri' }, 'prov:informed': { type: 'string', format: 'uri' } }, required: ['prov:informant', 'prov:informed'], additionalProperties: { $ref: '#/definitions/attributeValues' },
+      type: 'object', title: 'communication', properties: { 'prov:informant': { type: 'string' }, 'prov:informed': { type: 'string' } }, required: ['prov:informant', 'prov:informed'], additionalProperties: { $ref: '#/definitions/attributeValues' },
     },
     start: {
-      type: 'object', title: 'start/end', properties: { 'prov:activity': { type: 'string', format: 'uri' }, 'prov:time': { type: 'string', format: 'date-time' }, 'prov:trigger': { type: 'string', format: 'uri' } }, required: ['prov:activity'], additionalProperties: { $ref: '#/definitions/attributeValues' },
+      type: 'object', title: 'start/end', properties: { 'prov:activity': { type: 'string' }, 'prov:time': { type: 'string', format: 'date-time' }, 'prov:trigger': { type: 'string' } }, required: ['prov:activity'], additionalProperties: { $ref: '#/definitions/attributeValues' },
     },
     end: { $ref: '#/definitions/start' },
     invalidation: {
-      type: 'object', title: 'invalidation', properties: { 'prov:entity': { type: 'string', format: 'uri' }, 'prov:time': { type: 'string', format: 'date-time' }, 'prov:activity': { type: 'string', format: 'uri' } }, required: ['prov:entity'], additionalProperties: { $ref: '#/definitions/attributeValues' },
+      type: 'object', title: 'invalidation', properties: { 'prov:entity': { type: 'string' }, 'prov:time': { type: 'string', format: 'date-time' }, 'prov:activity': { type: 'string' } }, required: ['prov:entity'], additionalProperties: { $ref: '#/definitions/attributeValues' },
     },
     derivation: {
       type: 'object',
       title: 'derivation',
       properties: {
-        'prov:generatedEntity': { type: 'string', format: 'uri' }, 'prov:usedEntity': { type: 'string', format: 'uri' }, 'prov:activity': { type: 'string', format: 'uri' }, 'prov:generation': { type: 'string', format: 'uri' }, 'prov:usage': { type: 'string', format: 'uri' },
+        'prov:generatedEntity': { type: 'string' }, 'prov:usedEntity': { type: 'string' }, 'prov:activity': { type: 'string' }, 'prov:generation': { type: 'string' }, 'prov:usage': { type: 'string' },
       },
       required: ['prov:generatedEntity', 'prov:usedEntity'],
       additionalProperties: { $ref: '#/definitions/attributeValues' },
     },
     attribution: {
-      type: 'object', title: 'attribution', properties: { 'prov:entity': { type: 'string', format: 'uri' }, 'prov:agent': { type: 'string', format: 'uri' } }, required: ['prov:entity', 'prov:agent'], additionalProperties: { $ref: '#/definitions/attributeValues' },
+      type: 'object', title: 'attribution', properties: { 'prov:entity': { type: 'string' }, 'prov:agent': { type: 'string' } }, required: ['prov:entity', 'prov:agent'], additionalProperties: { $ref: '#/definitions/attributeValues' },
     },
     association: {
-      type: 'object', title: 'association', properties: { 'prov:activity': { type: 'string', format: 'uri' }, 'prov:agent': { type: 'string', format: 'uri' }, 'prov:plan': { type: 'string', format: 'uri' } }, required: ['prov:activity'], additionalProperties: { $ref: '#/definitions/attributeValues' },
+      type: 'object', title: 'association', properties: { 'prov:activity': { type: 'string' }, 'prov:agent': { type: 'string' }, 'prov:plan': { type: 'string' } }, required: ['prov:activity'], additionalProperties: { $ref: '#/definitions/attributeValues' },
     },
     delegation: {
-      type: 'object', title: 'delegation', properties: { 'prov:delegate': { type: 'string', format: 'uri' }, 'prov:responsible': { type: 'string', format: 'uri' }, 'prov:activity': { type: 'string', format: 'uri' } }, required: ['prov:delegate', 'prov:responsible'], additionalProperties: { $ref: '#/definitions/attributeValues' },
+      type: 'object', title: 'delegation', properties: { 'prov:delegate': { type: 'string' }, 'prov:responsible': { type: 'string' }, 'prov:activity': { type: 'string' } }, required: ['prov:delegate', 'prov:responsible'], additionalProperties: { $ref: '#/definitions/attributeValues' },
     },
     influence: {
-      type: 'object', title: '', properties: { 'prov:influencer': { type: 'string', format: 'uri' }, 'prov:influencee': { type: 'string', format: 'uri' } }, required: ['prov:influencer', 'prov:influencee'], additionalProperties: { $ref: '#/definitions/attributeValues' },
+      type: 'object', title: '', properties: { 'prov:influencer': { type: 'string' }, 'prov:influencee': { type: 'string' } }, required: ['prov:influencer', 'prov:influencee'], additionalProperties: { $ref: '#/definitions/attributeValues' },
     },
     specialization: {
-      type: 'object', title: 'specialization', properties: { 'prov:generalEntity': { type: 'string', format: 'uri' }, 'prov:specificEntity': { type: 'string', format: 'uri' } }, required: ['prov:generalEntity', 'prov:specificEntity'], additionalProperties: { $ref: '#/definitions/attributeValues' },
+      type: 'object', title: 'specialization', properties: { 'prov:generalEntity': { type: 'string' }, 'prov:specificEntity': { type: 'string' } }, required: ['prov:generalEntity', 'prov:specificEntity'], additionalProperties: { $ref: '#/definitions/attributeValues' },
     },
     alternate: {
-      type: 'object', title: 'alternate', properties: { 'prov:alternate1': { type: 'string', format: 'uri' }, 'prov:alternate2': { type: 'string', format: 'uri' } }, required: ['prov:alternate1', 'prov:alternate2'], additionalProperties: { $ref: '#/definitions/attributeValues' },
+      type: 'object', title: 'alternate', properties: { 'prov:alternate1': { type: 'string' }, 'prov:alternate2': { type: 'string' } }, required: ['prov:alternate1', 'prov:alternate2'], additionalProperties: { $ref: '#/definitions/attributeValues' },
     },
     membership: {
-      type: 'object', title: 'membership', properties: { 'prov:collection': { type: 'string', format: 'uri' }, 'prov:entity': { type: 'string', format: 'uri' } }, required: ['prov:collection', 'prov:entity'], additionalProperties: { $ref: '#/definitions/attributeValues' },
+      type: 'object', title: 'membership', properties: { 'prov:collection': { type: 'string' }, 'prov:entity': { type: 'string' } }, required: ['prov:collection', 'prov:entity'], additionalProperties: { $ref: '#/definitions/attributeValues' },
     },
     bundle: {
       type: 'object',
