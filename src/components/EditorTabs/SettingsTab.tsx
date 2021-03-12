@@ -6,6 +6,7 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import Button from '@material-ui/core/Button';
 import Section from './Section';
 import ColorPicker from '../ColorPicker';
 import VisualisationContext, { defaultSettings, ProvenanceView, PROVENANCE_VIEW_NAMES } from '../contexts/VisualisationContext';
@@ -56,6 +57,8 @@ const SettingsTab: React.FC<SettingsTabProps> = () => {
       view: (e.target.value as ProvenanceView) || null,
     }));
   };
+
+  const handleResetVisualisationSettings = () => setVisualisationSettings(defaultSettings);
 
   const { palette, view } = visualisationSettings;
 
@@ -117,6 +120,9 @@ const SettingsTab: React.FC<SettingsTabProps> = () => {
           />
         </FormControl>
       </Section>
+      <Button variant="contained" onClick={handleResetVisualisationSettings}>
+        Reset Visualisation Settings
+      </Button>
     </>
   );
 };
