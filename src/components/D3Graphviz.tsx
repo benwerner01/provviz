@@ -77,13 +77,13 @@ const useStyles = makeStyles((theme) => ({
     '& svg': {
       '& .node': {
         '&.selected': {
-          '& ellipse, polygon': {
+          '& [stroke="black"]': {
             stroke: 'red',
           },
         },
         '&.hover': {
           cursor: 'pointer',
-          '& ellipse, polygon': {
+          '& [stroke="black"]': {
             stroke: 'red',
           },
         },
