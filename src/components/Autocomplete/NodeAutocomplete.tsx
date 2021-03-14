@@ -35,7 +35,7 @@ const useAutocompleteStyles = makeStyles((theme) => ({
 const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
   label, value, variant, exclude, onChange,
 }) => {
-  const { document, setDocument } = useContext(DocumentContext);
+  const { document } = useContext(DocumentContext);
 
   const autocompleteClasses = useAutocompleteStyles();
 

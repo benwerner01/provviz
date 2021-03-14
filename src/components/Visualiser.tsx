@@ -185,7 +185,8 @@ const Visualiser: React.FC<VisualiserProps> = ({
                   height={(
                     height
                     - MENU_BAR_HEIGHT
-                    - (displayEditor ? TABS_HEIGHT : 0))}
+                    - (displayEditor ? TABS_HEIGHT : 0)
+                    - (displayEditorContent ? editorContentHeight : 0))}
                 />
                 )}
                 {currentView === 'Tree' && (
