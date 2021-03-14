@@ -271,6 +271,8 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
   useEffect(() => {
     if (graphvizInstance) {
       graphvizInstance
+        .height(height)
+        .width(width)
         .renderDot(mapDocumentToDots(document, visualisationSettings))
         .on('end', () => {
           const svg = select(graphvizWrapper.current).select<SVGSVGElement>('svg');
