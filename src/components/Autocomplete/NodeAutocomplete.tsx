@@ -16,7 +16,7 @@ type NodeAutocompleteProps = {
 }
 
 type NewNode = {
-  prefix: string;
+  prefix?: string;
   name: string;
 }
 
@@ -42,13 +42,10 @@ const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
   const options = queries.node.getAll(variant)(document)
     .filter((o) => !exclude || !exclude.includes(o));
 
-  const defaultPrefix = queries.prefix.getAll(document)[0];
-
-  const parseNewNodeFromInput = (input: string): NewNode => (
-    input.includes(':')
-      ? { prefix: input.split(':')[0], name: input.split(':').slice(1).join('') }
-      : { prefix: defaultPrefix, name: input }
-  );
+  const parseNewNodeFromInput = (input: string): NewNode => ({
+    prefix: queries.document.parsePrefixFromID(input),
+    name: queries.document.parseNameFromID(input),
+  });
 
   return (
     <Autocomplete<string | NewNode, true, false, true>
@@ -58,12 +55,11 @@ const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
       onChange={(_, updated) => {
         let updatedDocument = { ...document };
         const values = updated.map((item) => {
-          if (typeof item === 'string') {
-            return item;
-          }
+          if (typeof item === 'string') return item;
           const { prefix, name } = item;
-          updatedDocument = mutations.document.create(variant, prefix, name)(updatedDocument);
-          return `${prefix || defaultPrefix}:${name}`;
+          const id = prefix ? `${prefix}:${name}` : name;
+          updatedDocument = mutations.document.create(variant, id)(updatedDocument);
+          return id;
         });
         onChange(updatedDocument, values);
       }}
@@ -82,7 +78,7 @@ const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
       ].flat()}
       getOptionLabel={(option) => (typeof option === 'string'
         ? option
-        : `Create ${variant[0].toUpperCase()}${variant.slice(1)} "${option.prefix}:${option.name}"`)}
+        : `Create ${variant[0].toUpperCase()}${variant.slice(1)} "${option.prefix ? `${option.prefix}:${option.name}` : option.name}"`)}
     />
   );
 };

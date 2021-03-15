@@ -14,6 +14,7 @@ import Section from './Section';
 import { palette } from '../../util/theme';
 import { Selection } from '../Visualiser';
 import { NodeVariant } from '../../util/document';
+import Namespace from '../Namespace';
 
 const useStyles = makeStyles((theme) => ({
   deleteButton: {
@@ -65,7 +66,7 @@ const BundleTab: React.FC<BundleTabProps> = ({
   const nodes = [...(agents || []), ...(entities || []), ...(activities || [])];
 
   const mapNodeIDToLink = (variant: NodeVariant) => (nodeID: string) => (
-    <Typography>
+    <Typography key={nodeID}>
       <Link
         className={classes.link}
         onClick={() => setSelected({ variant, id: nodeID })}
@@ -80,6 +81,11 @@ const BundleTab: React.FC<BundleTabProps> = ({
       name: 'Definition',
       open: openSections.includes('Definition'),
       content: <EditableIdentifier initialID={id} onChange={onIDChange} />,
+    },
+    {
+      name: 'Namespace',
+      open: openSections.includes('Namespace'),
+      content: <Namespace bundleID={id} />,
     },
     (agents && agents.length > 0)
       ? {

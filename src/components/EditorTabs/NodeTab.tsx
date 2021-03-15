@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
@@ -123,6 +123,17 @@ const NodeTab: React.FC<NodeTabProps> = ({
   const classes = useStyles();
   const { document, setDocument } = useContext(DocumentContext);
 
+  const [fullName, setFullName] = useState<string>('');
+  const [
+    bundleID, setBundleID] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (queries.document.hasNode(id)(document)) {
+      setFullName(queries.node.getFullName(id)(document));
+      setBundleID(queries.node.getBundleID(id)(document));
+    }
+  }, [document, id]);
+
   const relationRangeIncludes = RELATIONS
     .filter(({ domain }) => domain === variant)
     .reduce((prev, { name }) => ({
@@ -157,8 +168,6 @@ const NodeTab: React.FC<NodeTabProps> = ({
     setDocument(updatedDocument);
   };
 
-  const fullName = queries.node.getFullName(id)(document);
-
   const handleDelete = () => {
     setDocument(mutations.node.delete(variant, id));
     if (onDelete) onDelete();
@@ -170,7 +179,7 @@ const NodeTab: React.FC<NodeTabProps> = ({
       open: openSections.includes('Definition'),
       content: (
         <>
-          <EditableIdentifier initialID={id} onChange={onIDChange} />
+          <EditableIdentifier initialID={id} onChange={onIDChange} bundleID={bundleID} />
           {ATTRIBUTE_DEFINITIONS
             .filter(({ domain }) => domain.includes(variant))
             .map((attribute) => (

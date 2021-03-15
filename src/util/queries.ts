@@ -10,14 +10,23 @@ import {
 } from './document';
 
 const queries = {
-  prefix: {
-    getAll: (document: PROVJSONDocument): string[] => [
+  namespace: {
+    getAll: (bundleID?: string) => (document: PROVJSONDocument): string[] => [
       ...Object.keys(document.prefix || {}),
-      ...Object.values(document.bundle || {})
-        .map(({ prefix }) => Object.keys(prefix || {})).flat(),
-    ],
+      ...(bundleID ? Object.keys(document.bundle?.[bundleID].prefix || {}) : []),
+    ].flat(),
   },
   document: {
+    parsePrefixFromID: (id: string) => {
+      const idComponents = id.split(':');
+      return idComponents.length > 1 ? idComponents[0] : undefined;
+    },
+    parseNameFromID: (id: string) => (id.split(':').length > 1 ? id.substring(id.indexOf(':') + 1) : id),
+    isEmpty: (document: PROVJSONDocument): boolean => (
+      queries.bundle.isEmpty(document)
+      && Object.values(document.bundle || {})
+        .find((bundle) => !queries.bundle.isEmpty(bundle)) === undefined
+    ),
     getNodeValue: (identifier: string) => (document: PROVJSONDocument) => {
       const localNodeValue = queries.bundle.getLocalNodeValue(identifier)(document);
 
@@ -27,6 +36,29 @@ const queries = {
       for (const nestedBundle of Object.values(document.bundle || {})) {
         const value = queries.bundle.getLocalNodeValue(identifier)(nestedBundle);
         if (value) return value;
+      }
+
+      throw new Error(`Node with identifier ${identifier} not found`);
+    },
+    getPrefixValue: (identifier: string) => (document: PROVJSONDocument) => {
+      // If the identifer represents a node or bundle in the document locally...
+      if (
+        queries.bundle.hasLocalNode(identifier)(document)
+        || queries.document.hasBundle(identifier)(document)) {
+        // ...we can get the prefix value directly.
+        return queries.bundle.getLocalPrefixValue(identifier)(document);
+      }
+      // Otherwise for each nested bundle...
+      // eslint-disable-next-line no-restricted-syntax
+      for (const nestedBundle of Object.values(document.bundle || {})) {
+        // ...if it contains the node with the identifier...
+        if (queries.bundle.hasLocalNode(identifier)(nestedBundle)) {
+          // ...then the prefix is either defined in the bundle, or in the document.
+          return (
+            queries.bundle.getLocalPrefixValue(identifier)(nestedBundle)
+            || queries.bundle.getLocalPrefixValue(identifier)(document)
+          );
+        }
       }
 
       throw new Error(`Node with identifier ${identifier} not found`);
@@ -73,6 +105,9 @@ const queries = {
       Object.keys(bundle || {}).includes(identifier)),
   },
   bundle: {
+    isEmpty: ({ activity, agent, entity }: PROVJSONBundle): boolean => (
+      Object.keys({ ...activity, ...agent, ...entity }).length === 0
+    ),
     getAll: ({ bundle }: PROVJSONDocument): string[] => Object.keys(bundle || {}),
     getNodes: (bundleID: string, variant?: NodeVariant) => (document: PROVJSONDocument) => {
       const bundle = Object.entries(document.bundle || {})
@@ -85,12 +120,22 @@ const queries = {
           : { ...bundle.agent, ...bundle.activity, ...bundle.entity })
         : undefined;
     },
-    generateName: (
-      prefix: string, index: number = 0,
-    ) => (document: PROVJSONDocument): string => (
-      queries.document.hasBundle(`${prefix}:Bundle${index > 0 ? index : ''}`)(document)
-        ? queries.bundle.generateName(prefix, index + 1)(document)
-        : `Bundle${index > 0 ? index : ''}`),
+    generateIdentifier: (
+      index: number = 0,
+    ) => (document: PROVJSONDocument): string => {
+      const potentialID = `Bundle${index > 0 ? index : ''}`;
+      return (
+        queries.document.hasBundle(potentialID)(document)
+          ? queries.bundle.generateIdentifier(index + 1)(document)
+          : potentialID);
+    },
+    getLocalPrefixValue: (identifier: string) => (bundle: PROVJSONBundle) => {
+      const prefix = queries.document.parsePrefixFromID(identifier);
+
+      // If the prefix is defined, let's attempt to get its value.
+      // Otherwise, the prefix value is either the default namespace value or undefined
+      return bundle.prefix?.[prefix || 'default'];
+    },
     getLocalNodeValue: (identifier: string) => ({
       agent, activity, entity,
     }: PROVJSONBundle) => Object
@@ -116,15 +161,30 @@ const queries = {
       ...Object.values(document.bundle || {})
         .map((bundle) => Object.keys(bundle[variant] || {})).flat(),
     ],
-    generateName: (
-      variant: NodeVariant, prefix: string, index: number = 0,
-    ) => (document: PROVJSONBundle): string => (
-      queries.document.hasNode(`${prefix}:${variant.charAt(0).toUpperCase()}${variant.slice(1)}${index > 0 ? index : ''}`)(document)
-        ? queries.node.generateName(variant, prefix, index + 1)(document)
-        : `${variant.charAt(0).toUpperCase()}${variant.slice(1)}${index > 0 ? index : ''}`),
-    getFullName: (identifier: string) => ({ prefix }: PROVJSONBundle) => (
-      `${(prefix || {})[identifier.split(':')[0]]}${identifier.split(':')[1]}`
-    ),
+    getBundleID: (identifier: string) => (document: PROVJSONDocument): string | undefined => {
+      if (queries.bundle.hasLocalNode(identifier)(document)) return undefined;
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [bundleID, nestedBundle] of Object.entries(document.bundle || {})) {
+        // ...if it contains the node with the identifier...
+        if (queries.bundle.hasLocalNode(identifier)(nestedBundle)) return bundleID;
+      }
+      throw new Error(`Node with identifier ${identifier} not found`);
+    },
+    generateIdentifier: (
+      variant: NodeVariant, index: number = 0,
+    ) => (document: PROVJSONDocument): string => {
+      const potentialID = `${variant.charAt(0).toUpperCase()}${variant.slice(1)}${index > 0 ? index : ''}`;
+      return (
+        queries.document.hasNode(potentialID)(document)
+          ? queries.node.generateIdentifier(variant, index + 1)(document)
+          : potentialID);
+    },
+    getFullName: (identifier: string) => (document: PROVJSONDocument) => {
+      const prefixValue = queries.document.getPrefixValue(identifier)(document);
+      return prefixValue
+        ? `${prefixValue}${identifier.substring(identifier.indexOf(':') + 1)}`
+        : identifier;
+    },
     getVariant: (identifier: string) => (document: PROVJSONDocument): NodeVariant => {
       if (queries.document.hasEntity(identifier)(document)) {
         return 'entity';

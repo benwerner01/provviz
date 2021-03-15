@@ -50,6 +50,10 @@ export const Example4: Story<VisualiserProps> = (args) => (
   <Visualiser {...args} document={document4} onChange={null} />
 );
 
+export const EmptyDocument: Story<VisualiserProps> = (args) => (
+  <Visualiser {...args} document={{}} onChange={null} />
+);
+
 const meta: Meta<VisualiserProps> = {
   title: 'Visualiser',
   component: Visualiser,

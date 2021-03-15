@@ -5,7 +5,7 @@ import { testDocument1 } from './testDocuments';
 // Document
 
 test('mutations.document.create', () => {
-  expect(mutations.document.create('agent', 'prefix1', 'Agent1')(testDocument1))
+  expect(mutations.document.create('agent', 'prefix1:Agent1')(testDocument1))
     .toEqual({
       ...testDocument1,
       agent: { ...testDocument1.agent, 'prefix1:Agent1': {} },
@@ -34,7 +34,7 @@ test('mutations.namespace.delete', () => {
       ),
     });
 
-  expect(mutations.namespace.delete('nestedPrefix1')(testDocument1))
+  expect(mutations.namespace.delete('nestedPrefix1', 'prefix1:Bundle')(testDocument1))
     .toEqual({
       ...testDocument1,
       bundle: {
@@ -273,6 +273,7 @@ test('mutations.bundle.delete', () => {
     .toEqual({
       ...testDocument1,
       bundle: {
+        Bundle: {},
         'prefix1:Bundle1': {},
       },
     });

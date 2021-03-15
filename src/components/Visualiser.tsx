@@ -13,6 +13,7 @@ import MenuBar, { MENU_BAR_HEIGHT, View } from './MenuBar';
 import TreeView from './TreeView';
 import VisualisationContext, { VisualisationSettings, defaultSettings } from './contexts/VisualisationContext';
 import { palette } from '../util/theme';
+import queries from '../util/queries';
 
 export const MIN_WIDTH = 350;
 
@@ -61,6 +62,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
     setVisualisationSettings] = useState<VisualisationSettings>(initialSettings || defaultSettings);
 
   const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(document);
+  const [isEmptyDocument, setIsEmtpyDocument] = useState<boolean>(true);
   const [displayEditor, setDisplayEditor] = useState<boolean>(false);
   const [displayEditorContent, setDisplayEditorContent] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<View>('Graph');
@@ -93,6 +95,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
   const contextDocument = controllingState ? localDocument : document;
 
   useEffect(() => {
+    setIsEmtpyDocument(queries.document.isEmpty(contextDocument));
     setValidationErrors(validateDocument(contextDocument));
   }, [contextDocument]);
 
@@ -128,6 +131,12 @@ const Visualiser: React.FC<VisualiserProps> = ({
     }
   };
 
+  const contentHeight = (
+    height
+    - MENU_BAR_HEIGHT
+    - (displayEditor ? TABS_HEIGHT : 0)
+    - (displayEditorContent ? editorContentHeight : 0));
+
   return (
     <DocumentContext.Provider
       value={{ document: contextDocument, setDocument: contextSetDocument }}
@@ -148,6 +157,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
               setDisplaySettings(true);
               setDisplayEditorContent(true);
             }}
+            isEmptyDocument={isEmptyDocument}
             collapseButtons={width < (searching ? 800 : 650)}
             collapseIconButtons={width < 650 && searching}
             setSelected={handleSelectedChange}
@@ -175,32 +185,32 @@ const Visualiser: React.FC<VisualiserProps> = ({
             )
             : (
               <>
-                {currentView === 'Graph' && (
-                <D3Graphviz
-                  selected={selected}
-                  setSelected={handleSelectedChange}
-                  width={width}
-                  wasmFolderURL={wasmFolderURL}
-                  setSVGElement={setSVGElement}
-                  height={(
-                    height
-                    - MENU_BAR_HEIGHT
-                    - (displayEditor ? TABS_HEIGHT : 0)
-                    - (displayEditorContent ? editorContentHeight : 0))}
-                />
-                )}
-                {currentView === 'Tree' && (
-                <TreeView
-                  width={width}
-                  height={(
-                    height
-                    - MENU_BAR_HEIGHT
-                    - (displayEditor ? TABS_HEIGHT : 0)
-                    - (displayEditorContent ? editorContentHeight : 0))}
-                  selected={selected}
-                  setSelected={handleSelectedChange}
-                  searchString={searchString}
-                />
+                {isEmptyDocument ? (
+                  <Box style={{ height: contentHeight }} m={1} display="flex" alignItems="center" justifyContent="center">
+                    <Typography variant="h5">Empty Document</Typography>
+                  </Box>
+                ) : (
+                  <>
+                    {currentView === 'Graph' && (
+                      <D3Graphviz
+                        selected={selected}
+                        setSelected={handleSelectedChange}
+                        width={width}
+                        wasmFolderURL={wasmFolderURL}
+                        setSVGElement={setSVGElement}
+                        height={contentHeight}
+                      />
+                    )}
+                    {currentView === 'Tree' && (
+                      <TreeView
+                        width={width}
+                        height={contentHeight}
+                        selected={selected}
+                        setSelected={handleSelectedChange}
+                        searchString={searchString}
+                      />
+                    )}
+                  </>
                 )}
                 <Editor
                   displaySettings={displaySettings}

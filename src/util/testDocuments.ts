@@ -4,10 +4,12 @@ export const date1 = (new Date()).toISOString();
 
 export const testDocument1: PROVJSONDocument = {
   prefix: {
+    default: 'defaultPrefixValue',
     prefix1: 'prefix1Value',
     prefix2: 'prefix2Value',
   },
   agent: {
+    Agent: {},
     'prefix1:Agent': {
       agentKey: 'agentValue',
     },
@@ -27,6 +29,7 @@ export const testDocument1: PROVJSONDocument = {
     },
   },
   bundle: {
+    Bundle: {},
     'prefix1:Bundle': {
       prefix: {
         nestedPrefix1: 'nestedPrefix1Value',

@@ -1,15 +1,23 @@
-import { ATTRIBUTE_DEFINITIONS } from './document';
+import { ATTRIBUTE_DEFINITIONS, PROVJSONDocument } from './document';
 import queries from './queries';
 import { testDocument1, date1 } from './testDocuments';
 
 // Prefix
 
-test('queries.prefix.getAll', () => {
-  expect(queries.prefix.getAll(testDocument1))
-    .toEqual(['prefix1', 'prefix2', 'nestedPrefix1', 'nestedPrefix2']);
+test('queries.namespace.getAll', () => {
+  expect(queries.namespace.getAll('prefix1:Bundle')(testDocument1))
+    .toEqual(['default', 'prefix1', 'prefix2', 'nestedPrefix1', 'nestedPrefix2']);
 });
 
 // Document
+
+test('queries.document.isEmpty', () => {
+  expect(queries.document.isEmpty(testDocument1))
+    .toBe(false);
+
+  expect(queries.document.isEmpty({}))
+    .toBe(true);
+});
 
 test('queries.document.getNodeValue', () => {
   expect(queries.document.getNodeValue('prefix1:Agent')(testDocument1))
@@ -24,6 +32,34 @@ test('queries.document.getNodeValue', () => {
 
   expect(() => queries.document.getNodeValue('fakeAgent')(testDocument1))
     .toThrow('Node with identifier fakeAgent not found');
+});
+
+const testPrefixValueDocument: PROVJSONDocument = {
+  prefix: { default: 'defaultValue', prefix1: 'prefix1Value', prefix2: 'prefix2Value' },
+  entity: { Entity: {}, 'prefix1:Entity': {} },
+  bundle: {
+    Bundle: {
+      prefix: { default: 'nestedDefaultValue', prefix1: 'nestedPrefix1Value' },
+      entity: { NestedEntity: {}, 'prefix1:NestedEntity': {}, 'prefix2:NestedEntity': {} },
+    },
+  },
+};
+
+test('queries.document.getPrefixValue', () => {
+  expect(queries.document.getPrefixValue('Entity')(testPrefixValueDocument))
+    .toBe('defaultValue');
+
+  expect(queries.document.getPrefixValue('prefix1:Entity')(testPrefixValueDocument))
+    .toBe('prefix1Value');
+
+  expect(queries.document.getPrefixValue('NestedEntity')(testPrefixValueDocument))
+    .toBe('nestedDefaultValue');
+
+  expect(queries.document.getPrefixValue('prefix1:NestedEntity')(testPrefixValueDocument))
+    .toBe('nestedPrefix1Value');
+
+  expect(queries.document.getPrefixValue('prefix2:NestedEntity')(testPrefixValueDocument))
+    .toBe('prefix2Value');
 });
 
 test('queries.document.getAttributeValue', () => {
@@ -89,12 +125,12 @@ test('queries.document.hasBundle', () => {
 
 test('queries.bundle.getAll', () => {
   expect(queries.bundle.getAll(testDocument1))
-    .toEqual(['prefix1:Bundle', 'prefix1:Bundle1']);
+    .toEqual(['Bundle', 'prefix1:Bundle', 'prefix1:Bundle1']);
 });
 
-test('queries.bundle.generateName', () => {
-  expect(queries.bundle.generateName('prefix1')(testDocument1))
-    .toBe('Bundle2');
+test('queries.bundle.generateIdentifier', () => {
+  expect(queries.bundle.generateIdentifier()(testDocument1))
+    .toBe('Bundle1');
 });
 
 test('queries.bundle.getLocalNodeValue', () => {
@@ -106,11 +142,11 @@ test('queries.bundle.getLocalNodeValue', () => {
 
 test('queries.node.getAll', () => {
   expect(queries.node.getAll('agent')(testDocument1))
-    .toEqual(['prefix1:Agent', 'nestedPrefix1:nestedAgent']);
+    .toEqual(['Agent', 'prefix1:Agent', 'nestedPrefix1:nestedAgent']);
 });
 
-test('queries.node.generateName', () => {
-  expect(queries.node.generateName('agent', 'prefix1')(testDocument1))
+test('queries.node.generateIdentifier', () => {
+  expect(queries.node.generateIdentifier('agent')(testDocument1))
     .toEqual('Agent1');
 });
 

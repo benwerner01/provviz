@@ -3,6 +3,7 @@ import { PROVENANVE_VIEW_DEFINITIONS, VisualisationSettings } from '../component
 import {
   PROVJSONBundle, PROVJSONDocument, PROVVIZ_ATTRIBUTE_DEFINITIONS, RELATIONS, tbdIsProvVizShape,
 } from './document';
+import queries from './queries';
 
 const DEFAULT_NODE_SHAPE = {
   agent: 'house',
@@ -75,16 +76,21 @@ const mapBundleToDots = (
     ))).flat(),
 ].join('\n');
 
-const getAllHiddenNodes = (settings: VisualisationSettings) => ({
+const getAllHiddenNodes = (settings: VisualisationSettings, bundleID?: string) => ({
   agent, activity, entity, bundle,
 }: PROVJSONDocument): string[] => [
   ...Object.entries({ ...agent, ...activity, ...entity })
     .filter(([id, attributes]) => (
       attributes['provviz:hide'] === true
-      || settings.hiddenNamespaces.findIndex((prefix) => id.split(':')[0] === prefix) >= 0))
+      || settings.hiddenNamespaces.find((hidden) => {
+        const prefix = queries.document.parsePrefixFromID(id) || 'default';
+        return (
+          hidden.prefix === prefix
+          && (hidden.bundleID === bundleID || hidden.bundleID === undefined));
+      }) !== undefined))
     .map(([id]) => id),
-  ...Object.values(bundle || {})
-    .map(getAllHiddenNodes(settings))
+  ...Object.entries(bundle || {})
+    .map(([id, nestedBundle]) => getAllHiddenNodes(settings, id)(nestedBundle))
     .flat(),
 ];
 

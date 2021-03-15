@@ -17,6 +17,7 @@ import AccountTreeIcon from '@material-ui/icons/AccountTree';
 import SettingsIcon from '@material-ui/icons/Settings';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import Tooltip from '@material-ui/core/Tooltip';
+import Fade from '@material-ui/core/Fade';
 import queries from '../util/queries';
 import mutations from '../util/mutations';
 import DocumentContext from './contexts/DocumentContext';
@@ -109,6 +110,7 @@ type MenuBarProps = {
   collapseButtons: boolean;
   collapseIconButtons: boolean;
   currentView: View;
+  isEmptyDocument: boolean;
   setCurrentView: (newCurrentView: View) => void;
   searching: boolean;
   setSearching: (searching: boolean) => void;
@@ -121,6 +123,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
   displaySettings,
   setSelected,
   currentView,
+  isEmptyDocument,
   setCurrentView,
   downloadVisualisation,
   collapseButtons,
@@ -145,12 +148,12 @@ const MenuBar: React.FC<MenuBarProps> = ({
   });
 
   const handleCreateNode = (variant: Variant) => {
-    const prefix = queries.prefix.getAll(document)[0];
-    const name = variant === 'bundle'
-      ? queries.bundle.generateName(prefix)(document)
-      : queries.node.generateName(variant, prefix)(document);
-    setDocument(mutations.document.create(variant, prefix, name));
-    setSelected({ variant, id: `${prefix}:${name}` });
+    const id = variant === 'bundle'
+      ? queries.bundle.generateIdentifier()(document)
+      : queries.node.generateIdentifier(variant)(document);
+
+    setDocument(mutations.document.create(variant, id));
+    setSelected({ variant, id });
   };
 
   const buttonClasses = { root: classes.buttonRoot, label: classes.buttonLabel };
@@ -234,34 +237,42 @@ const MenuBar: React.FC<MenuBarProps> = ({
         </Box>
       )}
       <Box display="flex" alignItems="center">
-        <SearchTextField
-          open={searching}
-          setOpen={setSearching}
-          searchString={searchString}
-          setSearchString={setSearchString}
-        />
+        <Fade in={!isEmptyDocument}>
+          <Box>
+            <SearchTextField
+              open={searching}
+              setOpen={setSearching}
+              searchString={searchString}
+              setSearchString={setSearchString}
+            />
+          </Box>
+        </Fade>
         <Box display="flex" className={classes.collapseIconButtons} style={{ maxWidth: collapseIconButtons ? 0 : 300 }}>
-          <Tooltip
-            arrow
-            title="Download Visualisation"
-            aria-label="download-visualisation"
-          >
-            <IconButton className={classes.iconButton} onClick={downloadVisualisation}>
-              <GetAppIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip
-            arrow
-            title={currentView === 'Graph' ? 'Tree View' : 'Graph View'}
-            aria-label={currentView === 'Graph' ? 'tree-view' : 'graph-view'}
-          >
-            <IconButton
-              className={classes.iconButton}
-              onClick={() => setCurrentView(currentView === 'Graph' ? 'Tree' : 'Graph')}
-            >
-              <AccountTreeIcon />
-            </IconButton>
-          </Tooltip>
+          <Fade in={!isEmptyDocument}>
+            <Box>
+              <Tooltip
+                arrow
+                title="Download Visualisation"
+                aria-label="download-visualisation"
+              >
+                <IconButton className={classes.iconButton} onClick={downloadVisualisation}>
+                  <GetAppIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip
+                arrow
+                title={currentView === 'Graph' ? 'Tree View' : 'Graph View'}
+                aria-label={currentView === 'Graph' ? 'tree-view' : 'graph-view'}
+              >
+                <IconButton
+                  className={classes.iconButton}
+                  onClick={() => setCurrentView(currentView === 'Graph' ? 'Tree' : 'Graph')}
+                >
+                  <AccountTreeIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Fade>
           <Tooltip arrow title="Settings" aria-label="settings">
             <IconButton className={classes.iconButton} onClick={displaySettings}>
               <SettingsIcon />

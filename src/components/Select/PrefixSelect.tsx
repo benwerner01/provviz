@@ -30,19 +30,20 @@ const useStyles = makeStyles((theme) => ({
 type PrefixSelectProps = {
   prefix: string;
   onChange: (updatedPrefix: string) => void;
+  bundleID?: string;
   additionalPrefixes?: string[];
   nullable?: boolean;
 }
 
 const PrefixSelect: React.FC<PrefixSelectProps> = ({
-  prefix, onChange, nullable, additionalPrefixes,
+  prefix, onChange, bundleID, nullable, additionalPrefixes,
 }) => {
   const { document } = useContext(DocumentContext);
   const classes = useStyles();
 
   const prefixes = [
     ...(additionalPrefixes || []),
-    ...queries.prefix.getAll(document),
+    ...queries.namespace.getAll(bundleID)(document),
   ].filter((current, i, all) => all.indexOf(current) === i);
 
   return (

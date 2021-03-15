@@ -190,7 +190,6 @@ const Editor: React.FC<EditorProps> = ({
   const handleTabIDChange = (tabIndex: number) => (updatedID: string) => {
     const prevID = tabs[tabIndex].id;
     const { variant } = tabs[tabIndex];
-
     setTabs((prevTabs) => [
       ...prevTabs.slice(0, tabIndex),
       { ...prevTabs[tabIndex], id: updatedID },
@@ -203,10 +202,10 @@ const Editor: React.FC<EditorProps> = ({
   };
 
   const handleTabOpenSectionsChange = (tabIndex: number) => (openSections: string[]) => {
-    setTabs([
-      ...tabs.slice(0, tabIndex),
-      { ...tabs[tabIndex], openSections },
-      ...tabs.slice(tabIndex + 1, tabs.length),
+    setTabs((prevTabs) => [
+      ...prevTabs.slice(0, tabIndex),
+      { ...prevTabs[tabIndex], openSections },
+      ...prevTabs.slice(tabIndex + 1),
     ]);
   };
 

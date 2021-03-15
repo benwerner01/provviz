@@ -45,18 +45,19 @@ const useStyles = makeStyles((theme) => ({
 
 type EditableIdentifierProps = {
   initialID: string;
+  bundleID?: string;
   onChange?: (id: string) => void;
 }
 
 const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
-  initialID, onChange,
+  initialID, bundleID, onChange,
 }) => {
   const { visualisationSettings, setVisualisationSettings } = useContext(VisualisationContext);
   const { document, setDocument } = useContext(DocumentContext);
   const classes = useStyles();
 
-  const initialPrefix = initialID.split(':')[0];
-  const initialName = initialID.split(':').slice(1).join('');
+  const initialPrefix = queries.document.parsePrefixFromID(initialID) || 'default';
+  const initialName = queries.document.parseNameFromID(initialID);
 
   const [prefix, setPrefix] = useState<string>(initialPrefix);
   const [name, setName] = useState<string>(initialName);
@@ -70,12 +71,12 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
   const nameIsValid = name !== '' && !queries.document.hasNode(`${prefix}:${name}`)(document);
 
   const debouncedUpdateIdentifier = useCallback(debounce((prevID: string, updatedID: string) => {
-    if (onChange) onChange(updatedID);
     setDocument(mutations.updateIdentifier(prevID, updatedID));
+    if (onChange) onChange(updatedID);
   }, 200), [document, setDocument, visualisationSettings, setVisualisationSettings]);
 
   useEffect(() => {
-    const updatedID = `${prefix}:${name}`;
+    const updatedID = prefix === 'default' ? name : `${prefix}:${name}`;
     if (prefixIsValid && nameIsValid && initialID !== updatedID) {
       debouncedUpdateIdentifier(initialID, updatedID);
     }
@@ -83,7 +84,7 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
 
   return (
     <Box className={classes.wrapper} display="flex">
-      <PrefixSelect prefix={prefix} onChange={setPrefix} />
+      <PrefixSelect prefix={prefix} onChange={setPrefix} bundleID={bundleID} additionalPrefixes={['default']} />
       <TextField
         variant="outlined"
         label="Name"

@@ -13,11 +13,11 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import debounce from 'lodash.debounce';
-import { PROVJSONBundle } from '../util/document';
+import { PROVJSONDocument } from '../util/document';
 import mutations from '../util/mutations';
 import DocumentContext from './contexts/DocumentContext';
 import { palette } from '../util/theme';
-import VisualisationContext from './contexts/VisualisationContext';
+import VisualisationContext, { HiddenNamespace } from './contexts/VisualisationContext';
 
 const PREFIX_INPUT_WIDTH = 150;
 const PREFIX_VALUE_WIDTH = 300;
@@ -63,15 +63,21 @@ const useEditableNamespaceStyles = makeStyles((theme) => ({
 type EditableNamespaceProps = {
   initialNamespace: Namespace;
   isHidden: boolean;
+  bundleID?: string;
   updatePrefix: (name: string) => void;
   updateValue: (value: string) => void;
   isUniquePrefix: (name: string) => boolean;
   onDelete: () => void;
 }
 
+const matchesHiddenNamespace = (prefix: string, bundleID?: string) => (hidden: HiddenNamespace) => (
+  hidden.prefix === prefix && hidden.bundleID === bundleID
+);
+
 const EditableNamespace: React.FC<EditableNamespaceProps> = ({
   initialNamespace,
   isHidden,
+  bundleID,
   updatePrefix,
   updateValue,
   isUniquePrefix,
@@ -122,9 +128,11 @@ const EditableNamespace: React.FC<EditableNamespaceProps> = ({
 
   const toggleHidden = () => setVisualisationSettings((prev) => ({
     ...prev,
-    hiddenNamespaces: prev.hiddenNamespaces.includes(prevPrefix)
-      ? prev.hiddenNamespaces.filter((p) => p !== prevPrefix)
-      : [...prev.hiddenNamespaces, prevPrefix],
+    hiddenNamespaces: prev.hiddenNamespaces.find(
+      matchesHiddenNamespace(prevPrefix, bundleID),
+    ) === undefined
+      ? [...prev.hiddenNamespaces, { prefix: prevPrefix, bundleID }]
+      : prev.hiddenNamespaces.filter((h) => !matchesHiddenNamespace(prevPrefix, bundleID)(h)),
   }));
 
   return (
@@ -271,7 +279,7 @@ const CreateNamespace: React.FC<CreateNamespaceProps> = ({
 };
 
 type NamespaceProps = {
-
+  bundleID?: string;
 }
 
 let counter = 0;
@@ -284,34 +292,43 @@ const generateKey = () => {
 const sortNamespaces = (a: Namespace, b: Namespace) => (
   a.prefix.charCodeAt(0) - b.prefix.charCodeAt(0));
 
-const mapDocumentToNamespaces = ({ prefix }: PROVJSONBundle) => Object
-  .entries(prefix || {})
+const mapDocumentToNamespaces = (bundleID?: string) => ({
+  prefix, bundle,
+}: PROVJSONDocument) => Object
+  .entries((bundleID ? bundle?.[bundleID].prefix : prefix) || {})
   .map(([key, value]) => ({ key: generateKey(), prefix: key, value }))
   .sort(sortNamespaces);
 
-const namespaceHasChanged = (namespaces: Namespace[], document: PROVJSONBundle): boolean => (
-  namespaces.length !== Object.keys(document.prefix || {}).length
-  || (Object.entries(document.prefix || {}).find(([p, v]) => {
+const namespaceHasChanged = (namespaces: Namespace[], bundleID?: string) => (
+  document: PROVJSONDocument,
+): boolean => {
+  const prefixObject = (bundleID ? document.bundle?.[bundleID].prefix : document) || {};
+  return (
+    namespaces.length !== Object.keys(prefixObject).length
+  || (Object.entries(prefixObject).find(([p, v]) => {
     const namespace = namespaces.find(({ prefix }) => prefix === p);
     if (!namespace || namespace.value !== v) return true;
     return false;
   }) !== undefined)
-);
+  );
+};
 
-const NamespaceComponent: React.FC<NamespaceProps> = () => {
+const NamespaceComponent: React.FC<NamespaceProps> = ({ bundleID }) => {
   const { visualisationSettings, setVisualisationSettings } = useContext(VisualisationContext);
   const { document, setDocument } = useContext(DocumentContext);
 
-  const [namespaces, setNamespaces] = useState<Namespace[]>(mapDocumentToNamespaces(document));
+  const [namespaces, setNamespaces] = useState<Namespace[]>(
+    mapDocumentToNamespaces(bundleID)(document),
+  );
   const [creating, setCreating] = useState<boolean>(false);
 
   useEffect(() => {
     // If any namespace has changed...
-    if (namespaceHasChanged(namespaces, document)) {
+    if (namespaceHasChanged(namespaces, bundleID)(document)) {
       // ...let's update the local state of the namespaces
-      setNamespaces(mapDocumentToNamespaces(document));
+      setNamespaces(mapDocumentToNamespaces(bundleID)(document));
     }
-  }, [document]);
+  }, [document, bundleID]);
 
   const debouncedUpdatePrefix = useCallback((index: number) => debounce((prefix: string) => {
     const { key } = namespaces[index];
@@ -323,15 +340,17 @@ const NamespaceComponent: React.FC<NamespaceProps> = () => {
       ...namespaces.slice(index + 1),
     ]);
 
-    setDocument(mutations.namespace.updatePrefix(prevPrefix, prefix));
+    setDocument(mutations.namespace.updatePrefix(prevPrefix, prefix, bundleID));
 
-    if (visualisationSettings.hiddenNamespaces.includes(prevPrefix)) {
+    if (visualisationSettings.hiddenNamespaces.find((h) => h.prefix === prevPrefix) !== undefined) {
       setVisualisationSettings((prev) => ({
         ...prev,
-        hiddenNamespaces: prev.hiddenNamespaces.map((p) => (p === prevPrefix ? prefix : p)),
+        hiddenNamespaces: prev.hiddenNamespaces.map((hidden) => (
+          matchesHiddenNamespace(prefix, bundleID)(hidden) ? { prefix, bundleID } : hidden
+        )),
       }));
     }
-  }, 200), [visualisationSettings, namespaces, setDocument]);
+  }, 200), [visualisationSettings, namespaces, setDocument, bundleID]);
 
   const debouncedUpdateValue = useCallback((index: number) => debounce((value: string) => {
     const { key, prefix } = namespaces[index];
@@ -342,21 +361,21 @@ const NamespaceComponent: React.FC<NamespaceProps> = () => {
       ...namespaces.slice(index + 1),
     ]);
 
-    setDocument(mutations.namespace.updateValue(prefix, value));
-  }, 200), [namespaces, setDocument]);
+    setDocument(mutations.namespace.updateValue(prefix, value, bundleID));
+  }, 200), [namespaces, setDocument, bundleID]);
 
   const handleDelete = (index: number) => () => {
     const { prefix } = namespaces[index];
 
     setNamespaces([...namespaces.slice(0, index), ...namespaces.slice(index + 1)]);
 
-    setDocument(mutations.namespace.delete(prefix));
+    setDocument(mutations.namespace.delete(prefix, bundleID));
   };
 
   const handleCreated = (namespace: Omit<Namespace, 'key'>) => {
     setCreating(false);
     setNamespaces([...namespaces, { ...namespace, key: `${namespaces.length}-${namespace.prefix}` }]);
-    setDocument(mutations.namespace.create(namespace.prefix, namespace.value));
+    setDocument(mutations.namespace.create(namespace.prefix, namespace.value, bundleID));
   };
 
   return (
@@ -387,7 +406,10 @@ const NamespaceComponent: React.FC<NamespaceProps> = () => {
       {namespaces.map((namespace, index) => (
         <EditableNamespace
           key={namespace.key}
-          isHidden={visualisationSettings.hiddenNamespaces.includes(namespace.prefix)}
+          bundleID={bundleID}
+          isHidden={visualisationSettings
+            .hiddenNamespaces
+            .find(matchesHiddenNamespace(namespace.prefix, bundleID)) !== undefined}
           initialNamespace={namespace}
           onDelete={handleDelete(index)}
           updatePrefix={debouncedUpdatePrefix(index)}

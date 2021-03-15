@@ -6,6 +6,10 @@ const defaultTheme = createMuiTheme();
 
 export type ProvenanceView = 'Responsibility' | 'Data Flow' | 'Proccess Flow'
 
+const tbdIsProvenanceView = (tbd: string): tbd is ProvenanceView => (
+  tbd === 'Responsibility' || tbd === 'Data Flow' || tbd === 'Proccess Flow'
+);
+
 export const PROVENANCE_VIEW_NAMES: ProvenanceView[] = ['Proccess Flow', 'Data Flow', 'Responsibility'];
 
 export type ProvenanceViewDefinition = {
@@ -33,6 +37,15 @@ export const PROVENANVE_VIEW_DEFINITIONS: { [key: string]: ProvenanceViewDefinit
   },
 };
 
+export type HiddenNamespace = {
+  bundleID?: string;
+  prefix: string;
+}
+
+const tbdIsHiddenNamespace = (tbd: object): tbd is HiddenNamespace => (
+  typeof (tbd as HiddenNamespace).prefix === 'string'
+);
+
 export type VisualisationSettings = {
   palette: {
     agent: string;
@@ -41,9 +54,37 @@ export type VisualisationSettings = {
     bundle: string;
   }
   hideAllNodeAttributes: boolean;
-  hiddenNamespaces: string[];
+  hiddenNamespaces: HiddenNamespace[];
   view: ProvenanceView | null;
 }
+
+export const tbdIsVisualisationSettings = (tbd: any): tbd is VisualisationSettings => (
+  (
+    tbd.palette !== undefined
+    && typeof tbd.palette === 'object'
+    && typeof tbd.palette.agent === 'string'
+    && typeof tbd.palette.activity === 'string'
+    && typeof tbd.palette.entity === 'string'
+    && typeof tbd.palette.bundle === 'string'
+  )
+  && (
+    tbd.hideAllNodeAttributes !== undefined
+    && typeof tbd.hideAllNodeAttributes === 'boolean'
+  )
+  && (
+    tbd.hiddenNamespaces !== undefined
+    && typeof tbd.hiddenNamespaces === 'object'
+    && Array.isArray(tbd.hiddenNamespaces)
+    && tbd.hiddenNamespaces.filter(tbdIsHiddenNamespace).length === 0
+  )
+  && (
+    tbd.view !== undefined
+    && (
+      (typeof tbd.view === 'string' && tbdIsProvenanceView(tbd.view))
+      || tbd.view === null
+    )
+  )
+);
 
 export type VisualisationContext = {
   visualisationSettings: VisualisationSettings;
