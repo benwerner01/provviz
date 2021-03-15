@@ -189,12 +189,14 @@ const Editor: React.FC<EditorProps> = ({
 
   const handleTabIDChange = (tabIndex: number) => (updatedID: string) => {
     const prevID = tabs[tabIndex].id;
-    const { variant, openSections } = tabs[tabIndex];
-    setTabs([
-      ...tabs.slice(0, tabIndex),
-      { id: updatedID, variant, openSections },
-      ...tabs.slice(tabIndex + 1, tabs.length),
+    const { variant } = tabs[tabIndex];
+
+    setTabs((prevTabs) => [
+      ...prevTabs.slice(0, tabIndex),
+      { ...prevTabs[tabIndex], id: updatedID },
+      ...prevTabs.slice(tabIndex + 1, prevTabs.length),
     ]);
+
     if (selected && selected.variant === variant && selected.id === prevID) {
       setSelected({ variant, id: updatedID });
     }
