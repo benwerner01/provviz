@@ -15,11 +15,17 @@ const queries = {
       ...Object.keys(document.prefix || {}),
       ...(bundleID ? Object.keys(document.bundle?.[bundleID].prefix || {}) : []),
     ].flat(),
+    getDefaultPrefix: ({ prefix }: PROVJSONDocument): string => {
+      if (!prefix) throw new Error('Cannot get default Prefix if prefix is undefined');
+      if (prefix.default) return 'default';
+      if (prefix.xsd) return 'xsd';
+      throw new Error('Cannot get default Prefix');
+    },
   },
   document: {
     parsePrefixFromID: (id: string) => {
       const idComponents = id.split(':');
-      return idComponents.length > 1 ? idComponents[0] : undefined;
+      return idComponents.length > 1 ? idComponents[0] : 'default';
     },
     parseNameFromID: (id: string) => (id.split(':').length > 1 ? id.substring(id.indexOf(':') + 1) : id),
     isEmpty: (document: PROVJSONDocument): boolean => (
@@ -108,6 +114,9 @@ const queries = {
     isEmpty: ({ activity, agent, entity }: PROVJSONBundle): boolean => (
       Object.keys({ ...activity, ...agent, ...entity }).length === 0
     ),
+    getAllInNamespace: (prefix: string) => (document: PROVJSONDocument): string[] => queries.bundle
+      .getAll(document)
+      .filter((id) => queries.document.parsePrefixFromID(id) === prefix),
     getAll: ({ bundle }: PROVJSONDocument): string[] => Object.keys(bundle || {}),
     getNodes: (bundleID: string, variant?: NodeVariant) => (document: PROVJSONDocument) => {
       const bundle = Object.entries(document.bundle || {})
@@ -121,12 +130,13 @@ const queries = {
         : undefined;
     },
     generateIdentifier: (
+      defaultPrefix: string,
       index: number = 0,
     ) => (document: PROVJSONDocument): string => {
-      const potentialID = `Bundle${index > 0 ? index : ''}`;
+      const potentialID = `${defaultPrefix === 'default' ? '' : `${defaultPrefix}:`}Bundle${index > 0 ? index : ''}`;
       return (
         queries.document.hasBundle(potentialID)(document)
-          ? queries.bundle.generateIdentifier(index + 1)(document)
+          ? queries.bundle.generateIdentifier(defaultPrefix, index + 1)(document)
           : potentialID);
     },
     getLocalPrefixValue: (identifier: string) => (bundle: PROVJSONBundle) => {
@@ -156,6 +166,11 @@ const queries = {
       Object.keys(entity || {}).includes(identifier)),
   },
   node: {
+    getAllInNamespace: (
+      variant: NodeVariant, prefix: string,
+    ) => (document: PROVJSONDocument): string[] => queries.node
+      .getAll(variant)(document)
+      .filter((id) => queries.document.parsePrefixFromID(id) === prefix),
     getAll: (variant: NodeVariant) => (document: PROVJSONDocument): string[] => [
       ...Object.keys(document[variant] || {}),
       ...Object.values(document.bundle || {})
@@ -171,12 +186,12 @@ const queries = {
       throw new Error(`Node with identifier ${identifier} not found`);
     },
     generateIdentifier: (
-      variant: NodeVariant, index: number = 0,
+      defaultPrefix: string, variant: NodeVariant, index: number = 0,
     ) => (document: PROVJSONDocument): string => {
-      const potentialID = `${variant.charAt(0).toUpperCase()}${variant.slice(1)}${index > 0 ? index : ''}`;
+      const potentialID = `${defaultPrefix === 'default' ? '' : `${defaultPrefix}:`}${variant.charAt(0).toUpperCase()}${variant.slice(1)}${index > 0 ? index : ''}`;
       return (
         queries.document.hasNode(potentialID)(document)
-          ? queries.node.generateIdentifier(variant, index + 1)(document)
+          ? queries.node.generateIdentifier(defaultPrefix, variant, index + 1)(document)
           : potentialID);
     },
     getFullName: (identifier: string) => (document: PROVJSONDocument) => {

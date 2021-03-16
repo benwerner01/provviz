@@ -148,9 +148,11 @@ const MenuBar: React.FC<MenuBarProps> = ({
   });
 
   const handleCreateNode = (variant: Variant) => {
+    const defaultPrefix = queries.namespace.getDefaultPrefix(document);
+
     const id = variant === 'bundle'
-      ? queries.bundle.generateIdentifier()(document)
-      : queries.node.generateIdentifier(variant)(document);
+      ? queries.bundle.generateIdentifier(defaultPrefix)(document)
+      : queries.node.generateIdentifier(defaultPrefix, variant)(document);
 
     setDocument(mutations.document.create(variant, id));
     setSelected({ variant, id });

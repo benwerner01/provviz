@@ -84,7 +84,7 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
 
   return (
     <Box className={classes.wrapper} display="flex">
-      <PrefixSelect prefix={prefix} onChange={setPrefix} bundleID={bundleID} additionalPrefixes={['default']} />
+      <PrefixSelect prefix={prefix} onChange={setPrefix} bundleID={bundleID} />
       <TextField
         variant="outlined"
         label="Name"

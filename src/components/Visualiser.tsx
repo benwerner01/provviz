@@ -49,6 +49,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const parseDocument = (document: PROVJSONDocument): PROVJSONDocument => ({
+  ...document,
+  prefix: {
+    ...document.prefix,
+    xsd: 'http://www.w3.org/2001/XMLSchema#',
+    prov: 'http://www.w3.org/ns/prov#',
+  },
+});
+
 const Visualiser: React.FC<VisualiserProps> = ({
   wasmFolderURL, width, height, documentName, document, onChange, initialSettings, onSettingsChange,
 }) => {
@@ -61,7 +70,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
     visualisationSettings,
     setVisualisationSettings] = useState<VisualisationSettings>(initialSettings || defaultSettings);
 
-  const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(document);
+  const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(parseDocument(document));
   const [isEmptyDocument, setIsEmtpyDocument] = useState<boolean>(true);
   const [displayEditor, setDisplayEditor] = useState<boolean>(false);
   const [displayEditorContent, setDisplayEditorContent] = useState<boolean>(false);
@@ -85,6 +94,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
     } else if (!controllingState && onChange === null) {
       console.log('⚠️ WARNING: Visualiser component is changing from uncontrolled state to controlled state');
       setControllingState(true);
+      setLocalDocument(parseDocument(document));
     }
   }, [controllingState, onChange]);
 
@@ -92,7 +102,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
     setVisualisationSettings(initialSettings || defaultSettings);
   }, [documentName]);
 
-  const contextDocument = controllingState ? localDocument : document;
+  const contextDocument = controllingState ? localDocument : parseDocument(document);
 
   useEffect(() => {
     setIsEmtpyDocument(queries.document.isEmpty(contextDocument));

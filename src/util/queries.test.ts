@@ -129,7 +129,7 @@ test('queries.bundle.getAll', () => {
 });
 
 test('queries.bundle.generateIdentifier', () => {
-  expect(queries.bundle.generateIdentifier()(testDocument1))
+  expect(queries.bundle.generateIdentifier('default')(testDocument1))
     .toBe('Bundle1');
 });
 
@@ -146,7 +146,7 @@ test('queries.node.getAll', () => {
 });
 
 test('queries.node.generateIdentifier', () => {
-  expect(queries.node.generateIdentifier('agent')(testDocument1))
+  expect(queries.node.generateIdentifier('default', 'agent')(testDocument1))
     .toEqual('Agent1');
 });
 
