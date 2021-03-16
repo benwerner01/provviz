@@ -1,5 +1,5 @@
 import React, {
-  useState, useEffect, useContext, useRef, useCallback, ReactNode, useLayoutEffect,
+  useState, useEffect, useContext, useRef, useCallback, useLayoutEffect,
 } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
@@ -8,7 +8,6 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
-import Fade from '@material-ui/core/Fade';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import VisibilityIcon from '@material-ui/icons/Visibility';
@@ -375,7 +374,7 @@ const mapDocumentToNamespaces = (bundleID?: string) => ({
 const namespaceHasChanged = (namespaces: Namespace[], bundleID?: string) => (
   document: PROVJSONDocument,
 ): boolean => {
-  const prefixObject = (bundleID ? document.bundle?.[bundleID].prefix : document) || {};
+  const prefixObject = (bundleID ? document.bundle?.[bundleID].prefix : document.prefix) || {};
   return (
     namespaces.length !== Object.keys(prefixObject).length
   || (Object.entries(prefixObject).find(([p, v]) => {
@@ -404,13 +403,12 @@ const NamespaceComponent: React.FC<NamespaceProps> = ({ bundleID }) => {
   }, [document, bundleID]);
 
   const debouncedUpdatePrefix = useCallback((index: number) => debounce((prefix: string) => {
-    const { key } = namespaces[index];
     const prevPrefix = namespaces[index].prefix;
 
-    setNamespaces([
-      ...namespaces.slice(0, index),
-      { key, prefix, value: namespaces[index].value },
-      ...namespaces.slice(index + 1),
+    setNamespaces((prev) => [
+      ...prev.slice(0, index),
+      { ...prev[index], prefix },
+      ...prev.slice(index + 1),
     ]);
 
     setDocument(mutations.namespace.updatePrefix(prevPrefix, prefix, bundleID));
@@ -423,19 +421,17 @@ const NamespaceComponent: React.FC<NamespaceProps> = ({ bundleID }) => {
         )),
       }));
     }
-  }, 200), [visualisationSettings, namespaces, setDocument, bundleID]);
+  }, 200), [visualisationSettings, namespaces, setNamespaces, setDocument, bundleID]);
 
   const debouncedUpdateValue = useCallback((index: number) => debounce((value: string) => {
-    const { key, prefix } = namespaces[index];
-
-    setNamespaces([
-      ...namespaces.slice(0, index),
-      { key, prefix, value },
-      ...namespaces.slice(index + 1),
+    setNamespaces((prev) => [
+      ...prev.slice(0, index),
+      { ...prev[index], value },
+      ...prev.slice(index + 1),
     ]);
-
+    const { prefix } = namespaces[index];
     setDocument(mutations.namespace.updateValue(prefix, value, bundleID));
-  }, 200), [namespaces, setDocument, bundleID]);
+  }, 200), [namespaces, setDocument, setNamespaces, bundleID]);
 
   const handleDelete = (index: number) => () => {
     const { prefix } = namespaces[index];
