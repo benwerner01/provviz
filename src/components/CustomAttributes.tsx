@@ -15,7 +15,11 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Collapse from '@material-ui/core/Collapse';
 import {
-  AttributeValue, ATTRIBUTE_DEFINITIONS, NodeVariant, PROVVIZ_ATTRIBUTE_DEFINITIONS,
+  AttributeValue,
+  ATTRIBUTE_DEFINITIONS,
+  NodeVariant,
+  PROVJSONDocument,
+  PROVVIZ_ATTRIBUTE_DEFINITIONS,
 } from '../util/document';
 import queries from '../util/queries';
 import DocumentContext from './contexts/DocumentContext';
@@ -130,7 +134,6 @@ const CustomAttribute: React.FC<CustomAttributeProps> = ({
     <Box flexGrow={1} display="flex" className={classes.wrapper}>
       <PrefixSelect
         prefix={prefix}
-        additionalPrefixes={['prov']}
         onChange={(updatedPrefix) => onNameChange(updatedPrefix === ''
           ? attributeName
           : `${updatedPrefix}:${attributeName}`)}
@@ -143,7 +146,9 @@ const CustomAttribute: React.FC<CustomAttributeProps> = ({
         variant="outlined"
         label="Name"
         value={attributeName}
-        onChange={({ target }) => onNameChange(`${prefix}:${target.value}`)}
+        onChange={({ target }) => onNameChange(prefix === ''
+          ? target.value.replaceAll(' ', '')
+          : `${prefix}:${target.value.replaceAll(' ', '')}`)}
       />
       {valueType === 'boolean' ? (
         <FormControl className={classes.valueTextField} classes={selectFormControlClasses} variant="outlined">
@@ -246,6 +251,18 @@ const mapDocumentAttributeEntryToAttribute = (
   value,
 });
 
+const attributesHaveChanged = (
+  prevAttributes: Attribute[], nodeVariant: NodeVariant, id: string,
+) => (document: PROVJSONDocument) => {
+  const attributes = queries.node.getAttributes(nodeVariant, id)(document);
+  if (!attributes) throw new Error('Could not get attributes');
+  return (
+    attributes.length !== prevAttributes.length
+    || (attributes?.find(([name, value]) => prevAttributes
+      .find((attribute) => attribute.name === name && attribute.value === value) === undefined))
+  );
+};
+
 type CustomAttributesProps = {
   nodeVariant: NodeVariant;
   nodeID: string;
@@ -260,11 +277,7 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
   const [creating, setCreating] = useState<boolean>(false);
   const [creatingName, setCreatingName] = useState<string>('');
   const [creatingValue, setCreatingValue] = useState<AttributeValue>('');
-  const [attributes, setAttributes] = useState<Attribute[]>(
-    queries.node.getAttributes(nodeVariant, nodeID)(document)
-      ?.filter(filterDefinedAttributes)
-      .map(mapDocumentAttributeEntryToAttribute) || [],
-  );
+  const [attributes, setAttributes] = useState<Attribute[]>([]);
 
   const resetCreating = () => {
     setCreating(false);
@@ -273,10 +286,11 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
   };
 
   useEffect(() => {
-    const newAttributes = queries.node.getAttributes(nodeVariant, nodeID)(document);
-    if (newAttributes) {
+    const updatedAttributes = queries.node.getAttributes(nodeVariant, nodeID)(document);
+
+    if (updatedAttributes && attributesHaveChanged(attributes, nodeVariant, nodeID)(document)) {
       resetCreating();
-      setAttributes(newAttributes
+      setAttributes(updatedAttributes
         .filter(filterDefinedAttributes)
         .map(mapDocumentAttributeEntryToAttribute));
     }
