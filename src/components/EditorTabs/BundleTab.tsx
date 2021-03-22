@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
@@ -53,7 +53,13 @@ const BundleTab: React.FC<BundleTabProps> = ({
   const classes = useStyles();
   const { document, setDocument } = useContext(DocumentContext);
 
-  const fullName = queries.node.getFullName(id)(document);
+  const [fullName, setFullName] = useState<string>('');
+
+  useEffect(() => {
+    if (queries.document.hasNode(id)(document)) {
+      setFullName(queries.node.getFullName(id)(document));
+    }
+  }, [document, id]);
 
   const handleDelete = () => {
     setDocument(mutations.bundle.delete(id));

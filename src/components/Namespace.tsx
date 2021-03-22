@@ -367,14 +367,14 @@ const sortNamespaces = (a: Namespace, b: Namespace) => (
 const mapDocumentToNamespaces = (bundleID?: string) => ({
   prefix, bundle,
 }: PROVJSONDocument) => Object
-  .entries((bundleID ? bundle?.[bundleID].prefix : prefix) || {})
+  .entries((bundleID ? bundle?.[bundleID]?.prefix : prefix) || {})
   .map(([key, value]) => ({ key: generateKey(), prefix: key, value }))
   .sort(sortNamespaces);
 
 const namespaceHasChanged = (namespaces: Namespace[], bundleID?: string) => (
   document: PROVJSONDocument,
 ): boolean => {
-  const prefixObject = (bundleID ? document.bundle?.[bundleID].prefix : document.prefix) || {};
+  const prefixObject = (bundleID ? document.bundle?.[bundleID]?.prefix : document.prefix) || {};
   return (
     namespaces.length !== Object.keys(prefixObject).length
   || (Object.entries(prefixObject).find(([p, v]) => {
