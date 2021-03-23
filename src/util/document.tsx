@@ -303,7 +303,7 @@ export type PROVAttributeDefinition = {
 export const ATTRIBUTE_DEFINITIONS: PROVAttributeDefinition[] = [
   {
     name: 'Started At Time',
-    key: 'prov:startedAtTime',
+    key: 'prov:startTime',
     documentation: 'Start is when an activity is deemed to have been started by an entity, known as trigger. The activity did not exist before its start. Any usage, generation, or invalidation involving an activity follows the activity\'s start. A start may refer to a trigger entity that set off the activity, or to an activity, known as starter, that generated the trigger.',
     url: 'https://www.w3.org/TR/prov-o/#startedAtTime',
     domain: ['activity'],
@@ -311,7 +311,7 @@ export const ATTRIBUTE_DEFINITIONS: PROVAttributeDefinition[] = [
   },
   {
     name: 'Ended At Time',
-    key: 'prov:endedAtTime',
+    key: 'prov:endTime',
     documentation: 'End is when an activity is deemed to have been ended by an entity, known as trigger. The activity no longer exists after its end. Any usage, generation, or invalidation involving an activity precedes the activity\'s end. An end may refer to a trigger entity that terminated the activity, or to an activity, known as ender that generated the trigger.',
     url: 'https://www.w3.org/TR/prov-o/#endedAtTime',
     domain: ['activity'],
