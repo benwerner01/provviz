@@ -36,15 +36,22 @@ const DateTimeAttribute: React.FC<DateTimeAttributeProps> = ({
   const classes = useDateTimeStyles();
   const { document, setDocument } = useContext(DocumentContext);
 
+  const attributeValue = queries.document.getAttributeValue(variant, domainID, attribute)(document);
+  const attributeValueISOString = attributeValue
+    ? new Date(attributeValue).toISOString()
+    : undefined;
+
+  const value = attributeValueISOString ? attributeValueISOString.slice(0, attributeValueISOString.length - 1) : '';
+
   return (
     <TextField
       label={attribute.name}
       type="datetime-local"
       classes={classes}
-      value={queries.document.getAttributeValue(variant, domainID, attribute)(document) || ''}
-      onChange={(e) => setDocument(
-        mutations.node.setAttribute(variant, domainID, attribute, e.target.value),
-      )}
+      value={value}
+      onChange={(e) => setDocument(mutations.node.setAttribute(
+        variant, domainID, attribute, (new Date(e.target.value)).toISOString(),
+      ))}
       InputLabelProps={{ shrink: true }}
     />
   );
