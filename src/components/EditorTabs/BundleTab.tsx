@@ -56,7 +56,7 @@ const BundleTab: React.FC<BundleTabProps> = ({
   const [fullName, setFullName] = useState<string>('');
 
   useEffect(() => {
-    if (queries.document.hasNode(id)(document)) {
+    if (queries.document.hasBundle(id)(document)) {
       setFullName(queries.node.getFullName(id)(document));
     }
   }, [document, id]);
