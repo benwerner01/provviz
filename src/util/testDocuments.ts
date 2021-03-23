@@ -16,7 +16,7 @@ export const testDocument1: PROVJSONDocument = {
   },
   activity: {
     'prefix1:Activity': {
-      'prov:startedAtTime': date1,
+      'prov:startTime': date1,
     },
   },
   entity: {
@@ -42,7 +42,7 @@ export const testDocument1: PROVJSONDocument = {
       },
       activity: {
         'nestedPrefix1:nestedActivity': {
-          'prov:startedAtTime': date1,
+          'prov:startTime': date1,
         },
       },
       entity: {

@@ -63,11 +63,11 @@ test('queries.document.getPrefixValue', () => {
 });
 
 test('queries.document.getAttributeValue', () => {
-  const startedAtTimeAttribute = ATTRIBUTE_DEFINITIONS.find(({ name }) => name === 'Started At Time')!;
-  const endedAtTimeAttribute = ATTRIBUTE_DEFINITIONS.find(({ name }) => name === 'Ended At Time')!;
-  expect(queries.document.getAttributeValue('activity', 'prefix1:Activity', startedAtTimeAttribute)(testDocument1))
+  const startTimeAttribute = ATTRIBUTE_DEFINITIONS.find(({ name }) => name === 'Started At Time')!;
+  const endedTimeAttribute = ATTRIBUTE_DEFINITIONS.find(({ name }) => name === 'Ended At Time')!;
+  expect(queries.document.getAttributeValue('activity', 'prefix1:Activity', startTimeAttribute)(testDocument1))
     .toBe(date1);
-  expect(queries.document.getAttributeValue('activity', 'prefix1:Activity', endedAtTimeAttribute)(testDocument1))
+  expect(queries.document.getAttributeValue('activity', 'prefix1:Activity', endedTimeAttribute)(testDocument1))
     .toBe(null);
 });
 
