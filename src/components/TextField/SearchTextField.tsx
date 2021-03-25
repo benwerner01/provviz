@@ -65,7 +65,7 @@ const SearchTextField: React.FC<SeachTextFieldProps> = ({
               setOpen(!open);
             }}
           >
-            {open ? <CloseIcon /> : <SearchIcon /> }
+            {open ? <CloseIcon titleAccess="Stop Searching" /> : <SearchIcon titleAccess="Search" /> }
           </IconButton>
         ),
         classes: { input: classes.input },

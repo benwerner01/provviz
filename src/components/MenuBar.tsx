@@ -104,7 +104,7 @@ const useStyles = makeStyles((theme) => ({
 
 export type View = 'Graph' | 'Tree'
 
-type MenuBarProps = {
+export type MenuBarProps = {
   displaySettings: () => void;
   setSelected: (selected: Selection) => void;
   collapseButtons: boolean;
@@ -188,7 +188,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
               aria-haspopup="menu"
               onClick={() => setButtonGroupOpen((prev) => !prev)}
             >
-              <ArrowDropDownIcon />
+              <ArrowDropDownIcon titleAccess="Dropdown" />
             </Button>
           </ButtonGroup>
           <Popper
@@ -197,7 +197,6 @@ const MenuBar: React.FC<MenuBarProps> = ({
             role={undefined}
             placement="bottom-start"
             transition
-            disablePortal
           >
             {({ TransitionProps, placement }) => (
               <Grow
@@ -208,7 +207,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
               >
                 <Paper>
                   <ClickAwayListener onClickAway={() => setButtonGroupOpen(false)}>
-                    <MenuList classes={{ root: classes.menuListRoot }} id="split-button-menu">
+                    <MenuList classes={{ root: classes.menuListRoot }}>
                       {VARIANTS
                         .filter((v) => v !== currentButtonGroupVariant)
                         .map((variant) => (
@@ -258,7 +257,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
                 aria-label="download-visualisation"
               >
                 <IconButton className={classes.iconButton} onClick={downloadVisualisation}>
-                  <GetAppIcon />
+                  <GetAppIcon titleAccess="Download" />
                 </IconButton>
               </Tooltip>
               <Tooltip
@@ -270,14 +269,14 @@ const MenuBar: React.FC<MenuBarProps> = ({
                   className={classes.iconButton}
                   onClick={() => setCurrentView(currentView === 'Graph' ? 'Tree' : 'Graph')}
                 >
-                  <AccountTreeIcon />
+                  <AccountTreeIcon titleAccess={currentView === 'Graph' ? 'Tree View' : 'Graph View'} />
                 </IconButton>
               </Tooltip>
             </Box>
           </Fade>
           <Tooltip arrow title="Settings" aria-label="settings">
             <IconButton className={classes.iconButton} onClick={displaySettings}>
-              <SettingsIcon />
+              <SettingsIcon titleAccess="Settings" />
             </IconButton>
           </Tooltip>
         </Box>

@@ -4,7 +4,7 @@
     "node_modules",
     "dist",
     "src/**/*.stories.tsx",
-    "src/**/*.test.tsx"
+    "*.test.tsx"
   ],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
