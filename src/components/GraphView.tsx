@@ -138,7 +138,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type GraphvizProps = {
+type GraphViewProps = {
   width: number;
   height: number;
   wasmFolderURL: string;
@@ -147,7 +147,7 @@ type GraphvizProps = {
   setSVGElement: (svg: SVGSVGElement) => void;
 }
 
-const D3Graphviz: React.FC<GraphvizProps> = ({
+const GraphView: React.FC<GraphViewProps> = ({
   width, height, wasmFolderURL, selected, setSelected, setSVGElement,
 }) => {
   const { document, setDocument } = useContext(DocumentContext);
@@ -435,4 +435,4 @@ const D3Graphviz: React.FC<GraphvizProps> = ({
   );
 };
 
-export default D3Graphviz;
+export default GraphView;

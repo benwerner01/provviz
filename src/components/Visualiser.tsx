@@ -8,9 +8,9 @@ import { Typography } from '@material-ui/core';
 import { PROVJSONDocument, validateDocument, Variant } from '../util/document';
 import DocumentContext from './contexts/DocumentContext';
 import Editor, { TABS_HEIGHT } from './Editor';
-import D3Graphviz from './D3Graphviz';
-import MenuBar, { MENU_BAR_HEIGHT, View } from './MenuBar';
+import GraphView from './GraphView';
 import TreeView from './TreeView';
+import MenuBar, { MENU_BAR_HEIGHT, View } from './MenuBar';
 import VisualisationContext, { VisualisationSettings, defaultSettings } from './contexts/VisualisationContext';
 import { palette } from '../util/theme';
 import queries from '../util/queries';
@@ -206,7 +206,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
                 ) : (
                   <>
                     {currentView === 'Graph' && (
-                      <D3Graphviz
+                      <GraphView
                         selected={selected}
                         setSelected={handleSelectedChange}
                         width={width}
