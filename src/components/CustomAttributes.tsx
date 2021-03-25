@@ -1,5 +1,5 @@
 import React, {
-  useCallback, useContext, useEffect, useState,
+  useCallback, useContext, useEffect, useRef, useState,
 } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
@@ -103,6 +103,8 @@ const CustomAttribute: React.FC<CustomAttributeProps> = ({
   name, value, onNameChange, onValueChange,
 }) => {
   if (typeof value === 'object' && Array.isArray(value)) throw new Error('LiteralArray not supported');
+
+  const typeNameInputRef = useRef<HTMLInputElement>();
   const classes = useCustomAttributeStyles();
 
   const handleTypeChange = ({ target }: React.ChangeEvent<{ value: unknown; }>) => {
@@ -110,7 +112,12 @@ const CustomAttribute: React.FC<CustomAttributeProps> = ({
     if (type === 'String') onValueChange('');
     if (type === 'Number') onValueChange(0);
     if (type === 'Boolean') onValueChange(true);
-    if (type === 'Custom') onValueChange({ $: value.toString(), type: '' });
+    if (type === 'Custom') {
+      onValueChange({ $: value.toString(), type: '' });
+      setTimeout(() => {
+        if (typeNameInputRef.current) typeNameInputRef.current.focus();
+      }, 300);
+    }
   };
 
   const valueType = typeof value === 'string'
@@ -183,7 +190,7 @@ const CustomAttribute: React.FC<CustomAttributeProps> = ({
         }}
         className={classes.typeNameTextField}
         classes={textFieldClasses}
-        InputProps={{ classes: textFieldInputClasses }}
+        InputProps={{ classes: textFieldInputClasses, inputRef: typeNameInputRef }}
         variant="outlined"
         label="Type Name"
         disabled={typeof value !== 'object'}
@@ -191,6 +198,7 @@ const CustomAttribute: React.FC<CustomAttributeProps> = ({
         onChange={({ target }) => {
           if (typeof value === 'object') onValueChange({ ...value, type: target.value });
         }}
+        error={typeof value === 'object' ? value.type === '' : false}
       />
       <FormControl className={classes.typeFormControl} variant="outlined" classes={selectFormControlClasses}>
         <InputLabel classes={selectLabelClasses}>Type</InputLabel>
@@ -242,6 +250,10 @@ const filterDefinedAttributes = ([key]: [name: string, value: AttributeValue]) =
   ...ATTRIBUTE_DEFINITIONS,
   ...PROVVIZ_ATTRIBUTE_DEFINITIONS].find((a) => a.key === key) === undefined;
 
+const filterLiteralArrayAttributeValues = ([_, value]: [name: string, value: AttributeValue]) => !(
+  typeof value === 'object' && Array.isArray(value)
+);
+
 const mapDocumentAttributeEntryToAttribute = (
   [name, value]: [name: string, value: AttributeValue],
 ): Attribute => ({
@@ -262,6 +274,14 @@ const attributesHaveChanged = (
       .find((attribute) => attribute.name === name && attribute.value === value) === undefined))
   );
 };
+
+const attributeValueIsValid = (attributeValue: AttributeValue) => !(
+  (
+    typeof attributeValue === 'object'
+    && !Array.isArray(attributeValue)
+    && attributeValue.type === ''
+  )
+);
 
 type CustomAttributesProps = {
   nodeVariant: NodeVariant;
@@ -291,6 +311,7 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
     if (updatedAttributes && attributesHaveChanged(attributes, nodeVariant, nodeID)(document)) {
       resetCreating();
       setAttributes(updatedAttributes
+        .filter(filterLiteralArrayAttributeValues)
         .filter(filterDefinedAttributes)
         .map(mapDocumentAttributeEntryToAttribute));
     }
@@ -335,7 +356,7 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
   };
 
   const handleValueChange = (key: string, name: string) => (updatedValue: AttributeValue) => {
-    debouncedUpdateValue(name, updatedValue);
+    if (attributeValueIsValid(updatedValue)) debouncedUpdateValue(name, updatedValue);
     setAttributes((prev) => {
       const index = prev.findIndex((a) => key === a.key);
       return index === -1

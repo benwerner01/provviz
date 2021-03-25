@@ -35,7 +35,7 @@ const schema = {
   },
   definitions: {
     typedLiteral: {
-      title: 'PROV-JSON Typed Literal', type: 'object', properties: { $: { type: 'string' }, type: { type: 'string', format: 'uri' }, lang: { type: 'string' } }, required: ['$'], additionalProperties: false,
+      title: 'PROV-JSON Typed Literal', type: 'object', properties: { $: { type: 'string' }, type: { type: 'string' }, lang: { type: 'string' } }, required: ['$'], additionalProperties: false,
     },
     stringLiteral: { type: 'string' },
     numberLiteral: { type: 'number' },
