@@ -22,7 +22,7 @@ import queries from '../util/queries';
 import mutations from '../util/mutations';
 import DocumentContext from './contexts/DocumentContext';
 import VisualisationContext from './contexts/VisualisationContext';
-import { Variant, VARIANTS } from '../util/definition/document';
+import { NodeVariant, NODE_VARIANTS } from '../util/definition/document';
 import SearchTextField from './TextField/SearchTextField';
 import { Selection } from './Visualiser';
 
@@ -138,7 +138,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
   const { visualisationSettings } = useContext(VisualisationContext);
 
   const [buttonGroupOpen, setButtonGroupOpen] = useState<boolean>(false);
-  const [currentButtonGroupVariant, setCurrentButtonGroupVariant] = useState<Variant>('agent');
+  const [currentButtonGroupVariant, setCurrentButtonGroupVariant] = useState<NodeVariant | 'bundle'>('agent');
 
   const {
     agent, activity, entity, bundle,
@@ -147,7 +147,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
     agentColor: agent, activityColor: activity, entityColor: entity, bundleColor: bundle,
   });
 
-  const handleCreateNode = (variant: Variant) => {
+  const handleCreateNode = (variant: NodeVariant | 'bundle') => {
     const defaultPrefix = queries.namespace.getDefaultPrefix(document);
 
     const id = variant === 'bundle'
@@ -208,7 +208,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
                 <Paper>
                   <ClickAwayListener onClickAway={() => setButtonGroupOpen(false)}>
                     <MenuList classes={{ root: classes.menuListRoot }}>
-                      {VARIANTS
+                      {([...NODE_VARIANTS, 'bundle'] as (NodeVariant | 'bundle')[])
                         .filter((v) => v !== currentButtonGroupVariant)
                         .map((variant) => (
                           <MenuItem
@@ -230,7 +230,7 @@ const MenuBar: React.FC<MenuBarProps> = ({
         </>
       ) : (
         <Box>
-          {VARIANTS.map((variant) => (
+          {([...NODE_VARIANTS, 'bundle'] as (NodeVariant | 'bundle')[]).map((variant) => (
             <Button key={variant} className={classes[variant]} classes={buttonClasses} onClick={() => handleCreateNode(variant)} variant="contained" endIcon={<AddIcon />}>
               {`${variant.charAt(0).toUpperCase()}${variant.slice(1)}`}
             </Button>

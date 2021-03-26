@@ -7,7 +7,7 @@ import download from 'downloadjs';
 import { Typography } from '@material-ui/core';
 import { PROVJSONDocument, validateDocument, Variant } from '../util/definition/document';
 import DocumentContext from './contexts/DocumentContext';
-import Editor, { TABS_HEIGHT } from './Editor';
+import Inspector, { TABS_HEIGHT } from './Inspector';
 import GraphView from './GraphView';
 import TreeView from './TreeView';
 import MenuBar, { MENU_BAR_HEIGHT, View } from './MenuBar';
@@ -63,10 +63,10 @@ const Visualiser: React.FC<VisualiserProps> = ({
 
   const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(document);
   const [isEmptyDocument, setIsEmtpyDocument] = useState<boolean>(true);
-  const [displayEditor, setDisplayEditor] = useState<boolean>(false);
-  const [displayEditorContent, setDisplayEditorContent] = useState<boolean>(false);
+  const [displayInspector, setDisplayInspector] = useState<boolean>(false);
+  const [displayInspectorContent, setDisplayInspectorContent] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<View>('Graph');
-  const [editorContentHeight, setEditorContentHeight] = useState<number>(400);
+  const [inspectorContentHeight, setInspectorContentHeight] = useState<number>(400);
   const [validationErrors, setValidationErrors] = useState<ReactNode[]>(validateDocument(document));
 
   const [selected, setSelected] = useState<Selection | undefined>();
@@ -131,7 +131,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
   };
 
   const handleSelectedChange = (updatedSelected: Selection | undefined) => {
-    if (updatedSelected && !displayEditorContent) setDisplayEditorContent(true);
+    if (updatedSelected && !displayInspectorContent) setDisplayInspectorContent(true);
     setSelected(updatedSelected);
   };
 
@@ -148,8 +148,8 @@ const Visualiser: React.FC<VisualiserProps> = ({
   const contentHeight = (
     height
     - MENU_BAR_HEIGHT
-    - (displayEditor ? TABS_HEIGHT : 0)
-    - (displayEditorContent ? editorContentHeight : 0));
+    - (displayInspector ? TABS_HEIGHT : 0)
+    - (displayInspectorContent ? inspectorContentHeight : 0));
 
   return (
     <DocumentContext.Provider
@@ -169,7 +169,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
             displaySettings={() => {
               setSelected(undefined);
               setDisplaySettings(true);
-              setDisplayEditorContent(true);
+              setDisplayInspectorContent(true);
             }}
             isEmptyDocument={isEmptyDocument}
             collapseButtons={width < (searching ? 800 : 650)}
@@ -226,17 +226,17 @@ const Visualiser: React.FC<VisualiserProps> = ({
                     )}
                   </>
                 )}
-                <Editor
+                <Inspector
                   displaySettings={displaySettings}
                   setDisplaySettings={setDisplaySettings}
-                  contentHeight={editorContentHeight}
-                  setContentHeight={setEditorContentHeight}
+                  contentHeight={inspectorContentHeight}
+                  setContentHeight={setInspectorContentHeight}
                   selected={selected}
                   setSelected={handleSelectedChange}
-                  display={displayEditor}
-                  setDisplay={setDisplayEditor}
-                  open={displayEditorContent}
-                  setOpen={setDisplayEditorContent}
+                  display={displayInspector}
+                  setDisplay={setDisplayInspector}
+                  open={displayInspectorContent}
+                  setOpen={setDisplayInspectorContent}
                 />
               </>
             )}

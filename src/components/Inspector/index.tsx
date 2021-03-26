@@ -13,12 +13,12 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Tooltip from '@material-ui/core/Tooltip';
 import { Fade, useTheme } from '@material-ui/core';
-import NodeTab from './EditorTabs/NodeTab';
-import SettingsTab from './EditorTabs/SettingsTab';
-import { tbdIsNodeVariant, Variant } from '../util/definition/document';
-import BundleTab from './EditorTabs/BundleTab';
-import { Selection } from './Visualiser';
-import RelationTab from './EditorTabs/RelationTab';
+import NodeInspector from './NodeInspector';
+import SettingsInspector from './SettingsInspector';
+import RelationInspector from './RelationInspector';
+import BundleInspector from './BundleInspector';
+import { tbdIsNodeVariant, Variant } from '../../util/definition/document';
+import { Selection } from '../Visualiser';
 
 export const TABS_HEIGHT = 48 + 1;
 
@@ -77,7 +77,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type EditorProps = {
+type InspectorProps = {
   displaySettings: boolean;
   setDisplaySettings: (updated: boolean) => void;
   contentHeight: number;
@@ -90,7 +90,7 @@ type EditorProps = {
   setOpen: (open: boolean) => void;
 }
 
-const Editor: React.FC<EditorProps> = ({
+const Inspector: React.FC<InspectorProps> = ({
   displaySettings,
   setDisplaySettings,
   contentHeight,
@@ -321,12 +321,12 @@ const Editor: React.FC<EditorProps> = ({
           px={4}
         >
           {(displaySettings && currentTabIndex === 0)
-            ? <SettingsTab />
+            ? <SettingsInspector />
             : (
               currentTabVariant
               && currentTabID
               && (currentTabVariant === 'bundle' ? (
-                <BundleTab
+                <BundleInspector
                   key={currentTabIndex}
                   id={currentTabID}
                   setSelected={setSelected}
@@ -338,7 +338,7 @@ const Editor: React.FC<EditorProps> = ({
                   }
                 />
               ) : tbdIsNodeVariant(currentTabVariant) ? (
-                <NodeTab
+                <NodeInspector
                   key={currentTabIndex}
                   variant={currentTabVariant}
                   id={currentTabID}
@@ -350,7 +350,7 @@ const Editor: React.FC<EditorProps> = ({
                   }
                 />
               ) : (
-                <RelationTab
+                <RelationInspector
                   key={currentTabIndex}
                   variant={currentTabVariant}
                   id={currentTabID}
@@ -367,4 +367,4 @@ const Editor: React.FC<EditorProps> = ({
   );
 };
 
-export default Editor;
+export default Inspector;

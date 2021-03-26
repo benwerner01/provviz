@@ -13,10 +13,6 @@ export const tbdIsNodeVariant = (tbd: string): tbd is NodeVariant => (
 
 export type Variant = 'bundle' | NodeVariant | RelationVariant
 
-export const VARIANTS: Variant[] = ['activity', 'agent', 'entity', 'bundle'];
-
-export const tbdIsVariant = (tbd: string): tbd is Variant => VARIANTS.includes(tbd as Variant);
-
 export type ProvVizShape = 'box' | 'polygon' | 'ellipse' | 'oval' | 'circle'
   | 'egg' | 'triangle' | 'diamond' | 'trapezium' | 'parallelogram' | 'house'
   | 'pentagon' | 'hexagon' | 'septagon' | 'octagon' | 'invtriangle' | 'invtrapezium'

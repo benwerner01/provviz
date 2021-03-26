@@ -26,11 +26,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type SettingsTabProps = {
+type SettingsInspectorProps = {
 
 }
 
-const SettingsTab: React.FC<SettingsTabProps> = () => {
+const SettingsInspector: React.FC<SettingsInspectorProps> = () => {
   const classes = useStyles();
   const { visualisationSettings, setVisualisationSettings } = useContext(VisualisationContext);
 
@@ -127,4 +127,4 @@ const SettingsTab: React.FC<SettingsTabProps> = () => {
   );
 };
 
-export default SettingsTab;
+export default SettingsInspector;

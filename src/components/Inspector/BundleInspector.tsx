@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type BundleTabProps = {
+type BundleInspectorProps = {
   id: string;
   openSections: string[];
   setOpenSections: (openSections: string[]) => void;
@@ -47,7 +47,7 @@ type BundleTabProps = {
   onDelete?: () => void;
 }
 
-const BundleTab: React.FC<BundleTabProps> = ({
+const BundleInspector: React.FC<BundleInspectorProps> = ({
   id, openSections, setOpenSections, setSelected, onIDChange, onDelete,
 }) => {
   const classes = useStyles();
@@ -167,4 +167,4 @@ const BundleTab: React.FC<BundleTabProps> = ({
   );
 };
 
-export default BundleTab;
+export default BundleInspector;

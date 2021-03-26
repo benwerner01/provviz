@@ -102,7 +102,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type NodeTabProps = {
+type NodeInspectorProps = {
   variant: NodeVariant;
   id: string;
   openSections: string[];
@@ -111,7 +111,7 @@ type NodeTabProps = {
   onDelete?: () => void;
 }
 
-const NodeTab: React.FC<NodeTabProps> = ({
+const NodeInspector: React.FC<NodeInspectorProps> = ({
   variant, id, onIDChange, onDelete, openSections, setOpenSections,
 }) => {
   const classes = useStyles();
@@ -282,4 +282,4 @@ const NodeTab: React.FC<NodeTabProps> = ({
   );
 };
 
-export default NodeTab;
+export default NodeInspector;

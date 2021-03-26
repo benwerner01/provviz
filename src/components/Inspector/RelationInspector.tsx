@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type RelationTabProps = {
+type RelationInspectorProps = {
   variant: RelationVariant;
   id: string;
   openSections: string[];
@@ -36,7 +36,7 @@ type RelationTabProps = {
   onDelete?: () => void;
 }
 
-const RelationTab: React.FC<RelationTabProps> = ({
+const RelationInspector: React.FC<RelationInspectorProps> = ({
   variant, id, onDelete, openSections, setOpenSections,
 }) => {
   const classes = useStyles();
@@ -76,4 +76,4 @@ const RelationTab: React.FC<RelationTabProps> = ({
   );
 };
 
-export default RelationTab;
+export default RelationInspector;
