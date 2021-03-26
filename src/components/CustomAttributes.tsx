@@ -19,7 +19,7 @@ import {
   NodeVariant,
   PROVJSONDocument,
 } from '../util/definition/document';
-import { ATTRIBUTE_DEFINITIONS, PROVVIZ_ATTRIBUTE_DEFINITIONS } from '../util/definition/attribute';
+import { NODE_ATTRIBUTE_DEFINITIONS, NODE_PROVVIZ_ATTRIBUTE_DEFINITIONS } from '../util/definition/attribute';
 import queries from '../util/queries';
 import DocumentContext from './contexts/DocumentContext';
 import mutations from '../util/mutations';
@@ -246,8 +246,8 @@ const feshAttributeKey = () => {
 };
 
 const filterDefinedAttributes = ([key]: [name: string, value: AttributeValue]) => [
-  ...ATTRIBUTE_DEFINITIONS,
-  ...PROVVIZ_ATTRIBUTE_DEFINITIONS].find((a) => a.key === key) === undefined;
+  ...NODE_ATTRIBUTE_DEFINITIONS,
+  ...NODE_PROVVIZ_ATTRIBUTE_DEFINITIONS].find((a) => a.key === key) === undefined;
 
 const filterLiteralArrayAttributeValues = ([_, value]: [name: string, value: AttributeValue]) => !(
   typeof value === 'object' && Array.isArray(value)

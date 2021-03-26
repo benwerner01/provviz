@@ -7,7 +7,7 @@ import queries from '../../util/queries';
 import mutations from '../../util/mutations';
 import { PROVJSONBundle } from '../../util/definition/document';
 
-type NodeAutocompleteProps = {
+type MultipleNodeAutocompleteProps = {
   label: string;
   value: string[];
   exclude?: string[];
@@ -32,7 +32,7 @@ const useAutocompleteStyles = makeStyles((theme) => ({
   },
 }));
 
-const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
+const MultipleNodeAutocomplete: React.FC<MultipleNodeAutocompleteProps> = ({
   label, value, variant, exclude, onChange,
 }) => {
   const { document } = useContext(DocumentContext);
@@ -83,4 +83,4 @@ const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
   );
 };
 
-export default NodeAutocomplete;
+export default MultipleNodeAutocomplete;

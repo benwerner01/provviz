@@ -11,12 +11,12 @@ import InfoIcon from '@material-ui/icons/Info';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import DocumentContext from '../contexts/DocumentContext';
 import EditableIdentifier from '../EditableIdentifier';
-import NodeAutocomplete from '../Autocomplete/NodeAutocomplete';
+import MultipleNodeAutocomplete from '../Autocomplete/MultipleNodeAutocomplete';
 import queries from '../../util/queries';
 import mutations from '../../util/mutations';
 import { PROVJSONBundle, NodeVariant } from '../../util/definition/document';
 import { Relation, RELATIONS, RelationName } from '../../util/definition/relation';
-import { PROVVIZ_ATTRIBUTE_DEFINITIONS, ATTRIBUTE_DEFINITIONS } from '../../util/definition/attribute';
+import { NODE_PROVVIZ_ATTRIBUTE_DEFINITIONS, NODE_ATTRIBUTE_DEFINITIONS } from '../../util/definition/attribute';
 import Section from './Section';
 import { palette } from '../../util/theme';
 import CustomAttributes from '../CustomAttributes';
@@ -56,7 +56,7 @@ const EditableRelation: React.FC<EditableRelationProps> = ({
   return (
     <>
       <Box mt={1} mb={1} display="flex" alignItems="center">
-        <NodeAutocomplete
+        <MultipleNodeAutocomplete
           variant={range}
           label={name}
           value={value}
@@ -174,7 +174,7 @@ const NodeTab: React.FC<NodeTabProps> = ({
       content: (
         <>
           <EditableIdentifier initialID={id} onChange={onIDChange} bundleID={bundleID} />
-          {ATTRIBUTE_DEFINITIONS
+          {NODE_ATTRIBUTE_DEFINITIONS
             .filter(({ domain }) => domain.includes(variant))
             .map((attribute) => (
               <DefinedAttribute
@@ -210,7 +210,7 @@ const NodeTab: React.FC<NodeTabProps> = ({
     {
       name: 'Visualisation',
       open: openSections.includes('Visualisation'),
-      content: PROVVIZ_ATTRIBUTE_DEFINITIONS
+      content: NODE_PROVVIZ_ATTRIBUTE_DEFINITIONS
         .filter(({ domain }) => domain.includes(variant))
         .map((attribute) => (
           <DefinedAttribute

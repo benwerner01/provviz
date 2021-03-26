@@ -1,9 +1,10 @@
 import React, { ReactNode } from 'react';
 import { NodeVariant } from './document';
+import { RelationName } from './relation';
 
 export type PROVAttributeRange = 'DateTime' | 'Color' | 'Boolean' | 'Shape'
 
-export type PROVAttributeDefinition = {
+export type NodePROVAttributeDefinition = {
   name: string;
   documentation?: ReactNode;
   url?: string;
@@ -12,7 +13,7 @@ export type PROVAttributeDefinition = {
   range: PROVAttributeRange
 }
 
-export const ATTRIBUTE_DEFINITIONS: PROVAttributeDefinition[] = [
+export const NODE_ATTRIBUTE_DEFINITIONS: NodePROVAttributeDefinition[] = [
   {
     name: 'Started At Time',
     key: 'prov:startTime',
@@ -31,7 +32,7 @@ export const ATTRIBUTE_DEFINITIONS: PROVAttributeDefinition[] = [
   },
 ];
 
-export const PROVVIZ_ATTRIBUTE_DEFINITIONS: PROVAttributeDefinition[] = [
+export const NODE_PROVVIZ_ATTRIBUTE_DEFINITIONS: NodePROVAttributeDefinition[] = [
   {
     name: 'Override Color',
     key: 'provviz:color',
