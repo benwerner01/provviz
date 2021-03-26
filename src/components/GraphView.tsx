@@ -20,6 +20,7 @@ import queries from '../util/queries';
 import { Selection as PROVVizSelection } from './Visualiser';
 import { Relation, RELATIONS } from '../util/definition/relation';
 import mutations from '../util/mutations';
+import { tbdIsNodeVariant } from '../util/definition/document';
 
 interface Datum {
   attributes: {
@@ -106,7 +107,16 @@ const useStyles = makeStyles((theme) => ({
           '& path, polygon': {
             stroke: 'red',
           },
-          '& polygon': {
+          '& polygon, text': {
+            fill: 'red',
+          },
+        },
+        '&.hover': {
+          cursor: 'pointer',
+          '& path, polygon': {
+            stroke: 'red',
+          },
+          '& polygon, text': {
             fill: 'red',
           },
         },
@@ -211,10 +221,12 @@ const GraphView: React.FC<GraphViewProps> = ({
   }, [graphvizWrapper, creatingRelation, d3Nodes]);
 
   useEffect(() => {
-    if (selected && d3Nodes && d3Clusters) {
+    if (selected && d3Nodes && d3Clusters && d3Edges) {
       const d3Selected = selected.variant === 'bundle'
         ? d3Clusters.filter(({ key }) => key === `cluster_${selected.id}`)
-        : d3Nodes.filter(({ key }) => key === selected.id);
+        : tbdIsNodeVariant(selected.variant)
+          ? d3Nodes.filter(({ key }) => key === selected.id)
+          : d3Edges.filter(({ attributes }) => attributes.id === selected.id);
 
       const datum = d3Selected.empty() ? undefined : d3Selected.datum();
 
@@ -224,7 +236,8 @@ const GraphView: React.FC<GraphViewProps> = ({
         const svg = select<HTMLDivElement, unknown>(graphvizWrapper.current).select<SVGSVGElement>('svg');
         const zoom = graphvizInstance.zoomBehavior();
 
-        const { center } = children.find(({ tag }) => tag === 'ellipse' || tag === 'polygon') || {};
+        const { center } = (children as (PathDatum | PolygonDatum | EllipseDatum)[])
+          .find(({ tag }) => tag === 'ellipse' || tag === 'polygon') || {};
 
         if (zoom && center) {
           const graph = svg.select<SVGGElement>('.graph');
@@ -243,7 +256,7 @@ const GraphView: React.FC<GraphViewProps> = ({
         }
       }
     }
-  }, [selected, d3Nodes, d3Clusters]);
+  }, [selected, d3Nodes, d3Clusters, d3Edges]);
 
   useEffect(() => {
     wasmFolder(wasmFolderURL);
@@ -309,12 +322,16 @@ const GraphView: React.FC<GraphViewProps> = ({
       if (selected) {
         const d3Selected = selected.variant === 'bundle'
           ? d3Clusters.filter(({ key }) => selected.id === key.slice(8))
-          : d3Nodes.filter(({ key }) => selected.id === key);
+          : tbdIsNodeVariant(selected.variant)
+            ? d3Nodes.filter(({ key }) => selected.id === key)
+            : d3Edges.filter(({ attributes }) => selected.id === attributes.id);
 
         d3Selected.classed('selected', true);
 
-        if (selected.variant !== 'bundle') {
-          d3Edges.filter(({ key }) => key.startsWith(`${selected.id}->`)).classed('selected', true);
+        if (tbdIsNodeVariant(selected.variant)) {
+          d3Edges
+            .filter(({ key }) => key.startsWith(`${selected.id}->`))
+            .classed('selected', true);
         }
       }
 
@@ -327,18 +344,31 @@ const GraphView: React.FC<GraphViewProps> = ({
       if (deselectedClusterGroups) deselectedClusterGroups.classed('selected', false);
 
       const deselectedEdges = d3Edges
-        .filter(({ key }) => !selected || selected.variant === 'bundle' || !key.startsWith(`${selected.id}->`));
+        .filter(({ key, attributes }) => (
+          !selected
+          || selected.variant === 'bundle'
+          || (tbdIsNodeVariant(selected.variant)
+            ? !key.startsWith(`${selected.id}->`)
+            : attributes.id !== selected.id)));
 
       deselectedEdges.classed('selected', false);
 
       d3Nodes.on('mouseover', function mouseover({ key }) {
-        const nodeGroup = select(this);
         const variant = queries.node.getVariant(key)(document);
         if (
           creatingRelation
           && creatingRelation.relation
           && creatingRelation.relation.range !== variant) return;
+
+        const nodeGroup = select(this);
         nodeGroup.classed('hover', true);
+      });
+
+      d3Edges.on('mouseover', function mouseover() {
+        if (creatingRelation) return;
+
+        const edgeGroup = select(this);
+        edgeGroup.classed('hover', true);
       });
 
       d3Nodes.on('mouseout', function mouseout() {
@@ -346,7 +376,12 @@ const GraphView: React.FC<GraphViewProps> = ({
         nodeGroup.classed('hover', false);
       });
 
-      d3Nodes.on('click', ({ key }) => {
+      d3Edges.on('mouseout', function mouseout() {
+        const edgeGroup = select(this);
+        edgeGroup.classed('hover', false);
+      });
+
+      d3Nodes.on('click', ({ key, attributes }) => {
         const variant = queries.node.getVariant(key)(document);
         if (creatingRelation && creatingRelation.relation) {
           const { relation, domainID } = creatingRelation;
@@ -358,6 +393,12 @@ const GraphView: React.FC<GraphViewProps> = ({
         } else {
           setSelected({ id: key, variant });
         }
+      });
+
+      d3Edges.on('click', ({ attributes }) => {
+        const { id } = attributes;
+        const variant = queries.relation.getVariant(id)(document);
+        setSelected({ id, variant });
       });
 
       if (!d3Clusters.empty()) {

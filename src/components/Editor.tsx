@@ -15,9 +15,10 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { Fade, useTheme } from '@material-ui/core';
 import NodeTab from './EditorTabs/NodeTab';
 import SettingsTab from './EditorTabs/SettingsTab';
-import { Variant } from '../util/definition/document';
+import { tbdIsNodeVariant, Variant } from '../util/definition/document';
 import BundleTab from './EditorTabs/BundleTab';
 import { Selection } from './Visualiser';
+import RelationTab from './EditorTabs/RelationTab';
 
 export const TABS_HEIGHT = 48 + 1;
 
@@ -327,7 +328,7 @@ const Editor: React.FC<EditorProps> = ({
               && (currentTabVariant === 'bundle' ? (
                 <BundleTab
                   key={currentTabIndex}
-                  id={tabs[currentTabIndex - (displaySettings ? 1 : 0)].id}
+                  id={currentTabID}
                   setSelected={setSelected}
                   onIDChange={handleTabIDChange(currentTabIndex - (displaySettings ? 1 : 0))}
                   onDelete={handleCloseTab(currentTabID)}
@@ -336,12 +337,23 @@ const Editor: React.FC<EditorProps> = ({
                     handleTabOpenSectionsChange(currentTabIndex - (displaySettings ? 1 : 0))
                   }
                 />
-              ) : (
+              ) : tbdIsNodeVariant(currentTabVariant) ? (
                 <NodeTab
                   key={currentTabIndex}
                   variant={currentTabVariant}
-                  id={tabs[currentTabIndex - (displaySettings ? 1 : 0)].id}
+                  id={currentTabID}
                   onIDChange={handleTabIDChange(currentTabIndex - (displaySettings ? 1 : 0))}
+                  onDelete={handleCloseTab(currentTabID)}
+                  openSections={tabs[currentTabIndex - (displaySettings ? 1 : 0)].openSections}
+                  setOpenSections={
+                    handleTabOpenSectionsChange(currentTabIndex - (displaySettings ? 1 : 0))
+                  }
+                />
+              ) : (
+                <RelationTab
+                  key={currentTabIndex}
+                  variant={currentTabVariant}
+                  id={currentTabID}
                   onDelete={handleCloseTab(currentTabID)}
                   openSections={tabs[currentTabIndex - (displaySettings ? 1 : 0)].openSections}
                   setOpenSections={

@@ -5,7 +5,7 @@ import {
   AttributeValue,
   PROVJSONDocument,
 } from './definition/document';
-import { RelationName, RELATIONS } from './definition/relation';
+import { RelationVariant, RELATIONS } from './definition/relation';
 import { PROVAttributeDefinition } from './definition/attribute';
 import queries from './queries';
 
@@ -82,6 +82,133 @@ const mutations = {
       ...document,
       [variant]: { ...document[variant], [id]: { } },
     }),
+
+    createAttribute: (
+      variant: NodeVariant | RelationVariant, nodeID: string, name: string, value: AttributeValue,
+    ) => (document: PROVJSONDocument): PROVJSONDocument => {
+      const updatedDocument = mutations.bundle
+        .find(
+          (bundle) => Object.keys(bundle[variant] || {}).includes(nodeID),
+        )(
+          (bundle) => ({
+            ...bundle,
+            [variant]: {
+              ...bundle[variant],
+              [nodeID]: { ...bundle[variant]![nodeID], [name]: value },
+            },
+          }),
+        )(document);
+
+      if (!updatedDocument) throw new Error(`Could not find node with id ${nodeID}`);
+
+      return updatedDocument;
+    },
+    deleteAttribute: (
+      variant: NodeVariant | RelationVariant, nodeID: string, attributeName: string,
+    ) => (document: PROVJSONDocument): PROVJSONDocument => {
+      const updatedDocument = mutations.bundle
+        .find(
+          (bundle) => Object.keys(bundle[variant] || {}).includes(nodeID),
+        )(
+          (bundle) => ({
+            ...bundle,
+            [variant]: {
+              ...bundle[variant],
+              [nodeID]: Object.entries(bundle[variant]![nodeID]).reduce(
+                (prev, [name, value]) => (name === attributeName
+                  ? prev
+                  : ({ ...prev, [name]: value })),
+                { },
+              ),
+            },
+          }),
+        )(document);
+
+      if (!updatedDocument) throw new Error(`Could not find node with id ${nodeID}`);
+
+      return updatedDocument;
+    },
+    setAttributeValue: (
+      variant: NodeVariant | RelationVariant,
+      nodeID: string,
+      attributeName: string,
+      attributeValue: AttributeValue,
+    ) => (document: PROVJSONDocument): PROVJSONDocument => {
+      const updatedDocument = mutations.bundle
+        .find(
+          (bundle) => Object.keys(bundle[variant] || {}).includes(nodeID),
+        )(
+          (bundle) => ({
+            ...bundle,
+            [variant]: {
+              ...bundle[variant],
+              [nodeID]: Object.entries(bundle[variant]![nodeID]).reduce(
+                (prev, [name]) => (name === attributeName
+                  ? ({ ...prev, [name]: attributeValue })
+                  : prev),
+                { ...bundle[variant]![nodeID] },
+              ),
+            },
+          }),
+        )(document);
+
+      if (!updatedDocument) throw new Error(`Could not find node with id ${nodeID}`);
+
+      return updatedDocument;
+    },
+    setAttributeName: (
+      variant: NodeVariant | RelationVariant,
+      nodeID: string,
+      prevAttributeName: string,
+      newAttributeName: string,
+    ) => (document: PROVJSONDocument): PROVJSONDocument => {
+      const updatedDocument = mutations.bundle
+        .find(
+          (bundle) => Object.keys(bundle[variant] || {}).includes(nodeID),
+        )(
+          (bundle) => ({
+            ...bundle,
+            [variant]: {
+              ...bundle[variant],
+              [nodeID]: Object.entries(bundle[variant]![nodeID]).reduce(
+                (prev, [name, value]) => (name === prevAttributeName
+                  ? ({ ...prev, [newAttributeName]: value })
+                  : ({ ...prev, [name]: value })),
+                {},
+              ),
+            },
+          }),
+        )(document);
+
+      if (!updatedDocument) throw new Error(`Could not find node with id ${nodeID}`);
+
+      return updatedDocument;
+    },
+    setAttribute: (
+      variant: NodeVariant | RelationVariant,
+      id: string,
+      attribute: PROVAttributeDefinition,
+      value: any,
+    ) => (document: PROVJSONDocument): PROVJSONDocument => {
+      const { key } = attribute;
+
+      const updatedDocument = mutations.bundle.find(
+        (b) => Object.keys(b[variant] || {}).includes(id),
+      )((bundle) => ({
+        ...bundle,
+        [variant]: {
+          ...bundle[variant],
+          [id]: {
+            ...bundle[variant]?.[id],
+            [key]: value,
+          },
+        },
+      }))(document);
+
+      if (!updatedDocument) throw new Error('Could not update node attribute');
+
+      return updatedDocument;
+    },
   },
   namespace: {
     create: (
@@ -181,127 +308,10 @@ const mutations = {
       if (!updatedBundle) throw new Error('Could not delete node');
       return ({ ...document, ...mutations.relation.deleteWithNode(id)(updatedBundle) });
     },
-    createAttribute: (
-      variant: NodeVariant, nodeID: string, name: string, value: AttributeValue,
-    ) => (document: PROVJSONDocument): PROVJSONDocument => {
-      const updatedDocument = mutations.bundle
-        .find(
-          (bundle) => Object.keys(bundle[variant] || {}).includes(nodeID),
-        )(
-          (bundle) => ({
-            ...bundle,
-            [variant]: {
-              ...bundle[variant],
-              [nodeID]: { ...bundle[variant]![nodeID], [name]: value },
-            },
-          }),
-        )(document);
-
-      if (!updatedDocument) throw new Error(`Could not find node with id ${nodeID}`);
-
-      return updatedDocument;
-    },
-    deleteAttribute: (
-      variant: NodeVariant, nodeID: string, attributeName: string,
-    ) => (document: PROVJSONDocument): PROVJSONDocument => {
-      const updatedDocument = mutations.bundle
-        .find(
-          (bundle) => Object.keys(bundle[variant] || {}).includes(nodeID),
-        )(
-          (bundle) => ({
-            ...bundle,
-            [variant]: {
-              ...bundle[variant],
-              [nodeID]: Object.entries(bundle[variant]![nodeID]).reduce(
-                (prev, [name, value]) => (name === attributeName
-                  ? prev
-                  : ({ ...prev, [name]: value })),
-                { },
-              ),
-            },
-          }),
-        )(document);
-
-      if (!updatedDocument) throw new Error(`Could not find node with id ${nodeID}`);
-
-      return updatedDocument;
-    },
-    setAttributeValue: (
-      variant: NodeVariant, nodeID: string, attributeName: string, attributeValue: AttributeValue,
-    ) => (document: PROVJSONDocument): PROVJSONDocument => {
-      const updatedDocument = mutations.bundle
-        .find(
-          (bundle) => Object.keys(bundle[variant] || {}).includes(nodeID),
-        )(
-          (bundle) => ({
-            ...bundle,
-            [variant]: {
-              ...bundle[variant],
-              [nodeID]: Object.entries(bundle[variant]![nodeID]).reduce(
-                (prev, [name]) => (name === attributeName
-                  ? ({ ...prev, [name]: attributeValue })
-                  : prev),
-                { ...bundle[variant]![nodeID] },
-              ),
-            },
-          }),
-        )(document);
-
-      if (!updatedDocument) throw new Error(`Could not find node with id ${nodeID}`);
-
-      return updatedDocument;
-    },
-    setAttributeName: (
-      variant: NodeVariant, nodeID: string, prevAttributeName: string, newAttributeName: string,
-    ) => (document: PROVJSONDocument): PROVJSONDocument => {
-      const updatedDocument = mutations.bundle
-        .find(
-          (bundle) => Object.keys(bundle[variant] || {}).includes(nodeID),
-        )(
-          (bundle) => ({
-            ...bundle,
-            [variant]: {
-              ...bundle[variant],
-              [nodeID]: Object.entries(bundle[variant]![nodeID]).reduce(
-                (prev, [name, value]) => (name === prevAttributeName
-                  ? ({ ...prev, [newAttributeName]: value })
-                  : ({ ...prev, [name]: value })),
-                {},
-              ),
-            },
-          }),
-        )(document);
-
-      if (!updatedDocument) throw new Error(`Could not find node with id ${nodeID}`);
-
-      return updatedDocument;
-    },
-    setAttribute: (
-      variant: NodeVariant, id: string, attribute: PROVAttributeDefinition, value: any,
-    ) => (document: PROVJSONDocument): PROVJSONDocument => {
-      const { key } = attribute;
-
-      const updatedDocument = mutations.bundle.find(
-        (b) => Object.keys(b[variant] || {}).includes(id),
-      )((bundle) => ({
-        ...bundle,
-        [variant]: {
-          ...bundle[variant],
-          [id]: {
-            ...bundle[variant]?.[id],
-            [key]: value,
-          },
-        },
-      }))(document);
-
-      if (!updatedDocument) throw new Error('Could not update node attribute');
-
-      return updatedDocument;
-    },
   },
   relation: {
     create: (
-      relationName: RelationName, relationID: string, domainID: string, rangeID: string,
+      relationName: RelationVariant, relationID: string, domainID: string, rangeID: string,
     ) => (document: PROVJSONDocument): PROVJSONDocument => {
       const { domainKey, rangeKey } = RELATIONS.find(({ name }) => name === relationName)!;
       return {
@@ -342,7 +352,7 @@ const mutations = {
             : prevBundle);
       }, { ...bundle }),
     delete: (
-      relationName: RelationName, relationID: string,
+      relationName: RelationVariant, relationID: string,
     ) => (document: PROVJSONDocument): PROVJSONDocument => {
       const updatedDocument = mutations.bundle
         .find(

@@ -1,6 +1,6 @@
 import { createMuiTheme } from '@material-ui/core/styles';
 import React, { Dispatch, SetStateAction } from 'react';
-import { RelationName } from '../../util/definition/relation';
+import { RelationVariant } from '../../util/definition/relation';
 
 const defaultTheme = createMuiTheme();
 
@@ -15,7 +15,7 @@ export const PROVENANCE_VIEW_NAMES: ProvenanceView[] = ['Proccess Flow', 'Data F
 export type ProvenanceViewDefinition = {
   description: string;
   nodes: ('activity' | 'agent' | 'entity')[];
-  relations: RelationName[]
+  relations: RelationVariant[]
 }
 
 // Descriptions taken from Chapter 3 of 'Provenance: An Introduction to PROV'

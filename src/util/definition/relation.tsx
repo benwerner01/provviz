@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { NodeVariant } from './document';
 
-export type RelationName = 'wasGeneratedBy'
+export type RelationVariant = 'wasGeneratedBy'
 | 'used'
 | 'wasInformedBy'
 | 'wasStartedBy'
@@ -16,7 +16,7 @@ export type RelationName = 'wasGeneratedBy'
 | 'alternateOf'
 | 'hadMember'
 
-export const RELATION_NAMES: RelationName[] = [
+export const RELATION_VARIANTS: RelationVariant[] = [
   'wasGeneratedBy',
   'used',
   'wasInformedBy',
@@ -34,14 +34,13 @@ export const RELATION_NAMES: RelationName[] = [
 ];
 
 export type Relation = {
-name: RelationName;
+name: RelationVariant;
 documentation: ReactNode;
 url: string;
 domain: NodeVariant;
 domainKey: string;
 range: NodeVariant;
 rangeKey: string;
-timestamp?: boolean;
 }
 
 export const RELATIONS: Relation[] = [
@@ -104,7 +103,6 @@ export const RELATIONS: Relation[] = [
     domainKey: 'prov:activity',
     range: 'entity',
     rangeKey: 'prov:trigger',
-    timestamp: true,
   },
   {
     name: 'wasEndedBy',
@@ -123,7 +121,6 @@ export const RELATIONS: Relation[] = [
     domainKey: 'prov:activity',
     range: 'entity',
     rangeKey: 'prov:trigger',
-    timestamp: true,
   },
   {
     name: 'wasInvalidatedBy',
@@ -138,7 +135,6 @@ export const RELATIONS: Relation[] = [
     domainKey: 'prov:entity',
     range: 'activity',
     rangeKey: 'prov:activity',
-    timestamp: true,
   },
   {
     name: 'wasDerivedFrom',

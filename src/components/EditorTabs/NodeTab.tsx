@@ -15,8 +15,8 @@ import MultipleNodeAutocomplete from '../Autocomplete/MultipleNodeAutocomplete';
 import queries from '../../util/queries';
 import mutations from '../../util/mutations';
 import { PROVJSONBundle, NodeVariant } from '../../util/definition/document';
-import { Relation, RELATIONS, RelationName } from '../../util/definition/relation';
-import { NODE_PROVVIZ_ATTRIBUTE_DEFINITIONS, NODE_ATTRIBUTE_DEFINITIONS } from '../../util/definition/attribute';
+import { Relation, RELATIONS, RelationVariant } from '../../util/definition/relation';
+import { PROVVIZ_ATTRIBUTE_DEFINITIONS, ATTRIBUTE_DEFINITIONS } from '../../util/definition/attribute';
 import Section from './Section';
 import { palette } from '../../util/theme';
 import CustomAttributes from '../CustomAttributes';
@@ -135,7 +135,7 @@ const NodeTab: React.FC<NodeTabProps> = ({
       [name]: queries.relation.getRangeWithDomain(name, id)(document),
     }), {} as { [key: string]: string[] });
 
-  const handleRelationRangeChange = (relationName: RelationName) => (
+  const handleRelationRangeChange = (relationName: RelationVariant) => (
     updatedDocument: PROVJSONBundle, rangeIDs: string[],
   ) => {
     const rangeIncludes = relationRangeIncludes[relationName];
@@ -174,7 +174,7 @@ const NodeTab: React.FC<NodeTabProps> = ({
       content: (
         <>
           <EditableIdentifier initialID={id} onChange={onIDChange} bundleID={bundleID} />
-          {NODE_ATTRIBUTE_DEFINITIONS
+          {ATTRIBUTE_DEFINITIONS
             .filter(({ domain }) => domain.includes(variant))
             .map((attribute) => (
               <DefinedAttribute
@@ -210,7 +210,7 @@ const NodeTab: React.FC<NodeTabProps> = ({
     {
       name: 'Visualisation',
       open: openSections.includes('Visualisation'),
-      content: NODE_PROVVIZ_ATTRIBUTE_DEFINITIONS
+      content: PROVVIZ_ATTRIBUTE_DEFINITIONS
         .filter(({ domain }) => domain.includes(variant))
         .map((attribute) => (
           <DefinedAttribute

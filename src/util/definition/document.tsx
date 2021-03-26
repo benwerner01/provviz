@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { validatePROVJSONSchema } from '../../lib/ajv';
 import queries from '../queries';
-import { RELATIONS } from './relation';
+import { RelationVariant, RELATIONS } from './relation';
 
 export type NodeVariant = 'activity' | 'agent' | 'entity'
 
@@ -11,7 +11,7 @@ export const tbdIsNodeVariant = (tbd: string): tbd is NodeVariant => (
   NODE_VARIANTS.includes(tbd as NodeVariant)
 );
 
-export type Variant = 'bundle' | NodeVariant
+export type Variant = 'bundle' | NodeVariant | RelationVariant
 
 export const VARIANTS: Variant[] = ['activity', 'agent', 'entity', 'bundle'];
 

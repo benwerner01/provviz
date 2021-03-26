@@ -28,7 +28,7 @@ const mapNodeToDot = (variant: 'agent' | 'activity' | 'entity', settings: Visual
     .filter(([key]) => PROVVIZ_ATTRIBUTE_DEFINITIONS.find((a) => a.key === key) === undefined);
 
   return [
-    `"${id}" [shape="${shape}" label="${id}" style="filled" fillcolor="${fillcolor}" fontcolor="${fontcolor}"]`,
+    `"${id}" [id="${id}" shape="${shape}" label="${id}" style="filled" fillcolor="${fillcolor}" fontcolor="${fontcolor}"]`,
     (
       filteredAttributes.length > 0
       && !settings.hideAllNodeAttributes
@@ -66,15 +66,15 @@ const mapBundleToDots = (
     .filter(([id]) => !hiddenNodes.includes(id))
     .map(mapNodeToDot('entity', settings))),
   ...RELATIONS.map(({ name, domainKey, rangeKey }) => Object
-    .values((
+    .entries((
       settings.view !== null
       && !PROVENANVE_VIEW_DEFINITIONS[settings.view].relations.includes(name)
     ) ? {} : bundle[name] || {})
-    .filter((value) => (
+    .filter(([_, value]) => (
       !hiddenNodes.includes(value[domainKey])
       && !hiddenNodes.includes(value[rangeKey])))
-    .map((value) => (
-      `"${value[domainKey]}" -> "${value[rangeKey]}" [label="${name}"${name === 'alternateOf' ? ' dir="both"' : ''}]`
+    .map(([id, value]) => (
+      `"${value[domainKey]}" -> "${value[rangeKey]}" [label="${name}"${name === 'alternateOf' ? ' dir="both"' : ''} id="${id}"]`
     ))).flat(),
 ].join('\n');
 

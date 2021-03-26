@@ -1,4 +1,5 @@
-import { ATTRIBUTE_DEFINITIONS, PROVJSONDocument } from './definition/document';
+import { PROVJSONDocument } from './definition/document';
+import { ATTRIBUTE_DEFINITIONS } from './definition/attribute';
 import queries from './queries';
 import { testDocument1, date1 } from './testDocuments';
 
@@ -160,10 +161,10 @@ test('queries.node.getVariant', () => {
     .toBe('agent');
 });
 
-test('queries.node.getAttributes', () => {
-  expect(queries.node.getAttributes('agent', 'prefix1:Agent')(testDocument1))
+test('queries.document.getAttributes', () => {
+  expect(queries.document.getAttributes('agent', 'prefix1:Agent')(testDocument1))
     .toEqual([['agentKey', 'agentValue']]);
-  expect(queries.node.getAttributes('agent', 'nestedPrefix1:nestedAgent')(testDocument1))
+  expect(queries.document.getAttributes('agent', 'nestedPrefix1:nestedAgent')(testDocument1))
     .toEqual([['nestedAgent1Key', 'nestedAgent1Value']]);
 });
 

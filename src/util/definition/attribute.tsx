@@ -1,19 +1,20 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { NodeVariant } from './document';
-import { RelationName } from './relation';
+import { RelationVariant } from './relation';
 
-export type PROVAttributeRange = 'DateTime' | 'Color' | 'Boolean' | 'Shape'
+export type PROVAttributeRange = 'DateTime' | 'Color' | 'Boolean' | 'Shape' | NodeVariant
 
-export type NodePROVAttributeDefinition = {
+export type PROVAttributeDefinition = {
   name: string;
   documentation?: ReactNode;
   url?: string;
   key: string;
-  domain: NodeVariant[];
-  range: PROVAttributeRange
+  domain: (NodeVariant | RelationVariant)[];
+  range: PROVAttributeRange;
+  required?: boolean;
 }
 
-export const NODE_ATTRIBUTE_DEFINITIONS: NodePROVAttributeDefinition[] = [
+export const ATTRIBUTE_DEFINITIONS: PROVAttributeDefinition[] = [
   {
     name: 'Started At Time',
     key: 'prov:startTime',
@@ -30,9 +31,146 @@ export const NODE_ATTRIBUTE_DEFINITIONS: NodePROVAttributeDefinition[] = [
     domain: ['activity'],
     range: 'DateTime',
   },
+  {
+    name: 'Agent',
+    key: 'prov:agent',
+    domain: ['wasAttributedTo', 'wasAssociatedWith'],
+    range: 'agent',
+    required: true,
+  },
+  {
+    name: 'Entity',
+    key: 'prov:entity',
+    domain: ['wasGeneratedBy', 'used', 'wasInvalidatedBy', 'wasAttributedTo', 'hadMember'],
+    range: 'entity',
+    required: true,
+  },
+  {
+    name: 'Activity',
+    key: 'prov:activity',
+    domain: ['wasGeneratedBy', 'used', 'wasStartedBy', 'wasEndedBy', 'wasInvalidatedBy', 'wasAssociatedWith', 'actedOnBehalfOf'],
+    range: 'activity',
+    required: true,
+  },
+  {
+    name: 'Activity',
+    key: 'prov:activity',
+    domain: ['wasDerivedFrom'],
+    range: 'activity',
+  },
+  {
+    name: 'Time',
+    key: 'prov:time',
+    domain: ['wasGeneratedBy', 'used', 'wasStartedBy', 'wasInvalidatedBy'],
+    range: 'DateTime',
+  },
+  {
+    name: 'Informant',
+    key: 'prov:informant',
+    domain: ['wasInformedBy'],
+    range: 'activity',
+    required: true,
+  },
+  {
+    name: 'Informed',
+    key: 'prov:informed',
+    domain: ['wasInformedBy'],
+    range: 'activity',
+    required: true,
+  },
+  {
+    name: 'Trigger',
+    key: 'prov:trigger',
+    domain: ['wasStartedBy', 'wasEndedBy'],
+    range: 'entity',
+    required: true,
+  },
+  {
+    name: 'Generated Entity',
+    key: 'prov:generatedEntity',
+    domain: ['wasDerivedFrom'],
+    range: 'entity',
+    required: true,
+  },
+  {
+    name: 'Used Entity',
+    key: 'prov:usedEntity',
+    domain: ['wasDerivedFrom'],
+    range: 'entity',
+    required: true,
+  },
+  {
+    name: 'Plan',
+    key: 'prov:plan',
+    domain: ['wasAssociatedWith'],
+    range: 'entity',
+  },
+  {
+    name: 'Delegate',
+    key: 'prov:delegate',
+    domain: ['actedOnBehalfOf'],
+    range: 'agent',
+    required: true,
+  },
+  {
+    name: 'Responsible',
+    key: 'prov:responsible',
+    domain: ['actedOnBehalfOf'],
+    range: 'agent',
+    required: true,
+  },
+  {
+    name: 'Influencer',
+    key: 'prov:influencer',
+    domain: ['wasInfluencedBy'],
+    range: 'agent',
+    required: true,
+  },
+  {
+    name: 'Influencee',
+    key: 'prov:influencee',
+    domain: ['wasInfluencedBy'],
+    range: 'agent',
+    required: true,
+  },
+  {
+    name: 'General Entity',
+    key: 'prov:generalEntity',
+    domain: ['specializationOf'],
+    range: 'entity',
+    required: true,
+  },
+  {
+    name: 'Specific Entity',
+    key: 'prov:specificEntity',
+    domain: ['specializationOf'],
+    range: 'entity',
+    required: true,
+  },
+  {
+    name: 'Alternate 1',
+    key: 'prov:alternate1',
+    domain: ['alternateOf'],
+    range: 'entity',
+    required: true,
+  },
+  {
+    name: 'Alternate 2',
+    key: 'prov:alternate2',
+    domain: ['alternateOf'],
+    range: 'entity',
+    required: true,
+  },
+  {
+    name: 'Collection',
+    key: 'prov:collection',
+    domain: ['hadMember'],
+    range: 'entity',
+    required: true,
+  },
 ];
 
-export const NODE_PROVVIZ_ATTRIBUTE_DEFINITIONS: NodePROVAttributeDefinition[] = [
+export const PROVVIZ_ATTRIBUTE_DEFINITIONS: PROVAttributeDefinition[] = [
   {
     name: 'Override Color',
     key: 'provviz:color',

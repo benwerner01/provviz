@@ -5,9 +5,9 @@ import {
   PROVJSONDocument,
 } from './definition/document';
 import {
-  RelationName,
+  RelationVariant,
   RELATIONS,
-  RELATION_NAMES,
+  RELATION_VARIANTS,
 } from './definition/relation';
 import { PROVAttributeDefinition } from './definition/attribute';
 
@@ -72,7 +72,7 @@ const queries = {
       throw new Error(`Node with identifier ${identifier} not found`);
     },
     getAttributeValue: (
-      variant: NodeVariant, id: string, attribute: PROVAttributeDefinition,
+      variant: NodeVariant | RelationVariant, id: string, attribute: PROVAttributeDefinition,
     ) => (document: PROVJSONDocument): any | null => {
       const { domain, key } = attribute;
       if (Object.keys(document[variant] || {}).includes(id)) {
@@ -87,10 +87,26 @@ const queries = {
       }
       return null;
     },
-    hasRelation: (identifier: string) => (document: PROVJSONDocument): boolean => (
-      queries.bundle.hasLocalRelation(identifier)(document)
+    getAttributes: (
+      variant: NodeVariant | RelationVariant, nodeID: string,
+    ) => (document: PROVJSONDocument): [key: string, value: AttributeValue][] | undefined => {
+      const entry = Object.entries<{ [attributeKey: string]: AttributeValue; }>(
+        document[variant] || {},
+      ).find(([id]) => id === nodeID);
+      if (entry) return Object.entries(entry[1]);
+      // eslint-disable-next-line no-restricted-syntax
+      for (const nestedBundle of Object.values(document.bundle || {})) {
+        const res = queries.document.getAttributes(variant, nodeID)(nestedBundle);
+        if (res) return res;
+      }
+      return undefined;
+    },
+    hasRelation: (
+      identifier: string, relationVariant?: RelationVariant,
+    ) => (document: PROVJSONDocument): boolean => (
+      queries.bundle.hasLocalRelation(identifier, relationVariant)(document)
       || Object.values(document.bundle || {})
-        .find(queries.bundle.hasLocalRelation(identifier)) !== undefined
+        .find(queries.bundle.hasLocalRelation(identifier, relationVariant)) !== undefined
     ),
     hasNode: (identifier: string) => (document: PROVJSONDocument): boolean => (
       queries.bundle.hasLocalNode(identifier)(document)
@@ -153,8 +169,12 @@ const queries = {
     }: PROVJSONBundle) => Object
       .entries({ ...agent, ...activity, ...entity })
       .find(([id, _]) => id === identifier)?.[1],
-    hasLocalRelation: (identifier: string) => (bundle: PROVJSONBundle): boolean => (
-      RELATIONS.find(({ name }) => (
+    hasLocalRelation: (
+      identifier: string, relationVariant?: RelationVariant,
+    ) => (bundle: PROVJSONBundle): boolean => (
+      relationVariant ? (
+        Object.keys(bundle[relationVariant] || {}).includes(identifier)
+      ) : RELATIONS.find(({ name }) => (
         (Object.keys(bundle[name] || {}).includes(identifier)))) !== undefined),
     hasLocalNode: (identifier: string) => (bundle: PROVJSONBundle): boolean => (
       queries.bundle.hasLocalActivity(identifier)(bundle)
@@ -212,33 +232,11 @@ const queries = {
       }
       throw new Error(`Node with identifier ${identifier} not found`);
     },
-    getAttributeValue: (
-      variant: NodeVariant, nodeID: string, attributeKey: string,
-    ) => (document: PROVJSONDocument): AttributeValue | undefined => (
-      queries.node
-        .getAttributes(variant, nodeID)(document)
-        ?.find(([key]) => key === attributeKey)
-        ?.[1]
-    ),
-    getAttributes: (
-      variant: NodeVariant, nodeID: string,
-    ) => (document: PROVJSONDocument): [key: string, value: AttributeValue][] | undefined => {
-      const entry = Object.entries<{ [attributeKey: string]: AttributeValue; }>(
-        document[variant] || {},
-      ).find(([id]) => id === nodeID);
-      if (entry) return Object.entries(entry[1]);
-      // eslint-disable-next-line no-restricted-syntax
-      for (const nestedBundle of Object.values(document.bundle || {})) {
-        const res = queries.node.getAttributes(variant, nodeID)(nestedBundle);
-        if (res) return res;
-      }
-      return undefined;
-    },
-    getOutgoingRelations: (nodeID: string) => (document: PROVJSONBundle) => RELATION_NAMES
+    getOutgoingRelations: (nodeID: string) => (document: PROVJSONBundle) => RELATION_VARIANTS
       .map((name) => Object.entries(document[name] || {})
         .filter(([_, relationValue]) => (
           relationValue[RELATIONS.find((r) => r.name === name)!.domainKey] === nodeID))).flat(),
-    getIncomingRelations: (nodeID: string) => (document: PROVJSONBundle) => RELATION_NAMES
+    getIncomingRelations: (nodeID: string) => (document: PROVJSONBundle) => RELATION_VARIANTS
       .map((name) => Object.entries(document[name] || {})
         .filter(([_, relationValue]) => (
           relationValue[RELATIONS.find((r) => r.name === name)!.rangeKey] === nodeID))).flat(),
@@ -250,32 +248,39 @@ const queries = {
         ? queries.relation.generateID(index + 1)(document)
         : id;
     },
+    getVariant: (identifier: string) => (document: PROVJSONDocument): RelationVariant => {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const name of RELATION_VARIANTS) {
+        if (queries.document.hasRelation(identifier, name)(document)) return name;
+      }
+      throw new Error(`Relation with identifier ${identifier} not found`);
+    },
     getID: (
-      relationName: RelationName, domainID: string, rangeID: string,
+      relationVariant: RelationVariant, domainID: string, rangeID: string,
     ) => (document: PROVJSONDocument): string | null => {
-      const relation = RELATIONS.find((r) => r.name === relationName)!;
+      const relation = RELATIONS.find((r) => r.name === relationVariant)!;
       return (
-        Object.entries(document[relationName] || {})
+        Object.entries(document[relationVariant] || {})
           .find(([_, value]) => (
             value[relation.domainKey] === domainID
             && value[relation.rangeKey] === rangeID))
           ?.[0]
         || Object.values(document.bundle || {})
-          .map(queries.relation.getID(relationName, domainID, rangeID))
+          .map(queries.relation.getID(relationVariant, domainID, rangeID))
           .find((id) => id !== null)
         || null
       );
     },
     getRangeWithDomain: (
-      relationName: RelationName, domainID: string,
+      relationVariant: RelationVariant, domainID: string,
     ) => (document: PROVJSONDocument): string[] => {
-      const relation = RELATIONS.find((r) => r.name === relationName)!;
+      const relation = RELATIONS.find((r) => r.name === relationVariant)!;
       return [
-        ...Object.entries(document[relationName] || {})
+        ...Object.entries(document[relationVariant] || {})
           .filter(([_, value]) => value[relation.domainKey] === domainID)
           .map(([_, value]) => value[relation.rangeKey]),
         ...Object.values(document.bundle || {})
-          .map((bundle) => Object.entries(bundle[relationName] || {})
+          .map((bundle) => Object.entries(bundle[relationVariant] || {})
             .filter(([_, value]) => value[relation.domainKey] === domainID)
             .map(([_, value]) => value[relation.rangeKey]))
           .flat(),

@@ -10,13 +10,15 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Box from '@material-ui/core/Box';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import { NodeVariant, PROVVIZ_SHAPES } from '../util/definition/document';
+import { NodeVariant, PROVVIZ_SHAPES, tbdIsNodeVariant } from '../util/definition/document';
 import { PROVAttributeDefinition } from '../util/definition/attribute';
 import queries from '../util/queries';
 import DocumentContext from './contexts/DocumentContext';
 import mutations from '../util/mutations';
 import VisualisationContext from './contexts/VisualisationContext';
 import ColorPicker from './ColorPicker';
+import NodeAutocomplete from './Autocomplete/NodeAutocomplete';
+import { RelationVariant } from '../util/definition/relation';
 
 const useDateTimeStyles = makeStyles((theme) => ({
   root: {
@@ -26,7 +28,7 @@ const useDateTimeStyles = makeStyles((theme) => ({
 }));
 
 type DateTimeAttributeProps = {
-  variant: NodeVariant;
+  variant: NodeVariant | RelationVariant;
   domainID: string;
   attribute: PROVAttributeDefinition;
 }
@@ -50,7 +52,7 @@ const DateTimeAttribute: React.FC<DateTimeAttributeProps> = ({
       type="datetime-local"
       classes={classes}
       value={value}
-      onChange={(e) => setDocument(mutations.node.setAttribute(
+      onChange={(e) => setDocument(mutations.document.setAttribute(
         variant, domainID, attribute, (new Date(e.target.value)).toISOString(),
       ))}
       InputLabelProps={{ shrink: true }}
@@ -59,7 +61,7 @@ const DateTimeAttribute: React.FC<DateTimeAttributeProps> = ({
 };
 
 type ColorAttributeProps = {
-  variant: NodeVariant;
+  variant: NodeVariant | RelationVariant;
   domainID: string;
   attribute: PROVAttributeDefinition;
 }
@@ -71,7 +73,8 @@ const ColorAttribute: React.FC<ColorAttributeProps> = ({
   const { document, setDocument } = useContext(DocumentContext);
 
   const getCurrentColor = () => {
-    const currentValue = queries.node.getAttributeValue(variant, domainID, attribute.key)(document);
+    const currentValue = queries.document
+      .getAttributeValue(variant, domainID, attribute)(document);
 
     return (currentValue && typeof currentValue === 'string')
       ? currentValue
@@ -79,15 +82,17 @@ const ColorAttribute: React.FC<ColorAttributeProps> = ({
   };
 
   const currentColorValue = getCurrentColor();
-  const defaultColorValue = visualisationSettings.palette[variant];
+  const defaultColorValue = tbdIsNodeVariant(variant)
+    ? visualisationSettings.palette[variant]
+    : '#FFFFFF';
 
   const onChangeComplete = (updatedColor: string) => {
-    setDocument(mutations.node.setAttribute(variant, domainID, attribute, updatedColor));
+    setDocument(mutations.document.setAttribute(variant, domainID, attribute, updatedColor));
   };
 
   const onClear = () => {
     if (currentColorValue !== undefined) {
-      setDocument(mutations.node.deleteAttribute(variant, domainID, attribute.key));
+      setDocument(mutations.document.deleteAttribute(variant, domainID, attribute.key));
     }
   };
 
@@ -112,7 +117,7 @@ const useBooleanStyles = makeStyles((theme) => ({
 }));
 
 type BooleanAttributeProps = {
-  variant: NodeVariant;
+  variant: NodeVariant | RelationVariant;
   domainID: string;
   attribute: PROVAttributeDefinition;
 }
@@ -121,7 +126,8 @@ const BooleanAttribute: React.FC<BooleanAttributeProps> = ({ variant, domainID, 
   const classes = useBooleanStyles();
   const { document, setDocument } = useContext(DocumentContext);
 
-  const attributeValue = queries.node.getAttributeValue(variant, domainID, attribute.key)(document);
+  const attributeValue = queries.document
+    .getAttributeValue(variant, domainID, attribute)(document);
 
   const checked = (
     attributeValue !== undefined
@@ -130,7 +136,7 @@ const BooleanAttribute: React.FC<BooleanAttributeProps> = ({ variant, domainID, 
   );
 
   const onChange = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
-    setDocument(mutations.node.setAttribute(variant, domainID, attribute, target.checked));
+    setDocument(mutations.document.setAttribute(variant, domainID, attribute, target.checked));
   };
 
   return (
@@ -169,7 +175,7 @@ const useShapeStyles = makeStyles((theme) => ({
 }));
 
 type ShapeAttributeProps = {
-  variant: NodeVariant;
+  variant: NodeVariant | RelationVariant;
   domainID: string;
   attribute: PROVAttributeDefinition;
 }
@@ -179,7 +185,8 @@ const ShapeAttribute: React.FC<ShapeAttributeProps> = ({ variant, domainID, attr
   const { document, setDocument } = useContext(DocumentContext);
 
   const getCurrentShape = () => {
-    const currentValue = queries.node.getAttributeValue(variant, domainID, attribute.key)(document);
+    const currentValue = queries.document
+      .getAttributeValue(variant, domainID, attribute)(document);
 
     return (currentValue && typeof currentValue === 'string')
       ? currentValue
@@ -189,12 +196,12 @@ const ShapeAttribute: React.FC<ShapeAttributeProps> = ({ variant, domainID, attr
   const currentShapeValue = getCurrentShape();
 
   const onChange = (updatedShape: string) => {
-    setDocument(mutations.node.setAttribute(variant, domainID, attribute, updatedShape));
+    setDocument(mutations.document.setAttribute(variant, domainID, attribute, updatedShape));
   };
 
   const onClear = () => {
     if (currentShapeValue !== undefined) {
-      setDocument(mutations.node.deleteAttribute(variant, domainID, attribute.key));
+      setDocument(mutations.document.deleteAttribute(variant, domainID, attribute.key));
     }
   };
 
@@ -227,10 +234,49 @@ const ShapeAttribute: React.FC<ShapeAttributeProps> = ({ variant, domainID, attr
   );
 };
 
+type NodeAttributeProps = {
+  variant: NodeVariant | RelationVariant;
+  domainID: string;
+  attribute: PROVAttributeDefinition;
+}
+
+const NodeAttribute: React.FC<NodeAttributeProps> = ({ variant, domainID, attribute }) => {
+  const { document, setDocument } = useContext(DocumentContext);
+
+  const getCurrentValue = () => {
+    const currentValue = queries.document
+      .getAttributeValue(variant, domainID, attribute)(document);
+
+    return (currentValue && typeof currentValue === 'string')
+      ? currentValue
+      : null;
+  };
+
+  const value = getCurrentValue();
+
+  return (
+    <NodeAutocomplete
+      label={attribute.name}
+      variant={attribute.range as NodeVariant}
+      value={value}
+      disableClearable={attribute.required}
+      onChange={(updatedDocument, updatedValue) => {
+        if (updatedValue) {
+          setDocument(mutations.document
+            .setAttribute(variant, domainID, attribute, updatedValue)(updatedDocument));
+        } else if (!attribute.required) {
+          setDocument(mutations.document
+            .deleteAttribute(variant, domainID, attribute.key)(updatedDocument));
+        }
+      }}
+    />
+  );
+};
+
 type DefinedAttributeProps = {
   attribute: PROVAttributeDefinition;
   domainID: string;
-  variant: NodeVariant;
+  variant: NodeVariant | RelationVariant;
 }
 
 const DefinedAttribute: React.FC<DefinedAttributeProps> = ({ attribute, variant, domainID }) => (
@@ -246,6 +292,9 @@ const DefinedAttribute: React.FC<DefinedAttributeProps> = ({ attribute, variant,
     )}
     {attribute.range === 'Shape' && (
       <ShapeAttribute attribute={attribute} variant={variant} domainID={domainID} />
+    )}
+    {(attribute.range === 'entity' || attribute.range === 'activity' || attribute.range === 'agent') && (
+      <NodeAttribute attribute={attribute} variant={variant} domainID={domainID} />
     )}
   </>
 );

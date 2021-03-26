@@ -1,4 +1,4 @@
-import { ATTRIBUTE_DEFINITIONS } from './definition/document';
+import { ATTRIBUTE_DEFINITIONS } from './definition/attribute';
 import mutations from './mutations';
 import { testDocument1 } from './testDocuments';
 
@@ -135,8 +135,8 @@ test('mutations.node.delete', () => {
     .toThrow('Could not delete node');
 });
 
-test('mutations.node.createAttribute', () => {
-  expect(mutations.node.createAttribute('agent', 'prefix1:Agent', 'agentKey1', 'agentValue1')(testDocument1))
+test('mutations.document.createAttribute', () => {
+  expect(mutations.document.createAttribute('agent', 'prefix1:Agent', 'agentKey1', 'agentValue1')(testDocument1))
     .toEqual({
       ...testDocument1,
       agent: {
@@ -148,7 +148,7 @@ test('mutations.node.createAttribute', () => {
       },
     });
 
-  expect(mutations.node.createAttribute('agent', 'nestedPrefix1:nestedAgent', 'agentKey1', 'agentValue1')(testDocument1))
+  expect(mutations.document.createAttribute('agent', 'nestedPrefix1:nestedAgent', 'agentKey1', 'agentValue1')(testDocument1))
     .toEqual({
       ...testDocument1,
       bundle: {
@@ -167,8 +167,8 @@ test('mutations.node.createAttribute', () => {
     });
 });
 
-test('mutations.node.deleteAttribute', () => {
-  expect(mutations.node.deleteAttribute('agent', 'prefix1:Agent', 'agentKey')(testDocument1))
+test('mutations.document.deleteAttribute', () => {
+  expect(mutations.document.deleteAttribute('agent', 'prefix1:Agent', 'agentKey')(testDocument1))
     .toEqual({
       ...testDocument1,
       agent: {
@@ -177,7 +177,7 @@ test('mutations.node.deleteAttribute', () => {
       },
     });
 
-  expect(mutations.node.deleteAttribute('agent', 'nestedPrefix1:nestedAgent', 'nestedAgent1Key')(testDocument1))
+  expect(mutations.document.deleteAttribute('agent', 'nestedPrefix1:nestedAgent', 'nestedAgent1Key')(testDocument1))
     .toEqual({
       ...testDocument1,
       bundle: {
@@ -194,7 +194,7 @@ test('mutations.node.deleteAttribute', () => {
 });
 
 test('mutations.node.setAttributeValue', () => {
-  expect(mutations.node.setAttributeValue('agent', 'prefix1:Agent', 'agentKey', 'updatedValue')(testDocument1))
+  expect(mutations.document.setAttributeValue('agent', 'prefix1:Agent', 'agentKey', 'updatedValue')(testDocument1))
     .toEqual({
       ...testDocument1,
       agent: {
@@ -207,7 +207,7 @@ test('mutations.node.setAttributeValue', () => {
 });
 
 test('mutations.node.setAttributeName', () => {
-  expect(mutations.node.setAttributeName('agent', 'prefix1:Agent', 'agentKey', 'updatedAgentKey')(testDocument1))
+  expect(mutations.document.setAttributeName('agent', 'prefix1:Agent', 'agentKey', 'updatedAgentKey')(testDocument1))
     .toEqual({
       ...testDocument1,
       agent: {
@@ -222,7 +222,7 @@ test('mutations.node.setAttributeName', () => {
 test('mutations.node.setAttribute', () => {
   const startTimeAttribute = ATTRIBUTE_DEFINITIONS.find(({ name }) => name === 'Started At Time')!;
   const updatedDate = (new Date()).toISOString();
-  expect(mutations.node.setAttribute('activity', 'prefix1:Activity', startTimeAttribute, updatedDate)(testDocument1))
+  expect(mutations.document.setAttribute('activity', 'prefix1:Activity', startTimeAttribute, updatedDate)(testDocument1))
     .toEqual({
       ...testDocument1,
       activity: {
