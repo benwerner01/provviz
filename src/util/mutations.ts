@@ -2,12 +2,11 @@ import {
   Variant,
   NodeVariant,
   PROVJSONBundle,
-  PROVAttributeDefinition,
-  RelationName,
-  RELATIONS,
   AttributeValue,
   PROVJSONDocument,
-} from './document';
+} from './definition/document';
+import { RelationName, RELATIONS } from './definition/relation';
+import { PROVAttributeDefinition } from './definition/attribute';
 import queries from './queries';
 
 const maybeUpdateIdentifier = (

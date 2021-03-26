@@ -16,11 +16,10 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import Collapse from '@material-ui/core/Collapse';
 import {
   AttributeValue,
-  ATTRIBUTE_DEFINITIONS,
   NodeVariant,
   PROVJSONDocument,
-  PROVVIZ_ATTRIBUTE_DEFINITIONS,
-} from '../util/document';
+} from '../util/definition/document';
+import { ATTRIBUTE_DEFINITIONS, PROVVIZ_ATTRIBUTE_DEFINITIONS } from '../util/definition/attribute';
 import queries from '../util/queries';
 import DocumentContext from './contexts/DocumentContext';
 import mutations from '../util/mutations';

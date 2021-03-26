@@ -1,13 +1,15 @@
 import {
   NodeVariant,
   PROVJSONBundle,
-  PROVAttributeDefinition,
+  AttributeValue,
+  PROVJSONDocument,
+} from './definition/document';
+import {
   RelationName,
   RELATIONS,
   RELATION_NAMES,
-  AttributeValue,
-  PROVJSONDocument,
-} from './document';
+} from './definition/relation';
+import { PROVAttributeDefinition } from './definition/attribute';
 
 const queries = {
   namespace: {

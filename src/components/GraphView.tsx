@@ -18,7 +18,7 @@ import DocumentContext from './contexts/DocumentContext';
 import VisualisationContext from './contexts/VisualisationContext';
 import queries from '../util/queries';
 import { Selection as PROVVizSelection } from './Visualiser';
-import { Relation, RELATIONS } from '../util/document';
+import { Relation, RELATIONS } from '../util/definition/relation';
 import mutations from '../util/mutations';
 
 interface Datum {

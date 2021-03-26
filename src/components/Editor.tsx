@@ -15,7 +15,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { Fade, useTheme } from '@material-ui/core';
 import NodeTab from './EditorTabs/NodeTab';
 import SettingsTab from './EditorTabs/SettingsTab';
-import { Variant } from '../util/document';
+import { Variant } from '../util/definition/document';
 import BundleTab from './EditorTabs/BundleTab';
 import { Selection } from './Visualiser';
 
@@ -222,9 +222,7 @@ const Editor: React.FC<EditorProps> = ({
 
   return (
     <div
-      style={{
-        bottom: display ? 0 : -1 * TABS_HEIGHT,
-      }}
+      style={{ bottom: display ? 0 : -1 * TABS_HEIGHT }}
       ref={wrapperRef}
       className={classes.wrapper}
     >

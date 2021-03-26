@@ -13,7 +13,7 @@ import mutations from '../../util/mutations';
 import Section from './Section';
 import { palette } from '../../util/theme';
 import { Selection } from '../Visualiser';
-import { NodeVariant } from '../../util/document';
+import { NodeVariant } from '../../util/definition/document';
 import Namespace from '../Namespace';
 
 const useStyles = makeStyles((theme) => ({

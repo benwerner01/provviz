@@ -10,7 +10,7 @@ import Button from '@material-ui/core/Button';
 import Section from './Section';
 import ColorPicker from '../ColorPicker';
 import VisualisationContext, { defaultSettings, ProvenanceView, PROVENANCE_VIEW_NAMES } from '../contexts/VisualisationContext';
-import { NodeVariant, NODE_VARIANTS } from '../../util/document';
+import { NodeVariant, NODE_VARIANTS } from '../../util/definition/document';
 import Namespace from '../Namespace';
 
 const useStyles = makeStyles((theme) => ({

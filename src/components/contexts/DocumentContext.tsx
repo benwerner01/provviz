@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction } from 'react';
-import { PROVJSONDocument } from '../../util/document';
+import { PROVJSONDocument } from '../../util/definition/document';
 
 export type DocumentContext = {
   document: PROVJSONDocument;

@@ -1,4 +1,4 @@
-import { ATTRIBUTE_DEFINITIONS } from './document';
+import { ATTRIBUTE_DEFINITIONS } from './definition/document';
 import mutations from './mutations';
 import { testDocument1 } from './testDocuments';
 

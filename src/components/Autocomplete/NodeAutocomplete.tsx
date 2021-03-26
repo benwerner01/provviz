@@ -5,7 +5,7 @@ import TextField from '@material-ui/core/TextField';
 import DocumentContext from '../contexts/DocumentContext';
 import queries from '../../util/queries';
 import mutations from '../../util/mutations';
-import { PROVJSONBundle } from '../../util/document';
+import { PROVJSONBundle } from '../../util/definition/document';
 
 type NodeAutocompleteProps = {
   label: string;

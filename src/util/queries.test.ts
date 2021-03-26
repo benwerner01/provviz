@@ -1,4 +1,4 @@
-import { ATTRIBUTE_DEFINITIONS, PROVJSONDocument } from './document';
+import { ATTRIBUTE_DEFINITIONS, PROVJSONDocument } from './definition/document';
 import queries from './queries';
 import { testDocument1, date1 } from './testDocuments';
 

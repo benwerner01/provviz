@@ -1,4 +1,4 @@
-import { PROVJSONDocument } from './document';
+import { PROVJSONDocument } from './definition/document';
 
 export const date1 = (new Date()).toISOString();
 

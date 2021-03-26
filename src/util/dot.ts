@@ -1,8 +1,10 @@
 import Color from 'color';
 import { PROVENANVE_VIEW_DEFINITIONS, VisualisationSettings } from '../components/contexts/VisualisationContext';
 import {
-  PROVJSONBundle, PROVJSONDocument, PROVVIZ_ATTRIBUTE_DEFINITIONS, RELATIONS, tbdIsProvVizShape,
-} from './document';
+  PROVJSONBundle, PROVJSONDocument, tbdIsProvVizShape,
+} from './definition/document';
+import { RELATIONS } from './definition/relation';
+import { PROVVIZ_ATTRIBUTE_DEFINITIONS } from './definition/attribute';
 import queries from './queries';
 
 const DEFAULT_NODE_SHAPE = {

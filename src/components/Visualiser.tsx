@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import download from 'downloadjs';
 import { Typography } from '@material-ui/core';
-import { PROVJSONDocument, validateDocument, Variant } from '../util/document';
+import { PROVJSONDocument, validateDocument, Variant } from '../util/definition/document';
 import DocumentContext from './contexts/DocumentContext';
 import Editor, { TABS_HEIGHT } from './Editor';
 import GraphView from './GraphView';

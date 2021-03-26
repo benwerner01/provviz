@@ -1,6 +1,6 @@
 import { createMuiTheme } from '@material-ui/core/styles';
 import React, { Dispatch, SetStateAction } from 'react';
-import { RelationName } from '../../util/document';
+import { RelationName } from '../../util/definition/relation';
 
 const defaultTheme = createMuiTheme();
 

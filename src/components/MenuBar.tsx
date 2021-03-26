@@ -22,7 +22,7 @@ import queries from '../util/queries';
 import mutations from '../util/mutations';
 import DocumentContext from './contexts/DocumentContext';
 import VisualisationContext from './contexts/VisualisationContext';
-import { Variant, VARIANTS } from '../util/document';
+import { Variant, VARIANTS } from '../util/definition/document';
 import SearchTextField from './TextField/SearchTextField';
 import { Selection } from './Visualiser';
 

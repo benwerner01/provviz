@@ -2,7 +2,7 @@ import React, { SetStateAction } from 'react';
 import { render, fireEvent, cleanup } from '@testing-library/react';
 import MenuBar, { MenuBarProps } from './MenuBar';
 import DocumentContext from './contexts/DocumentContext';
-import { VARIANTS, PROVJSONDocument } from '../util/document';
+import { VARIANTS, PROVJSONDocument } from '../util/definition/document';
 
 afterEach(cleanup);
 

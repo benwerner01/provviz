@@ -14,15 +14,9 @@ import EditableIdentifier from '../EditableIdentifier';
 import NodeAutocomplete from '../Autocomplete/NodeAutocomplete';
 import queries from '../../util/queries';
 import mutations from '../../util/mutations';
-import {
-  ATTRIBUTE_DEFINITIONS,
-  PROVJSONBundle,
-  RelationName,
-  RELATIONS,
-  PROVVIZ_ATTRIBUTE_DEFINITIONS,
-  NodeVariant,
-  Relation,
-} from '../../util/document';
+import { PROVJSONBundle, NodeVariant } from '../../util/definition/document';
+import { Relation, RELATIONS, RelationName } from '../../util/definition/relation';
+import { PROVVIZ_ATTRIBUTE_DEFINITIONS, ATTRIBUTE_DEFINITIONS } from '../../util/definition/attribute';
 import Section from './Section';
 import { palette } from '../../util/theme';
 import CustomAttributes from '../CustomAttributes';
