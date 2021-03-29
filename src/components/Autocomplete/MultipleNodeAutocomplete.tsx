@@ -68,12 +68,6 @@ const MultipleNodeAutocomplete: React.FC<MultipleNodeAutocompleteProps> = ({
         <TextField
           {...params}
           variant="outlined"
-          InputProps={{
-            ...params.InputProps,
-            classes: {
-              root: autocompleteClasses.inputRoot,
-            },
-          }}
           label={label}
           placeholder={`${variant[0].toUpperCase()}${variant.slice(1)}...`}
         />

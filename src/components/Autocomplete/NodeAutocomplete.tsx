@@ -35,9 +35,14 @@ const useAutocompleteStyles = makeStyles((theme) => ({
   },
   inputRoot: {
     borderRadius: 8,
-  },
-  input: {
-    padding: theme.spacing(1.5),
+    '&[class*="MuiOutlinedInput-root"] ': {
+      paddingTop: theme.spacing(1.5),
+      paddingLeft: theme.spacing(1.5),
+      paddingBottom: theme.spacing(1.5),
+      '&.MuiAutocomplete-input:first-child': {
+        padding: 0,
+      },
+    },
   },
 }));
 
@@ -79,13 +84,6 @@ const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
           variant="outlined"
           label={label}
           classes={{ root: autocompleteClasses.textFieldRoot }}
-          InputProps={{
-            ...params.InputProps,
-            classes: {
-              root: autocompleteClasses.inputRoot,
-              input: autocompleteClasses.input,
-            },
-          }}
           placeholder={`${variant[0].toUpperCase()}${variant.slice(1)}...`}
         />
       )}
