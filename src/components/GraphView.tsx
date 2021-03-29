@@ -9,6 +9,7 @@ import { Graphviz, graphviz } from 'd3-graphviz';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import Fade from '@material-ui/core/Fade';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
@@ -419,54 +420,56 @@ const GraphView: React.FC<GraphViewProps> = ({
 
   return (
     <div className={classes.wrapper} style={{ maxHeight: height }}>
-      {usingMouse && selected && (
-      <Box display="flex" alignItems="center" className={classes.creatingRelationWrapper} style={{ width }}>
-        {creatingRelation
-          ? creatingRelation.relation ? (
-            <>
-              <Button className={classes.createRelationButton} variant="contained" onClick={() => setCreatingRelation(undefined)}>
-                Cancel
-              </Button>
-              <Typography>
-                {'Creating '}
-                <i>{creatingRelation.relation.name}</i>
-                {' relation'}
-              </Typography>
-            </>
-          ) : (
-            <>
-              <Box display="flex" className={classes.relationButtonsWrapper}>
-                {RELATIONS
-                  .filter(({ domain }) => domain === selected.variant)
-                  .map((relation) => (
-                    <Button
-                      key={relation.name}
-                      className={[classes.createRelationButton, classes.relationButton].join(' ')}
-                      variant="contained"
-                      onClick={() => setCreatingRelation({ relation, domainID: selected.id })}
-                    >
-                      {relation.name}
-                    </Button>
-                  ))}
-              </Box>
-              <IconButton
-                className={classes.stopCreatingRelationIconButton}
-                onClick={() => setCreatingRelation(undefined)}
+      {usingMouse && (
+      <Fade in={selected && tbdIsNodeVariant(selected.variant)}>
+        <Box display="flex" alignItems="center" className={classes.creatingRelationWrapper} style={{ width }}>
+          {selected && (creatingRelation
+            ? creatingRelation.relation ? (
+              <>
+                <Button className={classes.createRelationButton} variant="contained" onClick={() => setCreatingRelation(undefined)}>
+                  Cancel
+                </Button>
+                <Typography>
+                  {'Creating '}
+                  <i>{creatingRelation.relation.name}</i>
+                  {' relation'}
+                </Typography>
+              </>
+            ) : (
+              <>
+                <Box display="flex" className={classes.relationButtonsWrapper}>
+                  {RELATIONS
+                    .filter(({ domain }) => domain === selected.variant)
+                    .map((relation) => (
+                      <Button
+                        key={relation.name}
+                        className={[classes.createRelationButton, classes.relationButton].join(' ')}
+                        variant="contained"
+                        onClick={() => setCreatingRelation({ relation, domainID: selected.id })}
+                      >
+                        {relation.name}
+                      </Button>
+                    ))}
+                </Box>
+                <IconButton
+                  className={classes.stopCreatingRelationIconButton}
+                  onClick={() => setCreatingRelation(undefined)}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </>
+            ) : (
+              <Button
+                variant="contained"
+                className={classes.createRelationButton}
+                onClick={() => setCreatingRelation({ domainID: selected.id })}
+                endIcon={<AddIcon />}
               >
-                <CloseIcon />
-              </IconButton>
-            </>
-          ) : (
-            <Button
-              variant="contained"
-              className={classes.createRelationButton}
-              onClick={() => setCreatingRelation({ domainID: selected.id })}
-              endIcon={<AddIcon />}
-            >
-              Relation
-            </Button>
-          )}
-      </Box>
+                Relation
+              </Button>
+            ))}
+        </Box>
+      </Fade>
       )}
       <div
         className={classes.graphvizWrapper}
