@@ -112,6 +112,7 @@ const RelationInspector: React.FC<RelationInspectorProps> = ({
             />
           ))}
       </Box>
+      <Divider />
       {collapsableSections.map(({ open, name, content }) => (
         <Section
           key={name}

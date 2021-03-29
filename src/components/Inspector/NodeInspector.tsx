@@ -263,6 +263,7 @@ const NodeInspector: React.FC<NodeInspectorProps> = ({
             />
           ))}
       </Box>
+      <Divider />
       {collapsableSections.map(({ open, name, content }) => (
         <Section
           key={name}

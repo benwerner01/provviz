@@ -165,6 +165,7 @@ const BundleInspector: React.FC<BundleInspectorProps> = ({
       <Box my={1.5} mx={3}>
         <EditableIdentifier initialID={id} onChange={onIDChange} />
       </Box>
+      <Divider />
       {collapsableSections.map(({ open, name, content }) => (
         <Section
           key={name}
@@ -177,7 +178,6 @@ const BundleInspector: React.FC<BundleInspectorProps> = ({
           {content}
         </Section>
       ))}
-      <Fade in={!displayDocumentation}><Divider /></Fade>
       <Box display="flex" flexWrap="wrap" alignItems="center" mt={2}>
         <Button onClick={handleDelete} className={classes.deleteButton} variant="contained">Delete</Button>
         {nodes.length > 0 && (

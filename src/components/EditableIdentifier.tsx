@@ -14,7 +14,7 @@ import PrefixSelect from './Select/PrefixSelect';
 const useStyles = makeStyles((theme) => ({
   wrapper: {
     maxWidth: 750,
-    marginBottom: theme.spacing(2),
+    marginBottom: theme.spacing(1.5),
   },
   prefixFormControlRoot: {
     '& div': {
