@@ -23,6 +23,7 @@ import Documentation from './Documentation';
 import { palette } from '../../util/theme';
 import CustomAttributes from '../CustomAttributes';
 import DefinedAttribute from '../DefinedAttribute';
+import { Selection } from '../Visualiser';
 
 const nodeDocumentation = {
   agent: {
@@ -61,12 +62,14 @@ type EditableRelationProps = {
   relation: Relation;
   value: string[];
   domainID: string;
-  onChange: (updatedDocument: PROVJSONBundle, value: string[]) => void
+  onChange: (updatedDocument: PROVJSONBundle, value: string[]) => void;
+  setSelected: (selected: Selection | undefined) => void;
 }
 
 const EditableRelation: React.FC<EditableRelationProps> = ({
-  domainID, relation, value, onChange,
+  domainID, relation, value, onChange, setSelected,
 }) => {
+  const { document } = useContext(DocumentContext);
   const [displayDocumentation, setDisplayDocumentation] = useState<boolean>(false);
 
   const {
@@ -82,6 +85,10 @@ const EditableRelation: React.FC<EditableRelationProps> = ({
           value={value}
           exclude={[domainID]}
           onChange={onChange}
+          onOptionClick={(rangeID) => {
+            const id = queries.relation.getID(relation.name, domainID, rangeID)(document);
+            if (id) setSelected({ variant: relation.name, id });
+          }}
         />
         <IconButton onClick={() => setDisplayDocumentation(!displayDocumentation)}>
           <InfoIcon />
@@ -116,12 +123,13 @@ type NodeInspectorProps = {
   id: string;
   openSections: string[];
   setOpenSections: (openSections: string[]) => void;
+  setSelected: (selected: Selection | undefined) => void;
   onIDChange?: (id: string) => void;
   onDelete?: () => void;
 }
 
 const NodeInspector: React.FC<NodeInspectorProps> = ({
-  variant, id, onIDChange, onDelete, openSections, setOpenSections,
+  variant, id, onIDChange, onDelete, openSections, setOpenSections, setSelected,
 }) => {
   const classes = useStyles();
   const { document, setDocument } = useContext(DocumentContext);
@@ -195,6 +203,7 @@ const NodeInspector: React.FC<NodeInspectorProps> = ({
             value={relationRangeIncludes[relation.name]}
             domainID={id}
             onChange={handleRelationRangeChange(relation.name)}
+            setSelected={setSelected}
           />
         )),
     },

@@ -348,6 +348,7 @@ const Inspector: React.FC<InspectorProps> = ({
                   setOpenSections={
                     handleTabOpenSectionsChange(currentTabIndex - (displaySettings ? 1 : 0))
                   }
+                  setSelected={setSelected}
                 />
               ) : (
                 <RelationInspector

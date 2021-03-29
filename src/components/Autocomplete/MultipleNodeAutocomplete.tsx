@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
+import Chip from '@material-ui/core/Chip';
 import DocumentContext from '../contexts/DocumentContext';
 import queries from '../../util/queries';
 import mutations from '../../util/mutations';
@@ -13,6 +14,7 @@ type MultipleNodeAutocompleteProps = {
   exclude?: string[];
   variant: 'agent' | 'activity' | 'entity';
   onChange: (updatedDocument: PROVJSONBundle, value: string[]) => void;
+  onOptionClick: (id: string) => void;
 }
 
 type NewNode = {
@@ -33,7 +35,7 @@ const useAutocompleteStyles = makeStyles((theme) => ({
 }));
 
 const MultipleNodeAutocomplete: React.FC<MultipleNodeAutocompleteProps> = ({
-  label, value, variant, exclude, onChange,
+  label, value, variant, exclude, onChange, onOptionClick,
 }) => {
   const { document } = useContext(DocumentContext);
 
@@ -63,6 +65,13 @@ const MultipleNodeAutocomplete: React.FC<MultipleNodeAutocompleteProps> = ({
         });
         onChange(updatedDocument, values);
       }}
+      renderTags={(tagValue, getTagProps) => tagValue.map((option, index) => (
+        <Chip
+          {...getTagProps({ index })}
+          onClick={typeof option === 'string' ? () => onOptionClick(option) : undefined}
+          label={typeof option === 'string' ? option : `${option.prefix ? `${option.prefix}:` : ''}${option.name}`}
+        />
+      ))}
       classes={autocompleteClasses}
       renderInput={(params) => (
         <TextField
