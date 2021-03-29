@@ -2,7 +2,7 @@ import React, { SetStateAction } from 'react';
 import { render, fireEvent, cleanup } from '@testing-library/react';
 import MenuBar, { MenuBarProps } from './MenuBar';
 import DocumentContext from './contexts/DocumentContext';
-import { VARIANTS, PROVJSONDocument } from '../util/definition/document';
+import { NodeVariant, PROVJSONDocument } from '../util/definition/document';
 
 afterEach(cleanup);
 
@@ -21,8 +21,10 @@ const defaultMenuBarProps: MenuBarProps = {
   setSearchString: jest.fn(),
 };
 
+const createButtonVariants: (NodeVariant | 'bundle')[] = ['entity', 'activity', 'agent', 'bundle'];
+
 describe('MenuBar buttons', () => {
-  test.each(VARIANTS)('create %s button creates the variant', (variant) => {
+  test.each(createButtonVariants)('create %s button creates the variant', (variant) => {
     const document: PROVJSONDocument = {
       prefix: { default: 'value' },
       agent: {
@@ -69,7 +71,7 @@ describe('MenuBar buttons', () => {
     expect(setSelected).toHaveBeenCalledWith({ variant, id });
   });
 
-  test.each(VARIANTS)('collapsed create %s button creates the variant', (variant) => {
+  test.each(createButtonVariants)('collapsed create %s button creates the variant', (variant) => {
     const document: PROVJSONDocument = {
       prefix: { default: 'value' },
       agent: {

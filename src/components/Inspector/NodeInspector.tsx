@@ -169,25 +169,6 @@ const NodeInspector: React.FC<NodeInspectorProps> = ({
 
   const collapsableSections = [
     {
-      name: 'Definition',
-      open: openSections.includes('Definition'),
-      content: (
-        <>
-          <EditableIdentifier initialID={id} onChange={onIDChange} bundleID={bundleID} />
-          {ATTRIBUTE_DEFINITIONS
-            .filter(({ domain }) => domain.includes(variant))
-            .map((attribute) => (
-              <DefinedAttribute
-                key={attribute.name}
-                attribute={attribute}
-                variant={variant}
-                domainID={id}
-              />
-            ))}
-        </>
-      ),
-    },
-    {
       name: 'Attributes',
       open: openSections.includes('Attributes'),
       content: <CustomAttributes nodeVariant={variant} nodeID={id} />,
@@ -237,6 +218,19 @@ const NodeInspector: React.FC<NodeInspectorProps> = ({
         </Typography>
       </Box>
       <Divider />
+      <Box my={1.5} mx={3}>
+        <EditableIdentifier initialID={id} onChange={onIDChange} bundleID={bundleID} />
+        {ATTRIBUTE_DEFINITIONS
+          .filter(({ domain }) => domain.includes(variant))
+          .map((attribute) => (
+            <DefinedAttribute
+              key={attribute.name}
+              attribute={attribute}
+              variant={variant}
+              domainID={id}
+            />
+          ))}
+      </Box>
       {collapsableSections.map(({ open, name, content }) => (
         <Section
           key={name}

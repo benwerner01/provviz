@@ -77,7 +77,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type InspectorProps = {
+export type InspectorProps = {
   displaySettings: boolean;
   setDisplaySettings: (updated: boolean) => void;
   contentHeight: number;
@@ -309,7 +309,7 @@ const Inspector: React.FC<InspectorProps> = ({
             onClick={() => (tabs.length > 0 || displaySettings) && setOpen(!open)}
             className={classes.displayEditorIconButton}
           >
-            <ExpandLessIcon style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+            <ExpandLessIcon titleAccess={open ? 'Close' : 'Open'} style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }} />
           </IconButton>
         </Tooltip>
       </Box>

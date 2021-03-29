@@ -84,11 +84,6 @@ const BundleInspector: React.FC<BundleInspectorProps> = ({
 
   const collapsableSections = [
     {
-      name: 'Definition',
-      open: openSections.includes('Definition'),
-      content: <EditableIdentifier initialID={id} onChange={onIDChange} />,
-    },
-    {
       name: 'Namespace',
       open: openSections.includes('Namespace'),
       content: <Namespace bundleID={id} />,
@@ -134,6 +129,9 @@ const BundleInspector: React.FC<BundleInspectorProps> = ({
         </Typography>
       </Box>
       <Divider />
+      <Box my={1.5} mx={3}>
+        <EditableIdentifier initialID={id} onChange={onIDChange} />
+      </Box>
       {collapsableSections.map(({ open, name, content }) => (
         <Section
           key={name}

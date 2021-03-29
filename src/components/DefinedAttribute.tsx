@@ -23,7 +23,6 @@ import { RelationVariant } from '../util/definition/relation';
 const useDateTimeStyles = makeStyles((theme) => ({
   root: {
     display: 'block',
-    marginBottom: theme.spacing(2),
   },
 }));
 
@@ -280,7 +279,7 @@ type DefinedAttributeProps = {
 }
 
 const DefinedAttribute: React.FC<DefinedAttributeProps> = ({ attribute, variant, domainID }) => (
-  <>
+  <Box mb={1.5}>
     {attribute.range === 'DateTime' && (
       <DateTimeAttribute attribute={attribute} variant={variant} domainID={domainID} />
     )}
@@ -296,7 +295,7 @@ const DefinedAttribute: React.FC<DefinedAttributeProps> = ({ attribute, variant,
     {(attribute.range === 'entity' || attribute.range === 'activity' || attribute.range === 'agent') && (
       <NodeAttribute attribute={attribute} variant={variant} domainID={domainID} />
     )}
-  </>
+  </Box>
 );
 
 export default DefinedAttribute;

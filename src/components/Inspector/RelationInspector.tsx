@@ -58,17 +58,18 @@ const RelationInspector: React.FC<RelationInspectorProps> = ({
         </Typography>
       </Box>
       <Divider />
-      {ATTRIBUTE_DEFINITIONS
-        .filter(({ domain }) => domain.includes(variant))
-        .map((attribute) => (
-          <Box m={2} key={attribute.key}>
+      <Box my={1.5} mx={3}>
+        {ATTRIBUTE_DEFINITIONS
+          .filter(({ domain }) => domain.includes(variant))
+          .map((attribute) => (
             <DefinedAttribute
+              key={attribute.key}
               attribute={attribute}
               variant={variant}
               domainID={id}
             />
-          </Box>
-        ))}
+          ))}
+      </Box>
       <Box display="flex" flexWrap="wrap" alignItems="center" mt={2}>
         <Button onClick={handleDelete} className={classes.deleteButton} variant="contained">Delete</Button>
       </Box>
