@@ -1,11 +1,17 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
+import Collapse from '@material-ui/core/Collapse';
+import Fade from '@material-ui/core/Fade';
+import Tooltip from '@material-ui/core/Tooltip';
+import IconButton from '@material-ui/core/IconButton';
+import InfoIcon from '@material-ui/icons/Info';
+import Documentation from './Documentation';
 import DocumentContext from '../contexts/DocumentContext';
-import { RelationVariant } from '../../util/definition/relation';
+import { RELATIONS, RelationVariant } from '../../util/definition/relation';
 import { ATTRIBUTE_DEFINITIONS } from '../../util/definition/attribute';
 import { palette } from '../../util/theme';
 import DefinedAttribute from '../DefinedAttribute';
@@ -42,22 +48,48 @@ const RelationInspector: React.FC<RelationInspectorProps> = ({
   const classes = useStyles();
   const { document, setDocument } = useContext(DocumentContext);
 
+  const [displayDocumentation, setDisplayDocumentation] = useState<boolean>(false);
+
   const handleDelete = () => {
     setDocument(mutations.relation.delete(variant, id));
     if (onDelete) onDelete();
   };
 
+  const relation = RELATIONS.find(({ name }) => name === variant);
+
   return (
     <>
-      <Box display="flex" mb={1}>
+      <Box display="flex" mb={1} justifyContent="space-between" alignItems="center">
         <Typography variant="h5">
           <strong>
             {`${variant[0].toUpperCase()}${variant.slice(1)}: `}
           </strong>
           {id}
         </Typography>
+        <Tooltip
+          title={(
+            <>
+              <strong>
+                <i>{variant}</i>
+              </strong>
+              {' Documentation'}
+            </>
+          )}
+        >
+          <IconButton onClick={() => setDisplayDocumentation(!displayDocumentation)}>
+            <InfoIcon />
+          </IconButton>
+        </Tooltip>
       </Box>
-      <Divider />
+      {relation && (
+      <Collapse in={displayDocumentation}>
+        <Documentation
+          documentation={relation.documentation}
+          url={relation.url}
+        />
+      </Collapse>
+      )}
+      <Fade in={!displayDocumentation}><Divider /></Fade>
       <Box my={1.5} mx={3}>
         {ATTRIBUTE_DEFINITIONS
           .filter(({ domain }) => domain.includes(variant))

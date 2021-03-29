@@ -6,9 +6,10 @@ import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import WarningIcon from '@material-ui/icons/Warning';
 import Collapse from '@material-ui/core/Collapse';
+import Fade from '@material-ui/core/Fade';
+import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import DocumentContext from '../contexts/DocumentContext';
 import EditableIdentifier from '../EditableIdentifier';
 import MultipleNodeAutocomplete from '../Autocomplete/MultipleNodeAutocomplete';
@@ -18,23 +19,43 @@ import { PROVJSONBundle, NodeVariant } from '../../util/definition/document';
 import { Relation, RELATIONS, RelationVariant } from '../../util/definition/relation';
 import { PROVVIZ_ATTRIBUTE_DEFINITIONS, ATTRIBUTE_DEFINITIONS } from '../../util/definition/attribute';
 import Section from './Section';
+import Documentation from './Documentation';
 import { palette } from '../../util/theme';
 import CustomAttributes from '../CustomAttributes';
 import DefinedAttribute from '../DefinedAttribute';
 
-const useEditableRelationStyles = makeStyles((theme) => ({
-  documenationWrapper: {
-    borderRadius: 8,
-    backgroundColor: theme.palette.primary.light,
-    color: theme.palette.common.white,
-    '& svg': {
-      color: theme.palette.common.white,
-    },
+const nodeDocumentation = {
+  agent: {
+    documentation: (
+      <>
+        {'An '}
+        <strong><i>Agent</i></strong>
+        {' agent is something that bears some form of responsibility for an activity taking place, for the existence of an entity, or for another agent\'s activity.'}
+      </>
+    ),
+    url: 'https://www.w3.org/ns/prov#Agent',
   },
-  openDocumentationIconButton: {
-    padding: 0,
+  entity: {
+    documentation: (
+      <>
+        {'An '}
+        <strong><i>Entity</i></strong>
+        {' entity is a physical, digital, conceptual, or other kind of thing with some fixed aspects; entities may be real or imaginary.'}
+      </>
+    ),
+    url: 'https://www.w3.org/ns/prov#Entity',
   },
-}));
+  activity: {
+    documentation: (
+      <>
+        {'An '}
+        <strong><i>activity</i></strong>
+        {' is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.'}
+      </>
+    ),
+    url: 'https://www.w3.org/ns/prov#Activity',
+  },
+};
 
 type EditableRelationProps = {
   relation: Relation;
@@ -46,7 +67,6 @@ type EditableRelationProps = {
 const EditableRelation: React.FC<EditableRelationProps> = ({
   domainID, relation, value, onChange,
 }) => {
-  const classes = useEditableRelationStyles();
   const [displayDocumentation, setDisplayDocumentation] = useState<boolean>(false);
 
   const {
@@ -68,18 +88,7 @@ const EditableRelation: React.FC<EditableRelationProps> = ({
         </IconButton>
       </Box>
       <Collapse in={displayDocumentation}>
-        <Box display="flex" alignItems="flex-start" justifyContent="space-between" p={1} className={classes.documenationWrapper}>
-          <Typography>{documentation}</Typography>
-          <a href={url} target="_blank" rel="noopener noreferrer">
-            <IconButton
-              disableRipple
-              disableFocusRipple
-              className={classes.openDocumentationIconButton}
-            >
-              <OpenInNewIcon />
-            </IconButton>
-          </a>
-        </Box>
+        <Documentation documentation={documentation} url={url} />
       </Collapse>
     </>
   );
@@ -117,6 +126,7 @@ const NodeInspector: React.FC<NodeInspectorProps> = ({
   const classes = useStyles();
   const { document, setDocument } = useContext(DocumentContext);
 
+  const [displayDocumentation, setDisplayDocumentation] = useState<boolean>(false);
   const [fullName, setFullName] = useState<string>('');
   const [
     bundleID, setBundleID] = useState<string | undefined>();
@@ -207,17 +217,39 @@ const NodeInspector: React.FC<NodeInspectorProps> = ({
   const outgoingRelationships = queries.node.getOutgoingRelations(id)(document);
   const incomingRelationships = queries.node.getIncomingRelations(id)(document);
 
+  const capitalisedVariant = `${variant[0].toUpperCase()}${variant.slice(1)}`;
+
   return (
     <>
-      <Box display="flex" mb={1}>
+      <Box display="flex" mb={1} justifyContent="space-between" alignItems="center">
         <Typography variant="h5">
           <strong>
-            {`${variant[0].toUpperCase()}${variant.slice(1)}: `}
+            {`${capitalisedVariant}: `}
           </strong>
           {fullName}
         </Typography>
+        <Tooltip
+          title={(
+            <>
+              <strong>
+                <i>{capitalisedVariant}</i>
+              </strong>
+              {' Documentation'}
+            </>
+          )}
+        >
+          <IconButton onClick={() => setDisplayDocumentation(!displayDocumentation)}>
+            <InfoIcon />
+          </IconButton>
+        </Tooltip>
       </Box>
-      <Divider />
+      <Collapse in={displayDocumentation}>
+        <Documentation
+          documentation={nodeDocumentation[variant].documentation}
+          url={nodeDocumentation[variant].url}
+        />
+      </Collapse>
+      <Fade in={!displayDocumentation}><Divider /></Fade>
       <Box my={1.5} mx={3}>
         <EditableIdentifier initialID={id} onChange={onIDChange} bundleID={bundleID} />
         {ATTRIBUTE_DEFINITIONS

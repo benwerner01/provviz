@@ -2,6 +2,11 @@ import React, { useContext, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
+import Collapse from '@material-ui/core/Collapse';
+import Fade from '@material-ui/core/Fade';
+import Tooltip from '@material-ui/core/Tooltip';
+import IconButton from '@material-ui/core/IconButton';
+import InfoIcon from '@material-ui/icons/Info';
 import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import WarningIcon from '@material-ui/icons/Warning';
@@ -11,6 +16,7 @@ import EditableIdentifier from '../EditableIdentifier';
 import queries from '../../util/queries';
 import mutations from '../../util/mutations';
 import Section from './Section';
+import Documentation from './Documentation';
 import { palette } from '../../util/theme';
 import { Selection } from '../Visualiser';
 import { NodeVariant } from '../../util/definition/document';
@@ -53,6 +59,7 @@ const BundleInspector: React.FC<BundleInspectorProps> = ({
   const classes = useStyles();
   const { document, setDocument } = useContext(DocumentContext);
 
+  const [displayDocumentation, setDisplayDocumentation] = useState<boolean>(false);
   const [fullName, setFullName] = useState<string>('');
 
   useEffect(() => {
@@ -122,13 +129,39 @@ const BundleInspector: React.FC<BundleInspectorProps> = ({
 
   return (
     <>
-      <Box display="flex" mb={1}>
+      <Box display="flex" mb={1} justifyContent="space-between" alignItems="center">
         <Typography variant="h5">
           <strong>Bundle: </strong>
           {fullName}
         </Typography>
+        <Tooltip
+          title={(
+            <>
+              <strong>
+                <i>Bundle</i>
+              </strong>
+              {' Documentation'}
+            </>
+          )}
+        >
+          <IconButton onClick={() => setDisplayDocumentation(!displayDocumentation)}>
+            <InfoIcon />
+          </IconButton>
+        </Tooltip>
       </Box>
-      <Divider />
+      <Collapse in={displayDocumentation}>
+        <Documentation
+          documentation={(
+            <>
+              {'A '}
+              <strong><i>bundle</i></strong>
+              {' is a named set of provenance descriptions, and is itself an entity, so allowing provenance of provenance to be expressed.'}
+            </>
+          )}
+          url="https://www.w3.org/ns/prov#Bundle"
+        />
+      </Collapse>
+      <Fade in={!displayDocumentation}><Divider /></Fade>
       <Box my={1.5} mx={3}>
         <EditableIdentifier initialID={id} onChange={onIDChange} />
       </Box>
@@ -144,6 +177,7 @@ const BundleInspector: React.FC<BundleInspectorProps> = ({
           {content}
         </Section>
       ))}
+      <Fade in={!displayDocumentation}><Divider /></Fade>
       <Box display="flex" flexWrap="wrap" alignItems="center" mt={2}>
         <Button onClick={handleDelete} className={classes.deleteButton} variant="contained">Delete</Button>
         {nodes.length > 0 && (
