@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash.clonedeep';
 import {
   Variant,
   NodeVariant,
@@ -74,15 +75,17 @@ const mutations = {
     prevID: string, updatedID: string,
   ) => (
     document: PROVJSONDocument,
-  ): PROVJSONDocument => updateIdentifiersInObject(prevID, updatedID)(document),
+  ): PROVJSONDocument => updateIdentifiersInObject(prevID, updatedID)(cloneDeep(document)),
   document: {
     create: (
       variant: Variant, id: string,
-    ) => (document: PROVJSONDocument): PROVJSONDocument => ({
+    ) => (document: PROVJSONDocument): PROVJSONDocument => cloneDeep(({
       ...document,
-      [variant]: { ...document[variant], [id]: { } },
-    }),
-
+      [variant]: {
+        ...document[variant],
+        [id]: { },
+      },
+    })),
     createAttribute: (
       variant: NodeVariant | RelationVariant, nodeID: string, name: string, value: AttributeValue,
     ) => (document: PROVJSONDocument): PROVJSONDocument => {
@@ -154,7 +157,7 @@ const mutations = {
 
       if (!updatedDocument) throw new Error(`Could not find node with id ${id}`);
 
-      return updatedDocument;
+      return cloneDeep(updatedDocument);
     },
     setAttributeName: (
       variant: NodeVariant | RelationVariant,
@@ -314,7 +317,7 @@ const mutations = {
       relationName: RelationVariant, relationID: string, domainID: string, rangeID: string,
     ) => (document: PROVJSONDocument): PROVJSONDocument => {
       const { domainKey, rangeKey } = RELATIONS.find(({ name }) => name === relationName)!;
-      return {
+      return cloneDeep({
         ...document,
         [relationName]: {
           ...document[relationName],
@@ -323,10 +326,10 @@ const mutations = {
             [rangeKey]: rangeID,
           },
         },
-      };
+      });
     },
     deleteWithNode: (nodeID: string) => (bundle: PROVJSONDocument): PROVJSONDocument => Object
-      .entries(bundle)
+      .entries(cloneDeep(bundle))
       .reduce<PROVJSONDocument>((prevBundle, [bundleKey, entries]) => {
         const relation = RELATIONS.find(({ name }) => name === bundleKey);
         return relation
@@ -371,15 +374,17 @@ const mutations = {
     ) => (
       callback: (b: PROVJSONBundle) => PROVJSONBundle,
     ) => (document: PROVJSONDocument): PROVJSONDocument | undefined => {
-      if (isMatch(document)) return { ...document, ...callback(document) };
+      const clonedDocument = cloneDeep(document);
 
-      const match = Object.entries(document.bundle || {}).find(([_, b]) => isMatch(b));
+      if (isMatch(clonedDocument)) return { ...clonedDocument, ...callback(clonedDocument) };
+
+      const match = Object.entries(clonedDocument.bundle || {}).find(([_, b]) => isMatch(b));
 
       return match
         ? ({
-          ...document,
+          ...clonedDocument,
           bundle: {
-            ...document.bundle,
+            ...clonedDocument.bundle,
             [match[0]]: callback(match[1]),
           },
         })
@@ -388,7 +393,9 @@ const mutations = {
     findByID: (bundleID: string) => (
       callback: (b: PROVJSONBundle) => PROVJSONBundle,
     ) => (document: PROVJSONDocument): PROVJSONDocument | undefined => {
-      if (bundleID === 'root') return { ...document, ...callback(document) };
+      const clonedDocument = cloneDeep(document);
+
+      if (bundleID === 'root') return { ...clonedDocument, ...callback(clonedDocument) };
 
       const matchingNestedBundle = Object
         .entries(document.bundle || {})
@@ -396,9 +403,9 @@ const mutations = {
 
       if (matchingNestedBundle) {
         return {
-          ...document,
+          ...clonedDocument,
           bundle: {
-            ...document.bundle,
+            ...clonedDocument.bundle,
             [bundleID]: callback(matchingNestedBundle),
           },
         };
@@ -406,7 +413,7 @@ const mutations = {
 
       return undefined;
     },
-    delete: (id: string) => (document: PROVJSONDocument): PROVJSONDocument => ({
+    delete: (id: string) => (document: PROVJSONDocument): PROVJSONDocument => cloneDeep({
       ...document,
       bundle: Object
         .entries(document.bundle || {})
@@ -417,7 +424,7 @@ const mutations = {
     }),
     addNode: (
       variant: NodeVariant, id: string, value: { [attributeKey: string]: AttributeValue; },
-    ) => (bundle: PROVJSONDocument): PROVJSONDocument => ({
+    ) => (bundle: PROVJSONDocument): PROVJSONDocument => cloneDeep({
       ...bundle,
       [variant]: {
         ...bundle[variant],
@@ -426,7 +433,7 @@ const mutations = {
     }),
     removeNode: (
       variant: NodeVariant, id: string,
-    ) => (bundle: PROVJSONDocument): PROVJSONDocument => ({
+    ) => (bundle: PROVJSONDocument): PROVJSONDocument => cloneDeep({
       ...bundle,
       [variant]: Object
         .entries(bundle[variant] || {})

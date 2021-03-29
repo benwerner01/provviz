@@ -1,4 +1,4 @@
-import AJV, { DefinedError } from 'ajv';
+import AJV from 'ajv';
 import addFormats from 'ajv-formats';
 
 const ajv = new AJV({});
