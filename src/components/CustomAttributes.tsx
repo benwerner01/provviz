@@ -24,6 +24,7 @@ import queries from '../util/queries';
 import DocumentContext from './contexts/DocumentContext';
 import mutations from '../util/mutations';
 import PrefixSelect from './Select/PrefixSelect';
+import { RelationVariant } from '../util/definition/relation';
 
 const useCustomAttributeStyles = makeStyles((theme) => ({
   wrapper: {
@@ -263,9 +264,9 @@ const mapDocumentAttributeEntryToAttribute = (
 });
 
 const attributesHaveChanged = (
-  prevAttributes: Attribute[], nodeVariant: NodeVariant, id: string,
+  prevAttributes: Attribute[], variant: NodeVariant | RelationVariant, id: string,
 ) => (document: PROVJSONDocument) => {
-  const attributes = queries.document.getAttributes(nodeVariant, id)(document);
+  const attributes = queries.document.getAttributes(variant, id)(document);
   if (!attributes) throw new Error('Could not get attributes');
   return (
     attributes.length !== prevAttributes.length
@@ -283,12 +284,12 @@ const attributeValueIsValid = (attributeValue: AttributeValue) => !(
 );
 
 type CustomAttributesProps = {
-  nodeVariant: NodeVariant;
+  variant: NodeVariant | RelationVariant;
   nodeID: string;
 }
 
 const CustomAttributes: React.FC<CustomAttributesProps> = ({
-  nodeVariant, nodeID,
+  variant, nodeID,
 }) => {
   const classes = useCustomAttributesStyles();
   const { document, setDocument } = useContext(DocumentContext);
@@ -305,9 +306,9 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
   };
 
   useEffect(() => {
-    const updatedAttributes = queries.document.getAttributes(nodeVariant, nodeID)(document);
+    const updatedAttributes = queries.document.getAttributes(variant, nodeID)(document);
 
-    if (updatedAttributes && attributesHaveChanged(attributes, nodeVariant, nodeID)(document)) {
+    if (updatedAttributes && attributesHaveChanged(attributes, variant, nodeID)(document)) {
       resetCreating();
       setAttributes(updatedAttributes
         .filter(filterLiteralArrayAttributeValues)
@@ -320,7 +321,7 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
 
   const debouncedUpdateName = useCallback(debounce(
     (key: string, prevName: string, newName: string) => {
-      setDocument(mutations.document.setAttributeName(nodeVariant, nodeID, prevName, newName));
+      setDocument(mutations.document.setAttributeName(variant, nodeID, prevName, newName));
       setAttributes((prev) => {
         const index = prev.findIndex((a) => key === a.key);
         return index === -1
@@ -332,13 +333,13 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
           ];
       });
     }, 300,
-  ), [nodeID]);
+  ), [nodeID, setDocument]);
 
   const debouncedUpdateValue = useCallback(debounce(
     (name: string, updatedValue: AttributeValue) => {
-      setDocument(mutations.document.setAttributeValue(nodeVariant, nodeID, name, updatedValue));
+      setDocument(mutations.document.setAttributeValue(variant, nodeID, name, updatedValue));
     }, 300,
-  ), [nodeID]);
+  ), [nodeID, setDocument]);
 
   const handleNameChange = (key: string, prevName: string) => (updatedName: string) => {
     if (updatedName !== '') debouncedUpdateName(key, prevName, updatedName);
@@ -377,7 +378,7 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
     if (!creatingIsValid) return;
     const name = creatingName;
     const value = creatingValue;
-    setDocument(mutations.document.createAttribute(nodeVariant, nodeID, name, value));
+    setDocument(mutations.document.createAttribute(variant, nodeID, name, value));
     setAttributes((prev) => [...prev, {
       key: feshAttributeKey(), prevName: name, name, value,
     }]);
@@ -385,7 +386,7 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
   };
 
   const handleDelete = (key: string, name: string) => {
-    setDocument(mutations.document.deleteAttribute(nodeVariant, nodeID, name));
+    setDocument(mutations.document.deleteAttribute(variant, nodeID, name));
     setAttributes((prev) => prev.filter((a) => a.key !== key));
   };
 

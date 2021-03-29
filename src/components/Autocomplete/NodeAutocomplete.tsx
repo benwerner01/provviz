@@ -28,11 +28,6 @@ const useAutocompleteStyles = makeStyles((theme) => ({
     flexGrow: 1,
     maxWidth: 500,
   },
-  textFieldRoot: {
-    '& .MuiInputLabel-root:not(.MuiInputLabel-shrink)': {
-      top: -7,
-    },
-  },
   inputRoot: {
     borderRadius: 8,
     '&[class*="MuiOutlinedInput-root"] ': {
@@ -46,11 +41,20 @@ const useAutocompleteStyles = makeStyles((theme) => ({
   },
 }));
 
+const useStyles = makeStyles((theme) => ({
+  textFieldRoot: {
+    '& .MuiInputLabel-root:not(.MuiInputLabel-shrink)': {
+      top: -7,
+    },
+  },
+}));
+
 const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
   label, value, disableClearable, variant, exclude, onChange,
 }) => {
   const { document } = useContext(DocumentContext);
 
+  const classes = useStyles();
   const autocompleteClasses = useAutocompleteStyles();
 
   const options = queries.node.getAll(variant)(document)
@@ -83,7 +87,7 @@ const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
           {...params}
           variant="outlined"
           label={label}
-          classes={{ root: autocompleteClasses.textFieldRoot }}
+          classes={{ root: classes.textFieldRoot }}
           placeholder={`${variant[0].toUpperCase()}${variant.slice(1)}...`}
         />
       )}

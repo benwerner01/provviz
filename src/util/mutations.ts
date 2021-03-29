@@ -130,29 +130,29 @@ const mutations = {
     },
     setAttributeValue: (
       variant: NodeVariant | RelationVariant,
-      nodeID: string,
+      id: string,
       attributeName: string,
       attributeValue: AttributeValue,
     ) => (document: PROVJSONDocument): PROVJSONDocument => {
       const updatedDocument = mutations.bundle
         .find(
-          (bundle) => Object.keys(bundle[variant] || {}).includes(nodeID),
+          (bundle) => Object.keys(bundle[variant] || {}).includes(id),
         )(
           (bundle) => ({
             ...bundle,
             [variant]: {
               ...bundle[variant],
-              [nodeID]: Object.entries(bundle[variant]![nodeID]).reduce(
+              [id]: Object.entries(bundle[variant]![id]).reduce(
                 (prev, [name]) => (name === attributeName
                   ? ({ ...prev, [name]: attributeValue })
                   : prev),
-                { ...bundle[variant]![nodeID] },
+                { ...bundle[variant]![id] },
               ),
             },
           }),
         )(document);
 
-      if (!updatedDocument) throw new Error(`Could not find node with id ${nodeID}`);
+      if (!updatedDocument) throw new Error(`Could not find node with id ${id}`);
 
       return updatedDocument;
     },

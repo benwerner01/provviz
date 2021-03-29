@@ -16,6 +16,8 @@ import { ATTRIBUTE_DEFINITIONS } from '../../util/definition/attribute';
 import { palette } from '../../util/theme';
 import DefinedAttribute from '../DefinedAttribute';
 import mutations from '../../util/mutations';
+import CustomAttributes from '../CustomAttributes';
+import Section from './Section';
 
 const useStyles = makeStyles((theme) => ({
   deleteButton: {
@@ -46,7 +48,7 @@ const RelationInspector: React.FC<RelationInspectorProps> = ({
   variant, id, onDelete, openSections, setOpenSections,
 }) => {
   const classes = useStyles();
-  const { document, setDocument } = useContext(DocumentContext);
+  const { setDocument } = useContext(DocumentContext);
 
   const [displayDocumentation, setDisplayDocumentation] = useState<boolean>(false);
 
@@ -54,6 +56,14 @@ const RelationInspector: React.FC<RelationInspectorProps> = ({
     setDocument(mutations.relation.delete(variant, id));
     if (onDelete) onDelete();
   };
+
+  const collapsableSections = [
+    {
+      name: 'Attributes',
+      open: openSections.includes('Attributes'),
+      content: <CustomAttributes variant={variant} nodeID={id} />,
+    },
+  ];
 
   const relation = RELATIONS.find(({ name }) => name === variant);
 
@@ -102,6 +112,18 @@ const RelationInspector: React.FC<RelationInspectorProps> = ({
             />
           ))}
       </Box>
+      {collapsableSections.map(({ open, name, content }) => (
+        <Section
+          key={name}
+          open={open}
+          name={name}
+          toggleOpen={() => setOpenSections(open
+            ? openSections.filter((sectionName) => sectionName !== name)
+            : [...openSections, name])}
+        >
+          {content}
+        </Section>
+      ))}
       <Box display="flex" flexWrap="wrap" alignItems="center" mt={2}>
         <Button onClick={handleDelete} className={classes.deleteButton} variant="contained">Delete</Button>
       </Box>

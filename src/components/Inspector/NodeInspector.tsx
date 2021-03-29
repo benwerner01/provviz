@@ -181,7 +181,7 @@ const NodeInspector: React.FC<NodeInspectorProps> = ({
     {
       name: 'Attributes',
       open: openSections.includes('Attributes'),
-      content: <CustomAttributes nodeVariant={variant} nodeID={id} />,
+      content: <CustomAttributes variant={variant} nodeID={id} />,
     },
     {
       name: 'Relationships',
