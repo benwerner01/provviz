@@ -6,6 +6,7 @@ addFormats(ajv);
 
 ajv.addVocabulary(['prov:startTime', 'prov:endTime']);
 
+// JSON Schema adapted from https://www.w3.org/Submission/2013/SUBM-prov-json-20130424/schema
 const schema = {
   $id: 'http://provenance.ecs.soton.ac.uk/prov-json/schema#',
   $schema: 'http://json-schema.org/draft-07/schema#',
