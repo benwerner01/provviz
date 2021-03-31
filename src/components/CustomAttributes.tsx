@@ -109,7 +109,7 @@ const CustomAttribute: React.FC<CustomAttributeProps> = ({
 
   const handleTypeChange = ({ target }: React.ChangeEvent<{ value: unknown; }>) => {
     const type = target.value;
-    if (type === 'String') onValueChange('');
+    if (type === 'String') onValueChange(typeof value === 'object' && !Array.isArray(value) ? value.$ : value.toString());
     if (type === 'Number') onValueChange(0);
     if (type === 'Boolean') onValueChange(true);
     if (type === 'Custom') {
@@ -180,7 +180,9 @@ const CustomAttribute: React.FC<CustomAttributeProps> = ({
           value={typeof value === 'object' ? value.$ : value}
           onChange={({ target }) => onValueChange(valueType === 'number'
             ? parseFloat(target.value)
-            : target.value)}
+            : (valueType === 'custom' && typeof value === 'object')
+              ? { ...value, $: target.value }
+              : target.value)}
         />
       )}
       <TextField
@@ -271,7 +273,13 @@ const attributesHaveChanged = (
   return (
     attributes.length !== prevAttributes.length
     || (attributes?.find(([name, value]) => prevAttributes
-      .find((attribute) => attribute.name === name && attribute.value === value) === undefined))
+      .find((attribute) => (
+        attribute.name === name
+        && ((typeof attribute.value === 'object' && !Array.isArray(attribute.value))
+          ? (typeof value === 'object' && !Array.isArray(value))
+            ? attribute.value.$ === value.$ && attribute.value.type === value.type
+            : false
+          : attribute.value === value)) === undefined)))
   );
 };
 
@@ -294,10 +302,11 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
   const classes = useCustomAttributesStyles();
   const { document, setDocument } = useContext(DocumentContext);
 
+  const [attributes, setAttributes] = useState<Attribute[]>([]);
+
   const [creating, setCreating] = useState<boolean>(false);
   const [creatingName, setCreatingName] = useState<string>('');
   const [creatingValue, setCreatingValue] = useState<AttributeValue>('');
-  const [attributes, setAttributes] = useState<Attribute[]>([]);
 
   const resetCreating = () => {
     setCreating(false);
@@ -321,7 +330,6 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
 
   const debouncedUpdateName = useCallback(debounce(
     (key: string, prevName: string, newName: string) => {
-      setDocument(mutations.document.setAttributeName(variant, nodeID, prevName, newName));
       setAttributes((prev) => {
         const index = prev.findIndex((a) => key === a.key);
         return index === -1
@@ -332,6 +340,7 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
             ...prev.slice(index + 1),
           ];
       });
+      setDocument(mutations.document.setAttributeName(variant, nodeID, prevName, newName));
     }, 300,
   ), [nodeID, setDocument]);
 
@@ -356,7 +365,6 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
   };
 
   const handleValueChange = (key: string, name: string) => (updatedValue: AttributeValue) => {
-    if (attributeValueIsValid(updatedValue)) debouncedUpdateValue(name, updatedValue);
     setAttributes((prev) => {
       const index = prev.findIndex((a) => key === a.key);
       return index === -1
@@ -367,6 +375,7 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
           ...prev.slice(index + 1),
         ];
     });
+    if (attributeValueIsValid(updatedValue)) debouncedUpdateValue(name, updatedValue);
   };
 
   const creatingIsValid = (

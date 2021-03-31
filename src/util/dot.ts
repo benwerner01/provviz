@@ -28,7 +28,14 @@ const mapNodeToDot = (variant: 'agent' | 'activity' | 'entity', settings: Visual
     .filter(([key]) => PROVVIZ_ATTRIBUTE_DEFINITIONS.find((a) => a.key === key) === undefined);
 
   return [
-    `"${id}" [id="${id}" shape="${shape}" label="${id}" style="filled" fillcolor="${fillcolor}" fontcolor="${fontcolor}"]`,
+    `"${id}" [
+      id="${id}"
+      shape="${shape}"
+      label="${id}"
+      style="filled"
+      fillcolor="${fillcolor}"
+      fontcolor="${fontcolor}"
+    ]`,
     (
       filteredAttributes.length > 0
       && !settings.hideAllNodeAttributes
