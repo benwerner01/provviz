@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type RelationInspectorProps = {
+export type RelationInspectorProps = {
   variant: RelationVariant;
   id: string;
   openSections: string[];

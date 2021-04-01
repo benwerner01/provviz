@@ -1,8 +1,7 @@
-import React, { SetStateAction } from 'react';
-import { render, fireEvent, cleanup } from '@testing-library/react';
+import React from 'react';
+import { render, cleanup } from '@testing-library/react';
 import BundleInspector, { BundleInspectorProps } from './BundleInspector';
 import { document1 as document } from '../../lib/examples';
-import { PROVJSONDocument } from '../../util/definition/document';
 import DocumentContext from '../contexts/DocumentContext';
 
 afterEach(cleanup);
@@ -21,7 +20,7 @@ test('Bundle Inspector renders', () => {
     <DocumentContext.Provider
       value={{
         document,
-        setDocument: (action: SetStateAction<PROVJSONDocument>) => undefined,
+        setDocument: jest.fn(),
       }}
     >
       <BundleInspector {...defaultBundleInspectorProps} />

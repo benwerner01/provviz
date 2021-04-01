@@ -1,9 +1,8 @@
-import React, { SetStateAction } from 'react';
+import React from 'react';
 import { render, cleanup } from '@testing-library/react';
 import NodeInspector, { NodeInspectorProps } from './NodeInspector';
 import { document1 as document } from '../../lib/examples';
 import DocumentContext from '../contexts/DocumentContext';
-import { PROVJSONDocument } from '../../util/definition/document';
 
 afterEach(cleanup);
 
@@ -22,7 +21,7 @@ test('Node Inspector renders', () => {
     <DocumentContext.Provider
       value={{
         document,
-        setDocument: (action: SetStateAction<PROVJSONDocument>) => undefined,
+        setDocument: jest.fn(),
       }}
     >
       <NodeInspector {...defaultNodeInspectorProps} />
