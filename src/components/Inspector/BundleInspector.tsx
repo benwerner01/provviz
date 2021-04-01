@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type BundleInspectorProps = {
+export type BundleInspectorProps = {
   id: string;
   openSections: string[];
   setOpenSections: (openSections: string[]) => void;
