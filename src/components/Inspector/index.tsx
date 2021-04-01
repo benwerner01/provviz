@@ -229,7 +229,7 @@ const Inspector: React.FC<InspectorProps> = ({
     >
       <Box className={classes.headerWrapper} display="flex" justifyContent="space-between">
         <Tabs
-          value={currentTabIndex}
+          value={currentTabIndex < 0 ? 0 : currentTabIndex}
           indicatorColor="primary"
           onChange={(_, newTab) => setCurrentTabIndex(newTab)}
           classes={{ root: classes.tabsRoot, indicator: classes.tabIndicator }}
