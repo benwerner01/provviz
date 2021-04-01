@@ -5,6 +5,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import download from 'downloadjs';
 import { Typography } from '@material-ui/core';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DateFnsUtils from '@date-io/date-fns';
 import { PROVJSONDocument, validateDocument, Variant } from '../util/definition/document';
 import DocumentContext from './contexts/DocumentContext';
 import Inspector, { TABS_HEIGHT } from './Inspector';
@@ -152,60 +154,61 @@ const Visualiser: React.FC<VisualiserProps> = ({
     - (displayInspectorContent ? inspectorContentHeight : 0));
 
   return (
-    <DocumentContext.Provider
-      value={{ document: contextDocument, setDocument: contextSetDocument }}
-    >
-      <VisualisationContext.Provider
-        value={{
-          visualisationSettings,
-          setVisualisationSettings: handleVisualisationSettings,
-        }}
+    <MuiPickersUtilsProvider utils={DateFnsUtils}>
+      <DocumentContext.Provider
+        value={{ document: contextDocument, setDocument: contextSetDocument }}
       >
-        <Box
-          className={classes.wrapper}
-          style={{ width, height }}
+        <VisualisationContext.Provider
+          value={{
+            visualisationSettings,
+            setVisualisationSettings: handleVisualisationSettings,
+          }}
         >
-          <MenuBar
-            displaySettings={() => {
-              setSelected(undefined);
-              setDisplaySettings(true);
-              setDisplayInspectorContent(true);
-            }}
-            isEmptyDocument={isEmptyDocument}
-            collapseButtons={width < (searching ? 800 : 650)}
-            collapseIconButtons={width < 650 && searching}
-            setSelected={handleSelectedChange}
-            currentView={currentView}
-            setCurrentView={setCurrentView}
-            downloadVisualisation={downloadVisualisation}
-            searching={searching}
-            setSearching={setSearching}
-            searchString={searchString}
-            setSearchString={setSearchString}
-          />
-          {validationErrors.length > 0
-            ? (
-              <Box m={1}>
-                <Typography className={classes.validationErrorHeading} variant="h5">
-                  <strong>Error Validating PROV Document</strong>
-                </Typography>
-                <ul>
-                  {validationErrors.map((error, i) => (
+          <Box
+            className={classes.wrapper}
+            style={{ width, height }}
+          >
+            <MenuBar
+              displaySettings={() => {
+                setSelected(undefined);
+                setDisplaySettings(true);
+                setDisplayInspectorContent(true);
+              }}
+              isEmptyDocument={isEmptyDocument}
+              collapseButtons={width < (searching ? 800 : 650)}
+              collapseIconButtons={width < 650 && searching}
+              setSelected={handleSelectedChange}
+              currentView={currentView}
+              setCurrentView={setCurrentView}
+              downloadVisualisation={downloadVisualisation}
+              searching={searching}
+              setSearching={setSearching}
+              searchString={searchString}
+              setSearchString={setSearchString}
+            />
+            {validationErrors.length > 0
+              ? (
+                <Box m={1}>
+                  <Typography className={classes.validationErrorHeading} variant="h5">
+                    <strong>Error Validating PROV Document</strong>
+                  </Typography>
+                  <ul>
+                    {validationErrors.map((error, i) => (
                     // eslint-disable-next-line react/no-array-index-key
-                    <li key={i}><Typography>{error}</Typography></li>
-                  ))}
-                </ul>
-              </Box>
-            )
-            : (
-              <>
-                {isEmptyDocument ? (
-                  <Box style={{ height: contentHeight }} m={1} display="flex" alignItems="center" justifyContent="center">
-                    <Typography variant="h5">Empty Document</Typography>
-                  </Box>
-                ) : (
-                  <>
-                    {currentView === 'Graph' && (
+                      <li key={i}><Typography>{error}</Typography></li>
+                    ))}
+                  </ul>
+                </Box>
+              )
+              : (
+                <>
+                  {isEmptyDocument ? (
+                    <Box style={{ height: contentHeight }} m={1} display="flex" alignItems="center" justifyContent="center">
+                      <Typography variant="h5">Empty Document</Typography>
+                    </Box>
+                  ) : (
+                    <>
+                      {currentView === 'Graph' && (
                       <GraphView
                         selected={selected}
                         setSelected={handleSelectedChange}
@@ -215,7 +218,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
                         height={contentHeight}
                       />
                     )}
-                    {currentView === 'Tree' && (
+                      {currentView === 'Tree' && (
                       <TreeView
                         width={width}
                         height={contentHeight}
@@ -224,25 +227,26 @@ const Visualiser: React.FC<VisualiserProps> = ({
                         searchString={searchString}
                       />
                     )}
-                  </>
-                )}
-                <Inspector
-                  displaySettings={displaySettings}
-                  setDisplaySettings={setDisplaySettings}
-                  contentHeight={inspectorContentHeight}
-                  setContentHeight={setInspectorContentHeight}
-                  selected={selected}
-                  setSelected={handleSelectedChange}
-                  display={displayInspector}
-                  setDisplay={setDisplayInspector}
-                  open={displayInspectorContent}
-                  setOpen={setDisplayInspectorContent}
-                />
-              </>
-            )}
-        </Box>
-      </VisualisationContext.Provider>
-    </DocumentContext.Provider>
+                    </>
+                  )}
+                  <Inspector
+                    displaySettings={displaySettings}
+                    setDisplaySettings={setDisplaySettings}
+                    contentHeight={inspectorContentHeight}
+                    setContentHeight={setInspectorContentHeight}
+                    selected={selected}
+                    setSelected={handleSelectedChange}
+                    display={displayInspector}
+                    setDisplay={setDisplayInspector}
+                    open={displayInspectorContent}
+                    setOpen={setDisplayInspectorContent}
+                  />
+                </>
+              )}
+          </Box>
+        </VisualisationContext.Provider>
+      </DocumentContext.Provider>
+    </MuiPickersUtilsProvider>
   );
 };
 

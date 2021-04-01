@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
+import { DateTimePicker } from '@material-ui/pickers';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -35,25 +36,19 @@ type DateTimeAttributeProps = {
 const DateTimeAttribute: React.FC<DateTimeAttributeProps> = ({
   variant, domainID, attribute,
 }) => {
-  const classes = useDateTimeStyles();
   const { document, setDocument } = useContext(DocumentContext);
 
   const attributeValue = queries.document.getAttributeValue(variant, domainID, attribute)(document);
-  const attributeValueISOString = attributeValue
-    ? new Date(attributeValue).toISOString()
-    : undefined;
-
-  const value = attributeValueISOString ? attributeValueISOString.slice(0, attributeValueISOString.length - 1) : '';
 
   return (
-    <TextField
+    <DateTimePicker
       label={attribute.name}
-      type="datetime-local"
-      classes={classes}
-      value={value}
-      onChange={(e) => setDocument(mutations.document.setAttribute(
-        variant, domainID, attribute, (new Date(e.target.value)).toISOString(),
-      ))}
+      value={attributeValue
+        ? new Date(attributeValue)
+        : undefined}
+      onChange={(date) => setDocument(date
+        ? mutations.document.setAttribute(variant, domainID, attribute, date.toISOString())
+        : mutations.document.deleteAttribute(variant, domainID, attribute.name))}
       InputLabelProps={{ shrink: true }}
     />
   );
