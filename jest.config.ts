@@ -102,7 +102,7 @@ export default {
   // notifyMode: "failure-change",
 
   // A preset that is used as a base for Jest's configuration
-  // preset: undefined,
+  preset: 'ts-jest',
 
   // Run tests from one or more projects
   // projects: undefined,
@@ -135,7 +135,7 @@ export default {
 
   // The paths to modules that run some code to configure or set up the testing environment
   // before each test
-  // setupFiles: ['core-js'],
+  setupFiles: ['core-js'],
 
   // A list of paths to modules that run some code to configure or set up the testing
   // framework before each test

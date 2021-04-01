@@ -1,8 +1,9 @@
-import React from 'react';
-import { render, cleanup } from '@testing-library/react';
+import React, { SetStateAction } from 'react';
+import { render, cleanup, fireEvent } from '@testing-library/react';
 import BundleInspector, { BundleInspectorProps } from './BundleInspector';
 import { document1 as document } from '../../lib/examples';
 import DocumentContext from '../contexts/DocumentContext';
+import { PROVJSONDocument } from '../../util/definition/document';
 
 afterEach(cleanup);
 
@@ -26,4 +27,29 @@ test('Bundle Inspector renders', () => {
       <BundleInspector {...defaultBundleInspectorProps} />
     </DocumentContext.Provider>,
   );
+});
+
+test('Bundle Inspector can delete bundle', () => {
+  const setDocument = jest.fn();
+
+  const { getByRole } = render(
+    <DocumentContext.Provider
+      value={{
+        document,
+        setDocument: (action: SetStateAction<PROVJSONDocument>) => {
+          if (typeof action === 'function') setDocument(action(document));
+          else setDocument(action);
+        },
+      }}
+    >
+      <BundleInspector {...defaultBundleInspectorProps} />
+    </DocumentContext.Provider>,
+  );
+
+  fireEvent.click(getByRole('button', { name: 'Delete' }));
+
+  expect(setDocument).toHaveBeenCalledWith({
+    ...document,
+    bundle: {},
+  });
 });
