@@ -217,7 +217,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
                         setSVGElement={setSVGElement}
                         height={contentHeight}
                       />
-                    )}
+                      )}
                       {currentView === 'Tree' && (
                       <TreeView
                         width={width}
@@ -226,7 +226,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
                         setSelected={handleSelectedChange}
                         searchString={searchString}
                       />
-                    )}
+                      )}
                     </>
                   )}
                   <Inspector

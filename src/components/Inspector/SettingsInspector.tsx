@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type SettingsInspectorProps = {
+export type SettingsInspectorProps = {
 
 }
 

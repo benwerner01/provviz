@@ -59,7 +59,7 @@ export const document2: PROVJSONDocument = {
 export const document3: PROVJSONDocument = {
   prefix: { ex: 'http://s11.no/survey4/' },
   bundle: {
-    'ex:test': {
+    'ex:bundle': {
       wasAttributedTo: {
         '_:id1': { 'prov:agent': 'ex:bob', 'prov:entity': 'ex:graph' }, '_:id2': { 'prov:agent': 'ex:alice', 'prov:entity': 'ex:dataset' }, '_:id13': { 'prov:agent': 'ex:patient7', 'prov:entity': 'ex:response2' }, '_:id14': { 'prov:agent': 'ex:patient4', 'prov:entity': 'ex:response1' },
       },
