@@ -24,6 +24,9 @@ const useStyles = makeStyles((theme) => ({
   formControlLabel: {
     marginLeft: 0,
   },
+  resetButton: {
+    textTransform: 'none',
+  },
 }));
 
 type SettingsInspectorProps = {
@@ -119,10 +122,10 @@ const SettingsInspector: React.FC<SettingsInspectorProps> = () => {
             label="Hide All Attributes"
           />
         </FormControl>
+        <Button className={classes.resetButton} variant="contained" onClick={handleResetVisualisationSettings}>
+          Reset Visualisation Settings
+        </Button>
       </Section>
-      <Button variant="contained" onClick={handleResetVisualisationSettings}>
-        Reset Visualisation Settings
-      </Button>
     </>
   );
 };
