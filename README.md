@@ -13,3 +13,10 @@
 | `height` | `number` | The height (in pixels) |
 | `initialSettings` | `object` | The visualisation settings used to initialise the ProvViz component |
 | `onSettingsChange` | `function` | The callback `function` called when the visualisation settings change<br />**Function Signature:**<br />`function(updatedSettings: object) => void` |
+
+## Developer Environment
+
+To start the local developer environment:
+- use `yarn install` to install the NPM dependencies
+- use `yarn storybook` to run the StoryBook environment
+
