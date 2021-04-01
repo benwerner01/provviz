@@ -1,28 +1,23 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
 import Chip from '@material-ui/core/Chip';
 import DocumentContext from '../contexts/DocumentContext';
 import queries from '../../util/queries';
 import mutations from '../../util/mutations';
 import { PROVJSONBundle } from '../../util/definition/document';
+import { filterOptions, NewNode, parseNewNodeFromInput } from './util';
 
 type MultipleNodeAutocompleteProps = {
   label: string;
   value: string[];
   exclude?: string[];
   variant: 'agent' | 'activity' | 'entity';
+  bundleID?: string;
   onChange: (updatedDocument: PROVJSONBundle, value: string[]) => void;
   onOptionClick: (id: string) => void;
 }
-
-type NewNode = {
-  prefix?: string;
-  name: string;
-}
-
-const filter = createFilterOptions<string | NewNode>();
 
 const useAutocompleteStyles = makeStyles((theme) => ({
   root: {
@@ -35,24 +30,22 @@ const useAutocompleteStyles = makeStyles((theme) => ({
 }));
 
 const MultipleNodeAutocomplete: React.FC<MultipleNodeAutocompleteProps> = ({
-  label, value, variant, exclude, onChange, onOptionClick,
+  label, value, variant, exclude, bundleID, onChange, onOptionClick,
 }) => {
   const { document } = useContext(DocumentContext);
 
   const autocompleteClasses = useAutocompleteStyles();
 
+  const [inputValue, setInputValue] = useState<string>('');
+
   const options = queries.node.getAll(variant)(document)
     .filter((o) => !exclude || !exclude.includes(o));
-
-  const parseNewNodeFromInput = (input: string): NewNode => ({
-    prefix: queries.document.parsePrefixFromID(input),
-    name: queries.document.parseNameFromID(input),
-  });
 
   return (
     <Autocomplete<string | NewNode, true, false, true>
       multiple
       value={value}
+      inputValue={inputValue}
       options={options}
       onChange={(_, updated) => {
         let updatedDocument = { ...document };
@@ -65,6 +58,7 @@ const MultipleNodeAutocomplete: React.FC<MultipleNodeAutocompleteProps> = ({
         });
         onChange(updatedDocument, values);
       }}
+      onInputChange={(_, updatedInputValue) => setInputValue(updatedInputValue.replaceAll(' ', ''))}
       renderTags={(tagValue, getTagProps) => tagValue.map((option, index) => (
         <Chip
           {...getTagProps({ index })}
@@ -82,8 +76,8 @@ const MultipleNodeAutocomplete: React.FC<MultipleNodeAutocompleteProps> = ({
         />
       )}
       filterOptions={(currentOptions, params) => [
-        ...filter(currentOptions, params),
-        (params.inputValue === '' ? [] : parseNewNodeFromInput(params.inputValue)),
+        ...filterOptions(currentOptions, params),
+        (params.inputValue === '' ? [] : parseNewNodeFromInput(document, bundleID)(params.inputValue)),
       ].flat()}
       getOptionLabel={(option) => (typeof option === 'string'
         ? option

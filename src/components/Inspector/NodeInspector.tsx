@@ -62,12 +62,13 @@ type EditableRelationProps = {
   relation: Relation;
   value: string[];
   domainID: string;
+  bundleID?: string;
   onChange: (updatedDocument: PROVJSONBundle, value: string[]) => void;
   setSelected: (selected: Selection | undefined) => void;
 }
 
 const EditableRelation: React.FC<EditableRelationProps> = ({
-  domainID, relation, value, onChange, setSelected,
+  domainID, relation, value, onChange, setSelected, bundleID,
 }) => {
   const { document } = useContext(DocumentContext);
   const [displayDocumentation, setDisplayDocumentation] = useState<boolean>(false);
@@ -84,6 +85,7 @@ const EditableRelation: React.FC<EditableRelationProps> = ({
           label={name}
           value={value}
           exclude={[domainID]}
+          bundleID={bundleID}
           onChange={onChange}
           onOptionClick={(rangeID) => {
             const id = queries.relation.getID(relation.name, domainID, rangeID)(document);
@@ -202,6 +204,7 @@ const NodeInspector: React.FC<NodeInspectorProps> = ({
             relation={relation}
             value={relationRangeIncludes[relation.name]}
             domainID={id}
+            bundleID={bundleID}
             onChange={handleRelationRangeChange(relation.name)}
             setSelected={setSelected}
           />
@@ -218,6 +221,7 @@ const NodeInspector: React.FC<NodeInspectorProps> = ({
             attribute={attribute}
             variant={variant}
             domainID={id}
+            bundleID={bundleID}
           />
         )),
     },
@@ -269,6 +273,7 @@ const NodeInspector: React.FC<NodeInspectorProps> = ({
               attribute={attribute}
               variant={variant}
               domainID={id}
+              bundleID={bundleID}
             />
           ))}
       </Box>

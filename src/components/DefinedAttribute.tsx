@@ -236,10 +236,13 @@ const ShapeAttribute: React.FC<ShapeAttributeProps> = ({ variant, domainID, attr
 type NodeAttributeProps = {
   variant: NodeVariant | RelationVariant;
   domainID: string;
+  bundleID?: string;
   attribute: PROVAttributeDefinition;
 }
 
-const NodeAttribute: React.FC<NodeAttributeProps> = ({ variant, domainID, attribute }) => {
+const NodeAttribute: React.FC<NodeAttributeProps> = ({
+  variant, domainID, attribute, bundleID,
+}) => {
   const { document, setDocument } = useContext(DocumentContext);
 
   const getCurrentValue = () => {
@@ -259,6 +262,7 @@ const NodeAttribute: React.FC<NodeAttributeProps> = ({ variant, domainID, attrib
       variant={attribute.range as NodeVariant}
       value={value}
       disableClearable={attribute.required}
+      bundleID={bundleID}
       onChange={(updatedDocument, updatedValue) => {
         if (updatedValue) {
           setDocument(mutations.document
@@ -275,10 +279,13 @@ const NodeAttribute: React.FC<NodeAttributeProps> = ({ variant, domainID, attrib
 type DefinedAttributeProps = {
   attribute: PROVAttributeDefinition;
   domainID: string;
+  bundleID?: string;
   variant: NodeVariant | RelationVariant;
 }
 
-const DefinedAttribute: React.FC<DefinedAttributeProps> = ({ attribute, variant, domainID }) => (
+const DefinedAttribute: React.FC<DefinedAttributeProps> = ({
+  attribute, variant, domainID, bundleID,
+}) => (
   <Box mb={1.5}>
     {attribute.range === 'DateTime' && (
       <DateTimeAttribute attribute={attribute} variant={variant} domainID={domainID} />
@@ -293,7 +300,12 @@ const DefinedAttribute: React.FC<DefinedAttributeProps> = ({ attribute, variant,
       <ShapeAttribute attribute={attribute} variant={variant} domainID={domainID} />
     )}
     {(attribute.range === 'entity' || attribute.range === 'activity' || attribute.range === 'agent') && (
-      <NodeAttribute attribute={attribute} variant={variant} domainID={domainID} />
+      <NodeAttribute
+        attribute={attribute}
+        variant={variant}
+        domainID={domainID}
+        bundleID={bundleID}
+      />
     )}
   </Box>
 );

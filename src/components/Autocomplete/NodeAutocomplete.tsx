@@ -1,11 +1,12 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
 import DocumentContext from '../contexts/DocumentContext';
 import queries from '../../util/queries';
 import mutations from '../../util/mutations';
 import { PROVJSONBundle } from '../../util/definition/document';
+import { filterOptions, NewNode, parseNewNodeFromInput } from './util';
 
 type NodeAutocompleteProps = {
   label: string;
@@ -13,15 +14,9 @@ type NodeAutocompleteProps = {
   disableClearable?: boolean;
   exclude?: string[];
   variant: 'agent' | 'activity' | 'entity';
+  bundleID?: string;
   onChange: (updatedDocument: PROVJSONBundle, value: string | null) => void;
 }
-
-type NewNode = {
-  prefix?: string;
-  name: string;
-}
-
-const filter = createFilterOptions<string | NewNode>();
 
 const useAutocompleteStyles = makeStyles((theme) => ({
   root: {
@@ -50,24 +45,22 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
-  label, value, disableClearable, variant, exclude, onChange,
+  label, value, disableClearable, variant, exclude, bundleID, onChange,
 }) => {
   const { document } = useContext(DocumentContext);
 
   const classes = useStyles();
   const autocompleteClasses = useAutocompleteStyles();
 
+  const [inputValue, setInputValue] = useState<string>('');
+
   const options = queries.node.getAll(variant)(document)
     .filter((o) => !exclude || !exclude.includes(o));
-
-  const parseNewNodeFromInput = (input: string): NewNode => ({
-    prefix: queries.document.parsePrefixFromID(input),
-    name: queries.document.parseNameFromID(input),
-  });
 
   return (
     <Autocomplete<string | NewNode, false, true | false>
       value={value}
+      inputValue={inputValue}
       options={options}
       disableClearable={disableClearable}
       onChange={(_, updatedValue) => {
@@ -81,6 +74,7 @@ const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
           onChange(updatedDocument, id);
         }
       }}
+      onInputChange={(_, updatedInputValue) => setInputValue(updatedInputValue.replaceAll(' ', ''))}
       classes={autocompleteClasses}
       renderInput={(params) => (
         <TextField
@@ -92,8 +86,8 @@ const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
         />
       )}
       filterOptions={(currentOptions, params) => [
-        ...filter(currentOptions, params),
-        (params.inputValue === '' ? [] : parseNewNodeFromInput(params.inputValue)),
+        ...filterOptions(currentOptions, params),
+        (params.inputValue === '' ? [] : parseNewNodeFromInput(document, bundleID)(params.inputValue)),
       ].flat()}
       getOptionLabel={(option) => (typeof option === 'string'
         ? option
