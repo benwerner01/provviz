@@ -120,7 +120,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type NodeInspectorProps = {
+export type NodeInspectorProps = {
   variant: NodeVariant;
   id: string;
   openSections: string[];
