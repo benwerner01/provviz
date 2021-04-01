@@ -389,6 +389,7 @@ const GraphView: React.FC<GraphViewProps> = ({
           if (relation.range === variant) {
             const relationID = queries.relation.generateID()(document);
             setDocument(mutations.relation.create(relation.name, relationID, domainID, key));
+            setSelected({ id: relationID, variant: relation.name });
             setCreatingRelation(undefined);
           }
         } else {
