@@ -3,8 +3,8 @@ import { PROVENANVE_VIEW_DEFINITIONS, VisualisationSettings } from '../component
 import {
   PROVJSONBundle, PROVJSONDocument, tbdIsProvVizShape,
 } from './definition/document';
-import { RELATIONS } from './definition/relation';
-import { PROVVIZ_ATTRIBUTE_DEFINITIONS } from './definition/attribute';
+import { Relation, RELATIONS } from './definition/relation';
+import { ATTRIBUTE_DEFINITIONS, PROVAttributeDefinition, PROVVIZ_ATTRIBUTE_DEFINITIONS } from './definition/attribute';
 import queries from './queries';
 
 const DEFAULT_NODE_SHAPE = {
@@ -14,6 +14,12 @@ const DEFAULT_NODE_SHAPE = {
 };
 
 const renderAttributeValue = (value: any) => (typeof value === 'object' ? value.$ : value);
+
+const mapAttributestoDot = (
+  id: string,
+) => (attributes: [string, any][]) => (
+  `"${id}_attributes" [shape="note" label="${attributes
+    .map(([attributeID, value]) => `${attributeID} = ${renderAttributeValue(value)}`).join('\n')}"];`);
 
 const mapNodeToDot = (variant: 'agent' | 'activity' | 'entity', settings: VisualisationSettings) => (
   [id, attributes]: [string, { [attributeKey: string]: any; }],
@@ -41,11 +47,65 @@ const mapNodeToDot = (variant: 'agent' | 'activity' | 'entity', settings: Visual
       && !settings.hideAllNodeAttributes
       && !attributes['provviz:hideAttributes']
     ) ? [
-        `"${id}_attributes" [shape="note" label="${filteredAttributes
-          .map(([attributeID, value]) => `${attributeID} = ${renderAttributeValue(value)}`).join('\n')}"]`,
+        mapAttributestoDot(id)(filteredAttributes),
         `"${id}" -> "${id}_attributes" [style="dotted" dir="none"]`,
       ] : [],
   ].flat().join('\n');
+};
+
+const mapDefinedAttributeToDot = (
+  id: string, attributes: { [attributeKey: string]: any; },
+) => ({ key, name }: PROVAttributeDefinition) => (
+  `"${id}_midpoint" -> "${attributes[key]}" [label="${name}", id="${id}"];`
+);
+
+const mapRelationToDot = (relation: Relation, settings: VisualisationSettings) => (
+  [id, attributes]: [string, { [attributeKey: string]: any; }],
+) => {
+  const { name, domainKey, rangeKey } = relation;
+  const otherDefinedAttributes = ATTRIBUTE_DEFINITIONS
+    .filter(({ domain, key }) => (
+      domain.includes(name)
+      && ![domainKey, rangeKey].includes(key)
+      && attributes[key]
+    ));
+
+  const customAttributes = Object.entries(attributes || {})
+    .filter(([key]) => (
+      PROVVIZ_ATTRIBUTE_DEFINITIONS.find((a) => a.key === key) === undefined
+      && ![domainKey, rangeKey].includes(key)
+      && otherDefinedAttributes.find((a) => a.key === key) === undefined
+    ));
+
+  const showAttributes = (
+    customAttributes.length > 0
+    && !settings.hideAllNodeAttributes
+    && !attributes['provviz:hideAttributes']
+  );
+
+  if (otherDefinedAttributes.length > 0 || showAttributes) {
+    return `
+      "${id}_midpoint" [
+        shape=point,
+        id="${id}"];
+      "${attributes[domainKey]}" -> "${id}_midpoint" [
+        ${name === 'alternateOf' ? 'dir=back' : 'dir=none'},
+        label="${name}",
+        id="${id}"];
+      "${id}_midpoint" -> "${attributes[rangeKey]}" [id="${id}"];
+      ${otherDefinedAttributes.map(mapDefinedAttributeToDot(id, attributes))}
+      ${showAttributes
+    ? [
+      mapAttributestoDot(id)(customAttributes),
+      `"${id}_midpoint" -> "${id}_attributes" [style="dotted" dir="none"]`,
+    ].join('\n') : ''}
+    `;
+  }
+
+  return `"${attributes[domainKey]}" -> "${attributes[rangeKey]}" [
+    label="${name}"
+    ${name === 'alternateOf' ? ' dir="both"' : ''}
+    id="${id}"]`;
 };
 
 const mapBundleToDots = (
@@ -72,17 +132,15 @@ const mapBundleToDots = (
     ) ? {} : bundle.entity || {})
     .filter(([id]) => !hiddenNodes.includes(id))
     .map(mapNodeToDot('entity', settings))),
-  ...RELATIONS.map(({ name, domainKey, rangeKey }) => Object
+  ...RELATIONS.map((relation) => Object
     .entries((
       settings.view !== null
-      && !PROVENANVE_VIEW_DEFINITIONS[settings.view].relations.includes(name)
-    ) ? {} : bundle[name] || {})
+      && !PROVENANVE_VIEW_DEFINITIONS[settings.view].relations.includes(relation.name)
+    ) ? {} : bundle[relation.name] || {})
     .filter(([_, value]) => (
-      !hiddenNodes.includes(value[domainKey])
-      && !hiddenNodes.includes(value[rangeKey])))
-    .map(([id, value]) => (
-      `"${value[domainKey]}" -> "${value[rangeKey]}" [label="${name}"${name === 'alternateOf' ? ' dir="both"' : ''} id="${id}"]`
-    ))).flat(),
+      !hiddenNodes.includes(value[relation.domainKey])
+      && !hiddenNodes.includes(value[relation.rangeKey])))
+    .map(mapRelationToDot(relation, settings))).flat(),
 ].join('\n');
 
 const getAllHiddenNodes = (settings: VisualisationSettings, bundleID?: string) => ({

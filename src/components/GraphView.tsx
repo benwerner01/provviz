@@ -82,11 +82,21 @@ const useStyles = makeStyles((theme) => ({
           '& [stroke="black"]': {
             stroke: 'red',
           },
+          '&.midpoint': {
+            '& [fill="black"]': {
+              fill: 'red',
+            },
+          },
         },
         '&.hover': {
           cursor: 'pointer',
           '& [stroke="black"]': {
             stroke: 'red',
+          },
+          '&.midpoint': {
+            '& [fill="black"]': {
+              fill: 'red',
+            },
           },
         },
       },
@@ -182,6 +192,10 @@ const GraphView: React.FC<GraphViewProps> = ({
     setD3Edges,
   ] = useState<Selection<SVGGElement, EdgeGroupDatum, SVGSVGElement, unknown> | undefined>();
   const [
+    d3EdgeMidpoints,
+    setD3EdgeMidpoints,
+  ] = useState<Selection<SVGGElement, NodeGroupDatum, SVGSVGElement, unknown> | undefined>();
+  const [
     d3Clusters,
     setD3Clusters,
   ] = useState<Selection<SVGGElement, ClusterGroupDatum, SVGSVGElement, unknown> | undefined>();
@@ -238,7 +252,7 @@ const GraphView: React.FC<GraphViewProps> = ({
         const zoom = graphvizInstance.zoomBehavior();
 
         const { center } = (children as (PathDatum | PolygonDatum | EllipseDatum)[])
-          .find(({ tag }) => tag === 'ellipse' || tag === 'polygon') || {};
+          .find(({ tag }) => tag === 'ellipse' || tag === 'polygon' || tag === 'path') || {};
 
         if (zoom && center) {
           const graph = svg.select<SVGGElement>('.graph');
@@ -296,7 +310,12 @@ const GraphView: React.FC<GraphViewProps> = ({
           setD3Clusters(svg
             .selectAll<SVGGElement, ClusterGroupDatum>('.cluster')
             .filter(({ key }) => queries.document.hasBundle(key.slice(8))(document)));
-          setD3Edges(svg.selectAll<SVGGElement, EdgeGroupDatum>('.edge'));
+          setD3Edges(svg
+            .selectAll<SVGGElement, EdgeGroupDatum>('.edge')
+            .filter(({ attributes }) => queries.document.hasRelation(attributes.id)(document)));
+          setD3EdgeMidpoints(svg
+            .selectAll<SVGGElement, NodeGroupDatum>('.node')
+            .filter(({ attributes }) => queries.document.hasRelation(attributes.id)(document)));
 
           if (svg.select('defs').select('#triangle').empty()) {
             svg.append('svg:defs').append('marker')
@@ -319,21 +338,24 @@ const GraphView: React.FC<GraphViewProps> = ({
   }, [graphvizInstance, visualisationSettings, document]);
 
   useEffect(() => {
-    if (graphvizWrapper.current && graphvizInstance && d3Nodes && d3Edges && d3Clusters) {
+    if (
+      graphvizWrapper.current
+      && graphvizInstance
+      && d3Nodes
+      && d3Edges
+      && d3Clusters
+      && d3EdgeMidpoints) {
       if (selected) {
         const d3Selected = selected.variant === 'bundle'
-          ? d3Clusters.filter(({ key }) => selected.id === key.slice(8))
+          ? [d3Clusters.filter(({ key }) => selected.id === key.slice(8))]
           : tbdIsNodeVariant(selected.variant)
-            ? d3Nodes.filter(({ key }) => selected.id === key)
-            : d3Edges.filter(({ attributes }) => selected.id === attributes.id);
+            ? [d3Nodes.filter(({ key }) => selected.id === key)]
+            : [
+              d3Edges.filter(({ attributes }) => selected.id === attributes.id),
+              d3EdgeMidpoints.filter(({ attributes }) => selected.id === attributes.id),
+            ];
 
-        d3Selected.classed('selected', true);
-
-        if (tbdIsNodeVariant(selected.variant)) {
-          d3Edges
-            .filter(({ key }) => key.startsWith(`${selected.id}->`))
-            .classed('selected', true);
-        }
+        d3Selected.forEach((d3Item: any) => d3Item.classed('selected', true));
       }
 
       const deselectedNodeGroups = d3Nodes
@@ -345,14 +367,20 @@ const GraphView: React.FC<GraphViewProps> = ({
       if (deselectedClusterGroups) deselectedClusterGroups.classed('selected', false);
 
       const deselectedEdges = d3Edges
-        .filter(({ key, attributes }) => (
+        .filter(({ attributes }) => (
           !selected
           || selected.variant === 'bundle'
-          || (tbdIsNodeVariant(selected.variant)
-            ? !key.startsWith(`${selected.id}->`)
-            : attributes.id !== selected.id)));
+          || attributes.id !== selected.id));
 
       deselectedEdges.classed('selected', false);
+
+      const deselectedEdgeMidpoints = d3EdgeMidpoints
+        .filter(({ attributes }) => (
+          !selected
+          || selected.variant === 'bundle'
+          || attributes.id !== selected.id));
+
+      deselectedEdgeMidpoints.classed('selected', false);
 
       d3Nodes.on('mouseover', function mouseover({ key }) {
         const variant = queries.node.getVariant(key)(document);
@@ -365,11 +393,20 @@ const GraphView: React.FC<GraphViewProps> = ({
         nodeGroup.classed('hover', true);
       });
 
-      d3Edges.on('mouseover', function mouseover() {
+      d3Edges.on('mouseover', ({ attributes }) => {
+        d3EdgeMidpoints.filter((edgeMidpointDatum) => edgeMidpointDatum.attributes.id === attributes.id).classed('hover', true);
+        d3Edges.filter((edgeDatum) => edgeDatum.attributes.id === attributes.id).classed('hover', true);
+      });
+
+      d3EdgeMidpoints.classed('midpoint', true);
+
+      d3EdgeMidpoints.on('mouseover', function mouseover({ attributes }) {
         if (creatingRelation) return;
 
         const edgeGroup = select(this);
         edgeGroup.classed('hover', true);
+
+        d3Edges.filter((edgeDatum) => edgeDatum.attributes.id === attributes.id).classed('hover', true);
       });
 
       d3Nodes.on('mouseout', function mouseout() {
@@ -377,9 +414,15 @@ const GraphView: React.FC<GraphViewProps> = ({
         nodeGroup.classed('hover', false);
       });
 
-      d3Edges.on('mouseout', function mouseout() {
+      d3Edges.on('mouseout', ({ attributes }) => {
+        d3EdgeMidpoints.filter((edgeMidpointDatum) => edgeMidpointDatum.attributes.id === attributes.id).classed('hover', false);
+        d3Edges.filter((edgeDatum) => edgeDatum.attributes.id === attributes.id).classed('hover', false);
+      });
+
+      d3EdgeMidpoints.on('mouseout', function mouseout({ attributes }) {
         const edgeGroup = select(this);
         edgeGroup.classed('hover', false);
+        d3Edges.filter((edgeDatum) => edgeDatum.attributes.id === attributes.id).classed('hover', false);
       });
 
       d3Nodes.on('click', ({ key, attributes }) => {
@@ -415,7 +458,7 @@ const GraphView: React.FC<GraphViewProps> = ({
         });
       }
     }
-  }, [d3Nodes, d3Edges, d3Clusters, selected, creatingRelation]);
+  }, [d3Nodes, d3Edges, d3EdgeMidpoints, d3Clusters, selected, creatingRelation]);
 
   const usingMouse = !('ontouchstart' in window);
 
