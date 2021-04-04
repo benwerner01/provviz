@@ -168,7 +168,7 @@ export const mapDocumentToDots = (
   const hiddenNodes = getAllHiddenNodes(settings)(document);
   return [
     'digraph  {',
-    'rankdir="BT";',
+    `rankdir="${settings.direction}";`,
     ...(Object
       .entries(document.bundle || {})
       .map(([bundleID, bundle]) => [

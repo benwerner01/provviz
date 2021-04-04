@@ -17,6 +17,7 @@ const useStyles = makeStyles((theme) => ({
   formControl: {
     width: 300,
     marginBottom: theme.spacing(1),
+    display: 'block',
   },
   formControlCheckbox: {
     display: 'block',
@@ -61,9 +62,17 @@ const SettingsInspector: React.FC<SettingsInspectorProps> = () => {
     }));
   };
 
+  const handleProvenanceDirectionChange = ({ target }: React.ChangeEvent<{ value: unknown; }>) => {
+    if (typeof target.value !== 'string' && !['RL', 'BT'].includes(target.value as string)) return;
+    setVisualisationSettings((prev) => ({
+      ...prev,
+      direction: target.value as 'RL' | 'BT',
+    }));
+  };
+
   const handleResetVisualisationSettings = () => setVisualisationSettings(defaultSettings);
 
-  const { palette, view } = visualisationSettings;
+  const { palette, view, direction } = visualisationSettings;
 
   return (
     <>
@@ -121,6 +130,18 @@ const SettingsInspector: React.FC<SettingsInspectorProps> = () => {
             )}
             label="Hide All Attributes"
           />
+        </FormControl>
+        <FormControl className={classes.formControl}>
+          <InputLabel id="provenance-view-select-label">Direction</InputLabel>
+          <Select
+            labelId="direction-select-label"
+            id="direction-select"
+            value={direction}
+            onChange={handleProvenanceDirectionChange}
+          >
+            <MenuItem value="RL">Horizontal</MenuItem>
+            <MenuItem value="BT">Vertical</MenuItem>
+          </Select>
         </FormControl>
         <Button className={classes.resetButton} variant="contained" onClick={handleResetVisualisationSettings}>
           Reset Visualisation Settings

@@ -56,6 +56,7 @@ export type VisualisationSettings = {
   hideAllNodeAttributes: boolean;
   hiddenNamespaces: HiddenNamespace[];
   view: ProvenanceView | null;
+  direction: 'RL' | 'BT';
 }
 
 export const tbdIsVisualisationSettings = (tbd: any): tbd is VisualisationSettings => (
@@ -84,6 +85,12 @@ export const tbdIsVisualisationSettings = (tbd: any): tbd is VisualisationSettin
       || tbd.view === null
     )
   )
+  && (
+    tbd.direction !== undefined
+    && (
+      (typeof tbd.direction === 'string' && ['BT', 'RL'].includes(tbd.view))
+    )
+  )
 );
 
 export type VisualisationContext = {
@@ -101,6 +108,7 @@ export const defaultSettings: VisualisationSettings = {
   hideAllNodeAttributes: false,
   hiddenNamespaces: [],
   view: null,
+  direction: 'RL',
 };
 
 export default React.createContext<VisualisationContext>({
