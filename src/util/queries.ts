@@ -3,6 +3,7 @@ import {
   PROVJSONBundle,
   AttributeValue,
   PROVJSONDocument,
+  NODE_VARIANTS,
 } from './definition/document';
 import {
   RelationVariant,
@@ -101,6 +102,18 @@ const queries = {
       }
       return undefined;
     },
+    getAttributesInNamespace: (prefix: string) => (document: PROVJSONDocument) => (
+      [...NODE_VARIANTS, ...RELATION_VARIANTS].map((variant) => (
+        [
+          ...Object.values(document[variant] || {}),
+          ...Object.keys(Object.values(document.bundle?.[variant] || {})),
+        ]
+          .map((value) => Object.keys(value)).flat()
+          .filter((attributeKey) => (
+            prefix === queries.document.parsePrefixFromID(attributeKey)
+          ))
+      )).flat()
+    ),
     hasRelation: (
       identifier: string, relationVariant?: RelationVariant,
     ) => (document: PROVJSONDocument): boolean => (

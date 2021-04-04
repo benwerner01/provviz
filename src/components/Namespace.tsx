@@ -100,6 +100,7 @@ const EditableNamespace: React.FC<EditableNamespaceProps> = ({
   const [entitiesInNamespace, setEntitiesInNamespace] = useState<number>(0);
   const [activitiesInNamespace, setActivitiesInNamespace] = useState<number>(0);
   const [bundlesInNamespace, setBundlesInNamespace] = useState<number>(0);
+  const [attributesInNamespace, setAttributesInNamespace] = useState<number>(0);
 
   useLayoutEffect(() => {
     setAgentsInNamespace(queries.node
@@ -110,6 +111,8 @@ const EditableNamespace: React.FC<EditableNamespaceProps> = ({
       .getAllInNamespace('activity', initialNamespace.prefix)(document).length);
     setBundlesInNamespace(queries.bundle
       .getAllInNamespace(initialNamespace.prefix)(document).length);
+    setAttributesInNamespace(queries.document
+      .getAttributesInNamespace(initialNamespace.prefix)(document).length);
   }, [initialNamespace.prefix, document]);
 
   const prefixIsUnique = isUniquePrefix(prefix);
@@ -161,6 +164,7 @@ const EditableNamespace: React.FC<EditableNamespaceProps> = ({
       && entitiesInNamespace === 0
       && activitiesInNamespace === 0
       && bundlesInNamespace === 0
+      && attributesInNamespace === 0
   );
 
   const handleDelete = () => {
@@ -231,6 +235,7 @@ const EditableNamespace: React.FC<EditableNamespaceProps> = ({
                       entitiesInNamespace > 0 ? `${entitiesInNamespace} Entit${agentsInNamespace === 1 ? 'y' : 'ies'}` : [],
                       activitiesInNamespace > 0 ? `${activitiesInNamespace} Activit${activitiesInNamespace === 1 ? 'y' : 'ies'}` : [],
                       bundlesInNamespace > 0 ? `${bundlesInNamespace} Bundle${bundlesInNamespace === 1 ? '' : 's'}` : [],
+                      attributesInNamespace > 0 ? `${attributesInNamespace} Attribute${attributesInNamespace === 1 ? '' : 's'}` : [],
                     ].flat().map((item, i, all) => (
                       // eslint-disable-next-line react/no-array-index-key
                       <React.Fragment key={i}>
