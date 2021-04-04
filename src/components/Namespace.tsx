@@ -103,17 +103,19 @@ const EditableNamespace: React.FC<EditableNamespaceProps> = ({
   const [attributesInNamespace, setAttributesInNamespace] = useState<number>(0);
 
   useLayoutEffect(() => {
+    const scopedDocument = bundleID ? document.bundle?.[bundleID] || {} : document;
     setAgentsInNamespace(queries.node
-      .getAllInNamespace('activity', initialNamespace.prefix)(document).length);
+      .getAllInNamespace('activity', initialNamespace.prefix)(scopedDocument).length);
     setEntitiesInNamespace(queries.node
-      .getAllInNamespace('entity', initialNamespace.prefix)(document).length);
+      .getAllInNamespace('entity', initialNamespace.prefix)(scopedDocument).length);
     setActivitiesInNamespace(queries.node
-      .getAllInNamespace('activity', initialNamespace.prefix)(document).length);
-    setBundlesInNamespace(queries.bundle
-      .getAllInNamespace(initialNamespace.prefix)(document).length);
+      .getAllInNamespace('activity', initialNamespace.prefix)(scopedDocument).length);
+    setBundlesInNamespace(bundleID === undefined
+      ? queries.bundle.getAllInNamespace(initialNamespace.prefix)(document).length
+      : 0);
     setAttributesInNamespace(queries.document
-      .getAttributesInNamespace(initialNamespace.prefix)(document).length);
-  }, [initialNamespace.prefix, document]);
+      .getAttributesInNamespace(initialNamespace.prefix)(scopedDocument).length);
+  }, [initialNamespace.prefix, document, bundleID]);
 
   const prefixIsUnique = isUniquePrefix(prefix);
 
@@ -232,7 +234,7 @@ const EditableNamespace: React.FC<EditableNamespaceProps> = ({
                     {'Cannot delete namespace that is being used by '}
                     {[
                       agentsInNamespace > 0 ? `${agentsInNamespace} Agent${agentsInNamespace === 1 ? '' : 's'}` : [],
-                      entitiesInNamespace > 0 ? `${entitiesInNamespace} Entit${agentsInNamespace === 1 ? 'y' : 'ies'}` : [],
+                      entitiesInNamespace > 0 ? `${entitiesInNamespace} Entit${entitiesInNamespace === 1 ? 'y' : 'ies'}` : [],
                       activitiesInNamespace > 0 ? `${activitiesInNamespace} Activit${activitiesInNamespace === 1 ? 'y' : 'ies'}` : [],
                       bundlesInNamespace > 0 ? `${bundlesInNamespace} Bundle${bundlesInNamespace === 1 ? '' : 's'}` : [],
                       attributesInNamespace > 0 ? `${attributesInNamespace} Attribute${attributesInNamespace === 1 ? '' : 's'}` : [],
