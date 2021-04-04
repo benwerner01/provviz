@@ -153,10 +153,59 @@ export interface PROVJSONDocument extends PROVJSONBundle {
 export const validateDocument = (document: PROVJSONDocument): ReactNode[] => {
   const schemaValidation = validatePROVJSONSchema(document);
   if (schemaValidation === true) {
-    return [
-      ...(['agent', 'entity', 'activity'] as NodeVariant[]).map((variant) => {
-        const nodes = queries.node.getAll(variant)(document);
-        return RELATIONS.map(({
+    return (['agent', 'entity', 'activity'] as NodeVariant[]).map((variant) => {
+      const globalPrefixes = queries.namespace.getAll()(document);
+      const nodes = queries.node.getAll(variant)(document);
+      const capitalisedVariant = `${variant.charAt(0).toUpperCase()}${variant.slice(1)}`;
+      return [
+        // For each instance of the variant...
+        ...Object.keys(document[variant] || {})
+          .map((id) => {
+            const prefix = queries.document.parsePrefixFromID(id);
+            // ...check if a matching global namespace declaration exists
+            return globalPrefixes.includes(prefix)
+              ? []
+              : (
+                <>
+                  <i>{capitalisedVariant}</i>
+                  {' with identifier '}
+                  <strong>{`"${id}"`}</strong>
+                  {' references global namespace prefix '}
+                  <strong>{`"${prefix}"`}</strong>
+                  {' that is not defined'}
+                </>
+              );
+          }),
+        // For each bundle...
+        ...Object.entries(document.bundle || {})
+          .map(([bundleID, bundle]) => {
+            const bundlePrefixes = queries.namespace.getAll(bundleID)(document);
+            return [
+            // For each instance of the variant in the bundle...
+              ...Object.keys(bundle[variant] || {})
+                .map((id) => {
+                  const prefix = queries.document.parsePrefixFromID(id);
+                  // ...check if a matching global namespace declaration exists
+                  return [...globalPrefixes, ...bundlePrefixes].includes(prefix)
+                    ? []
+                    : (
+                      <>
+                        <i>{capitalisedVariant}</i>
+                        {' with identifier '}
+                        <strong>{`"${id}"`}</strong>
+                        {' in the '}
+                        <i>Bundle</i>
+                        {' with identifier '}
+                        <strong>{`"${bundleID}"`}</strong>
+                        {' references namespace prefix '}
+                        <strong>{`"${prefix}"`}</strong>
+                        {' that is not defined'}
+                      </>
+                    );
+                }),
+            ].flat();
+          }),
+        ...RELATIONS.map(({
           name, domain, domainKey, range, rangeKey,
         }) => {
           if (
@@ -232,9 +281,9 @@ export const validateDocument = (document: PROVJSONDocument): ReactNode[] => {
             ].flat();
           }
           return [];
-        }).flat();
-      }),
-    ].flat();
+        }).flat(),
+      ].flat();
+    }).flat();
   }
 
   return schemaValidation.map(({ dataPath, message }) => (
