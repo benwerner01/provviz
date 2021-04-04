@@ -1,6 +1,15 @@
 import Visualiser, { MIN_WIDTH } from './components/Visualiser';
-import { VisualisationSettings, tbdIsVisualisationSettings } from './components/contexts/VisualisationContext';
+import {
+  VisualisationSettings,
+  tbdIsVisualisationSettings,
+  defaultSettings as defaultVisualisationSettings,
+} from './components/contexts/VisualisationContext';
 
-export { MIN_WIDTH, VisualisationSettings, tbdIsVisualisationSettings };
+export {
+  MIN_WIDTH,
+  VisualisationSettings,
+  tbdIsVisualisationSettings,
+  defaultVisualisationSettings,
+};
 
 export default Visualiser;
