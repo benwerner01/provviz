@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { NodeVariant } from './document';
-import { RelationVariant } from './relation';
+import { RelationVariant, RELATION_VARIANTS } from './relation';
 
 export type PROVAttributeRange = 'DateTime' | 'Color' | 'Boolean' | 'Shape' | NodeVariant
 
@@ -186,13 +186,13 @@ export const PROVVIZ_ATTRIBUTE_DEFINITIONS: PROVAttributeDefinition[] = [
   {
     name: 'Hide',
     key: 'provviz:hide',
-    domain: ['activity', 'agent', 'entity'],
+    domain: ['activity', 'agent', 'entity', ...RELATION_VARIANTS],
     range: 'Boolean',
   },
   {
     name: 'Hide Attributes',
     key: 'provviz:hideAttributes',
-    domain: ['activity', 'agent', 'entity'],
+    domain: ['activity', 'agent', 'entity', ...RELATION_VARIANTS],
     range: 'Boolean',
   },
 ];

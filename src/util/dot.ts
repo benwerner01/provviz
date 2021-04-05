@@ -3,7 +3,7 @@ import { PROVENANVE_VIEW_DEFINITIONS, VisualisationSettings } from '../component
 import {
   PROVJSONBundle, PROVJSONDocument, tbdIsProvVizShape,
 } from './definition/document';
-import { Relation, RELATIONS } from './definition/relation';
+import { Relation, RELATIONS, RELATION_VARIANTS } from './definition/relation';
 import { ATTRIBUTE_DEFINITIONS, PROVAttributeDefinition, PROVVIZ_ATTRIBUTE_DEFINITIONS } from './definition/attribute';
 import queries from './queries';
 
@@ -109,7 +109,10 @@ const mapRelationToDot = (relation: Relation, settings: VisualisationSettings) =
 };
 
 const mapBundleToDots = (
-  bundle: PROVJSONBundle, settings: VisualisationSettings, hiddenNodes: string[],
+  bundle: PROVJSONBundle,
+  settings: VisualisationSettings,
+  hiddenNodes: string[],
+  hiddenRelationships: string[],
 ): string => [
   ...(Object
     .entries((
@@ -137,8 +140,9 @@ const mapBundleToDots = (
       settings.view !== null
       && !PROVENANVE_VIEW_DEFINITIONS[settings.view].relations.includes(relation.name)
     ) ? {} : bundle[relation.name] || {})
-    .filter(([_, value]) => (
-      !hiddenNodes.includes(value[relation.domainKey])
+    .filter(([id, value]) => (
+      !hiddenRelationships.includes(id)
+      && !hiddenNodes.includes(value[relation.domainKey])
       && !hiddenNodes.includes(value[relation.rangeKey])))
     .map(mapRelationToDot(relation, settings))).flat(),
 ].join('\n');
@@ -161,11 +165,24 @@ const getAllHiddenNodes = (settings: VisualisationSettings, bundleID?: string) =
     .flat(),
 ];
 
+const getAllHiddenRelations = (
+  settings: VisualisationSettings,
+) => (document: PROVJSONDocument): string[] => [
+  ...RELATION_VARIANTS.map((variant) => Object.entries(document[variant] || {})
+    .filter(([_, attributes]) => (
+      attributes['provviz:hide'] === true
+    )).map(([id]) => id)).flat(),
+  ...Object.values(document.bundle || {})
+    .map(getAllHiddenRelations(settings))
+    .flat(),
+];
+
 export const mapDocumentToDots = (
   document: PROVJSONDocument,
   settings: VisualisationSettings,
 ): string => {
   const hiddenNodes = getAllHiddenNodes(settings)(document);
+  const hiddenRelationship = getAllHiddenRelations(settings)(document);
   return [
     'digraph  {',
     `rankdir="${settings.direction}";`,
@@ -174,10 +191,10 @@ export const mapDocumentToDots = (
       .map(([bundleID, bundle]) => [
         `subgraph "cluster_${bundleID}" {`,
         `label="${bundleID}";`,
-        mapBundleToDots(bundle, settings, hiddenNodes),
+        mapBundleToDots(bundle, settings, hiddenNodes, hiddenRelationship),
         '}',
       ])).flat(),
-    mapBundleToDots(document, settings, hiddenNodes),
+    mapBundleToDots(document, settings, hiddenNodes, hiddenRelationship),
     '}',
   ].join('\n');
 };

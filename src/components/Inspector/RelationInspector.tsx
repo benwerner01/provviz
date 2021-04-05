@@ -12,7 +12,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import Documentation from './Documentation';
 import DocumentContext from '../contexts/DocumentContext';
 import { RELATIONS, RelationVariant } from '../../util/definition/relation';
-import { ATTRIBUTE_DEFINITIONS } from '../../util/definition/attribute';
+import { ATTRIBUTE_DEFINITIONS, PROVVIZ_ATTRIBUTE_DEFINITIONS } from '../../util/definition/attribute';
 import { palette } from '../../util/theme';
 import DefinedAttribute from '../DefinedAttribute';
 import mutations from '../../util/mutations';
@@ -62,6 +62,21 @@ const RelationInspector: React.FC<RelationInspectorProps> = ({
       name: 'Custom Attributes',
       open: openSections.includes('Custom Attributes'),
       content: <CustomAttributes variant={variant} nodeID={id} />,
+    },
+    {
+      name: 'Visualisation',
+      open: openSections.includes('Visualisation'),
+      content: PROVVIZ_ATTRIBUTE_DEFINITIONS
+        .filter(({ domain }) => domain.includes(variant))
+        .map((attribute) => (
+          <DefinedAttribute
+            key={attribute.name}
+            attribute={attribute}
+            variant={variant}
+            domainID={id}
+            // bundleID={bundleID}
+          />
+        )),
     },
   ];
 
