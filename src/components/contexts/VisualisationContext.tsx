@@ -108,7 +108,7 @@ export const defaultSettings: VisualisationSettings = {
   hideAllNodeAttributes: false,
   hiddenNamespaces: [],
   view: null,
-  direction: 'RL',
+  direction: 'BT',
 };
 
 export default React.createContext<VisualisationContext>({

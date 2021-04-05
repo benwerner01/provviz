@@ -59,8 +59,8 @@ const RelationInspector: React.FC<RelationInspectorProps> = ({
 
   const collapsableSections = [
     {
-      name: 'Attributes',
-      open: openSections.includes('Attributes'),
+      name: 'Custom Attributes',
+      open: openSections.includes('Custom Attributes'),
       content: <CustomAttributes variant={variant} nodeID={id} />,
     },
   ];
