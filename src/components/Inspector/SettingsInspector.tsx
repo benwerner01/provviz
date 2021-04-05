@@ -14,10 +14,13 @@ import { NodeVariant, NODE_VARIANTS } from '../../util/definition/document';
 import Namespace from '../Namespace';
 
 const useStyles = makeStyles((theme) => ({
-  formControl: {
+  formControlRoot: {
     width: 300,
     marginBottom: theme.spacing(1),
     display: 'block',
+  },
+  formControlSelect: {
+    width: '100%',
   },
   formControlCheckbox: {
     display: 'block',
@@ -88,13 +91,14 @@ const SettingsInspector: React.FC<SettingsInspectorProps> = () => {
         toggleOpen={() => setVisualisationOpen(!visualisationOpen)}
         name="Visualisation"
       >
-        <FormControl className={classes.formControl}>
+        <FormControl className={classes.formControlRoot}>
           <InputLabel id="provenance-view-select-label">Provenance View</InputLabel>
           <Select
             labelId="provenance-view-select-label"
             id="provenance-view-select"
             value={view || ''}
             onChange={handleProvenanceViewChange}
+            className={classes.formControlSelect}
           >
             <MenuItem value="">None</MenuItem>
             {PROVENANCE_VIEW_NAMES.map((name) => (
@@ -131,13 +135,14 @@ const SettingsInspector: React.FC<SettingsInspectorProps> = () => {
             label="Hide All Attributes"
           />
         </FormControl>
-        <FormControl className={classes.formControl}>
+        <FormControl className={classes.formControlRoot}>
           <InputLabel id="provenance-view-select-label">Direction</InputLabel>
           <Select
             labelId="direction-select-label"
             id="direction-select"
             value={direction}
             onChange={handleProvenanceDirectionChange}
+            className={classes.formControlSelect}
           >
             <MenuItem value="RL">Horizontal</MenuItem>
             <MenuItem value="BT">Vertical</MenuItem>
