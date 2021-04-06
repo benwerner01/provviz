@@ -1,6 +1,5 @@
 import React, { useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
 import { DateTimePicker } from '@material-ui/pickers';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -11,7 +10,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Box from '@material-ui/core/Box';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import { NodeVariant, PROVVIZ_SHAPES, tbdIsNodeVariant } from '../util/definition/document';
+import {
+  AttributeValue, NodeVariant, PROVVIZ_SHAPES, tbdIsNodeVariant,
+} from '../util/definition/document';
 import { PROVAttributeDefinition } from '../util/definition/attribute';
 import queries from '../util/queries';
 import DocumentContext from './contexts/DocumentContext';
@@ -67,11 +68,11 @@ const ColorAttribute: React.FC<ColorAttributeProps> = ({
   const { document, setDocument } = useContext(DocumentContext);
 
   const getCurrentColor = () => {
-    const currentValue = queries.document
+    const currentValue: AttributeValue | undefined = queries.document
       .getAttributeValue(variant, domainID, attribute)(document);
 
-    return (currentValue && typeof currentValue === 'string')
-      ? currentValue
+    return currentValue
+      ? queries.document.parseStringFromAttributeValue(currentValue)
       : undefined;
   };
 
@@ -125,8 +126,7 @@ const BooleanAttribute: React.FC<BooleanAttributeProps> = ({ variant, domainID, 
 
   const checked = (
     attributeValue !== undefined
-    && typeof attributeValue === 'boolean'
-    && attributeValue === true
+    && queries.document.parseBooleanFromAttributeValue(attributeValue)
   );
 
   const onChange = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
@@ -182,8 +182,8 @@ const ShapeAttribute: React.FC<ShapeAttributeProps> = ({ variant, domainID, attr
     const currentValue = queries.document
       .getAttributeValue(variant, domainID, attribute)(document);
 
-    return (currentValue && typeof currentValue === 'string')
-      ? currentValue
+    return currentValue
+      ? queries.document.parseStringFromAttributeValue(currentValue)
       : undefined;
   };
 
@@ -244,8 +244,8 @@ const NodeAttribute: React.FC<NodeAttributeProps> = ({
     const currentValue = queries.document
       .getAttributeValue(variant, domainID, attribute)(document);
 
-    return (currentValue && typeof currentValue === 'string')
-      ? currentValue
+    return currentValue
+      ? queries.document.parseStringFromAttributeValue(currentValue) || null
       : null;
   };
 

@@ -48,14 +48,14 @@ export const ATTRIBUTE_DEFINITIONS: PROVAttributeDefinition[] = [
   {
     name: 'Activity',
     key: 'prov:activity',
-    domain: ['wasGeneratedBy', 'used', 'wasStartedBy', 'wasEndedBy', 'wasInvalidatedBy', 'wasAssociatedWith', 'actedOnBehalfOf'],
+    domain: ['wasGeneratedBy', 'used', 'wasStartedBy', 'wasEndedBy', 'wasInvalidatedBy', 'wasAssociatedWith'],
     range: 'activity',
     required: true,
   },
   {
     name: 'Activity',
     key: 'prov:activity',
-    domain: ['wasDerivedFrom'],
+    domain: ['wasDerivedFrom', 'actedOnBehalfOf'],
     range: 'activity',
   },
   {

@@ -27,6 +27,16 @@ const queries = {
     },
   },
   document: {
+    parseStringFromAttributeValue: (value: AttributeValue) => (typeof value === 'string'
+      ? value
+      : (typeof value === 'object' && !Array.isArray(value) && value.type === 'xsd:string')
+        ? value.$
+        : undefined),
+    parseBooleanFromAttributeValue: (value: AttributeValue) => (typeof value === 'boolean'
+      ? value
+      : (typeof value === 'object' && !Array.isArray(value) && value.type === 'xsd:boolean')
+        ? (['true', 'True'].includes(value.$))
+        : undefined),
     parsePrefixFromID: (id: string) => {
       const idComponents = id.split(':');
       return idComponents.length > 1 ? idComponents[0] : 'default';

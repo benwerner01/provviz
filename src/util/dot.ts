@@ -24,10 +24,11 @@ const mapAttributestoDot = (
 const mapNodeToDot = (variant: 'agent' | 'activity' | 'entity', settings: VisualisationSettings) => (
   [id, attributes]: [string, { [attributeKey: string]: any; }],
 ) => {
-  const shape = (attributes['provviz:shape'] && tbdIsProvVizShape(attributes['provviz:shape']))
-    ? attributes['provviz:shape']
+  const shapeString = queries.document.parseStringFromAttributeValue(attributes['provviz:shape']);
+  const shape = (shapeString && tbdIsProvVizShape(shapeString))
+    ? shapeString
     : DEFAULT_NODE_SHAPE[variant];
-  const fillcolor = attributes['provviz:color'] || settings.palette[variant];
+  const fillcolor = queries.document.parseStringFromAttributeValue(attributes['provviz:color']) || settings.palette[variant];
   const fontcolor = Color(fillcolor).isLight() ? '#000000' : '#FFFFFF';
 
   const filteredAttributes = Object.entries(attributes || {})
@@ -45,7 +46,7 @@ const mapNodeToDot = (variant: 'agent' | 'activity' | 'entity', settings: Visual
     (
       filteredAttributes.length > 0
       && !settings.hideAllNodeAttributes
-      && !attributes['provviz:hideAttributes']
+      && !queries.document.parseBooleanFromAttributeValue(attributes['provviz:hideAttributes'])
     ) ? [
         mapAttributestoDot(id)(filteredAttributes),
         `"${id}" -> "${id}_attributes" [style="dotted" dir="none"]`,
@@ -56,7 +57,7 @@ const mapNodeToDot = (variant: 'agent' | 'activity' | 'entity', settings: Visual
 const mapDefinedAttributeToDot = (
   id: string, attributes: { [attributeKey: string]: any; },
 ) => ({ key, name }: PROVAttributeDefinition) => (
-  `"${id}_midpoint" -> "${attributes[key]}" [label="${name}", id="${id}"];`
+  `"${id}_midpoint" -> "${queries.document.parseStringFromAttributeValue(attributes[key])}" [label="${name}", id="${id}"];`
 );
 
 const mapRelationToDot = (relation: Relation, settings: VisualisationSettings) => (
@@ -80,7 +81,7 @@ const mapRelationToDot = (relation: Relation, settings: VisualisationSettings) =
   const showAttributes = (
     customAttributes.length > 0
     && !settings.hideAllNodeAttributes
-    && !attributes['provviz:hideAttributes']
+    && !queries.document.parseBooleanFromAttributeValue(attributes['provviz:hideAttributes'])
   );
 
   if (otherDefinedAttributes.length > 0 || showAttributes) {
@@ -88,11 +89,11 @@ const mapRelationToDot = (relation: Relation, settings: VisualisationSettings) =
       "${id}_midpoint" [
         shape=point,
         id="${id}"];
-      "${attributes[domainKey]}" -> "${id}_midpoint" [
+      "${queries.document.parseStringFromAttributeValue(attributes[domainKey])}" -> "${id}_midpoint" [
         ${name === 'alternateOf' ? 'dir=back' : 'dir=none'},
         label="${name}",
         id="${id}"];
-      "${id}_midpoint" -> "${attributes[rangeKey]}" [id="${id}"];
+      "${id}_midpoint" -> "${queries.document.parseStringFromAttributeValue(attributes[rangeKey])}" [id="${id}"];
       ${otherDefinedAttributes.map(mapDefinedAttributeToDot(id, attributes))}
       ${showAttributes
     ? [
@@ -102,7 +103,7 @@ const mapRelationToDot = (relation: Relation, settings: VisualisationSettings) =
     `;
   }
 
-  return `"${attributes[domainKey]}" -> "${attributes[rangeKey]}" [
+  return `"${queries.document.parseStringFromAttributeValue(attributes[domainKey])}" -> "${queries.document.parseStringFromAttributeValue(attributes[rangeKey])}" [
     label="${name}"
     ${name === 'alternateOf' ? ' dir="both"' : ''}
     id="${id}"]`;
@@ -152,7 +153,7 @@ const getAllHiddenNodes = (settings: VisualisationSettings, bundleID?: string) =
 }: PROVJSONDocument): string[] => [
   ...Object.entries({ ...agent, ...activity, ...entity })
     .filter(([id, attributes]) => (
-      attributes['provviz:hide'] === true
+      queries.document.parseBooleanFromAttributeValue(attributes['provviz:hide']) === true
       || settings.hiddenNamespaces.find((hidden) => {
         const prefix = queries.document.parsePrefixFromID(id) || 'default';
         return (
@@ -170,7 +171,7 @@ const getAllHiddenRelations = (
 ) => (document: PROVJSONDocument): string[] => [
   ...RELATION_VARIANTS.map((variant) => Object.entries(document[variant] || {})
     .filter(([_, attributes]) => (
-      attributes['provviz:hide'] === true
+      queries.document.parseBooleanFromAttributeValue(attributes['provviz:hide']) === true
     )).map(([id]) => id)).flat(),
   ...Object.values(document.bundle || {})
     .map(getAllHiddenRelations(settings))
