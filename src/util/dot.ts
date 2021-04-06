@@ -1,6 +1,8 @@
 import Color from 'color';
 import { PROVENANVE_VIEW_DEFINITIONS, VisualisationSettings } from '../components/contexts/VisualisationContext';
 import {
+  NodeVariant,
+  NODE_VARIANTS,
   PROVJSONBundle, PROVJSONDocument, tbdIsProvVizShape,
 } from './definition/document';
 import { Relation, RELATIONS, RELATION_VARIANTS } from './definition/relation';
@@ -65,9 +67,10 @@ const mapRelationToDot = (relation: Relation, settings: VisualisationSettings) =
 ) => {
   const { name, domainKey, rangeKey } = relation;
   const otherDefinedAttributes = ATTRIBUTE_DEFINITIONS
-    .filter(({ domain, key }) => (
+    .filter(({ domain, range, key }) => (
       domain.includes(name)
       && ![domainKey, rangeKey].includes(key)
+      && NODE_VARIANTS.includes(range as NodeVariant)
       && attributes[key]
     ));
 

@@ -44,7 +44,7 @@ const DateTimeAttribute: React.FC<DateTimeAttributeProps> = ({
   return (
     <DateTimePicker
       label={attribute.name}
-      value={attributeValue
+      value={attributeValue && typeof attributeValue === 'string'
         ? new Date(attributeValue)
         : undefined}
       onChange={(date) => setDocument(date
@@ -68,7 +68,7 @@ const ColorAttribute: React.FC<ColorAttributeProps> = ({
   const { document, setDocument } = useContext(DocumentContext);
 
   const getCurrentColor = () => {
-    const currentValue: AttributeValue | undefined = queries.document
+    const currentValue = queries.document
       .getAttributeValue(variant, domainID, attribute)(document);
 
     return currentValue
@@ -125,7 +125,7 @@ const BooleanAttribute: React.FC<BooleanAttributeProps> = ({ variant, domainID, 
     .getAttributeValue(variant, domainID, attribute)(document);
 
   const checked = (
-    attributeValue !== undefined
+    attributeValue !== null
     && queries.document.parseBooleanFromAttributeValue(attributeValue)
   );
 

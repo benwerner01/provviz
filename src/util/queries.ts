@@ -85,8 +85,8 @@ const queries = {
     },
     getAttributeValue: (
       variant: NodeVariant | RelationVariant, id: string, attribute: PROVAttributeDefinition,
-    ) => (document: PROVJSONDocument): any | null => {
-      const { domain, key } = attribute;
+    ) => (document: PROVJSONDocument): AttributeValue | null => {
+      const { key } = attribute;
       if (Object.keys(document[variant] || {}).includes(id)) {
         return (document[variant]?.[id][key] || null);
       }
