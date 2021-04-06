@@ -18,10 +18,11 @@ const queries = {
       ...Object.keys(document.prefix || {}),
       ...(bundleID ? Object.keys(document.bundle?.[bundleID].prefix || {}) : []),
     ].flat(),
-    getDefaultPrefix: ({ prefix }: PROVJSONDocument): string => {
-      if (!prefix) throw new Error('Cannot get default Prefix if prefix is undefined');
-      if (prefix.default) return 'default';
-      if (prefix.xsd) return 'xsd';
+    getDefaultPrefix: (document: PROVJSONDocument): string => {
+      if (!document.prefix) throw new Error('Cannot get default Prefix if prefix is undefined');
+      if (document.prefix.default) return 'default';
+      const prefixes = queries.namespace.getAll()(document);
+      if (prefixes.length > 0) return prefixes[0];
       throw new Error('Cannot get default Prefix');
     },
   },
