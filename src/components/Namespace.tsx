@@ -137,7 +137,7 @@ const EditableNamespace: React.FC<EditableNamespaceProps> = ({
   }, [value, valueIsValid]);
 
   const handlePrefixChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-    setPrefix(e.target.value.replaceAll(' ', ''));
+    setPrefix(e.target.value.replaceAll(' ', '').replaceAll(':', ''));
   };
 
   const handlePrefixBlur = () => {
@@ -145,7 +145,7 @@ const EditableNamespace: React.FC<EditableNamespaceProps> = ({
   };
 
   const handleValueChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-    setValue(e.target.value.replaceAll(' ', ''));
+    setValue(e.target.value.replaceAll(' ', '').replaceAll(':', ''));
   };
 
   const handleValueBlur = () => {

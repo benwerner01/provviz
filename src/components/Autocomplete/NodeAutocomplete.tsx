@@ -74,7 +74,7 @@ const NodeAutocomplete: React.FC<NodeAutocompleteProps> = ({
           onChange(updatedDocument, id);
         }
       }}
-      onInputChange={(_, updatedInputValue) => setInputValue(updatedInputValue.replaceAll(' ', ''))}
+      onInputChange={(_, updatedInputValue) => setInputValue(updatedInputValue.replaceAll(' ', '').replaceAll(':', ''))}
       classes={autocompleteClasses}
       renderInput={(params) => (
         <TextField

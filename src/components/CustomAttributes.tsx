@@ -134,8 +134,8 @@ const CustomAttribute: React.FC<CustomAttributeProps> = ({
   const selectLabelClasses = { root: classes.selectLabelRoot };
   const selectFormControlClasses = { root: classes.selectFormControlRoot };
 
-  const prefix = name.includes(':') ? name.split(':')[0] : '';
-  const attributeName = name.includes(':') ? name.split(':').slice(1).join('') : name;
+  const prefix = queries.document.parsePrefixFromID(name);
+  const attributeName = queries.document.parseNameFromID(name);
 
   return (
     <Box flexGrow={1} display="flex" className={classes.wrapper}>
@@ -144,7 +144,6 @@ const CustomAttribute: React.FC<CustomAttributeProps> = ({
         onChange={(updatedPrefix) => onNameChange(updatedPrefix === ''
           ? attributeName
           : `${updatedPrefix}:${attributeName}`)}
-        nullable
       />
       <TextField
         className={classes.nameTextField}
@@ -154,8 +153,8 @@ const CustomAttribute: React.FC<CustomAttributeProps> = ({
         label="Name"
         value={attributeName}
         onChange={({ target }) => onNameChange(prefix === ''
-          ? target.value.replaceAll(' ', '')
-          : `${prefix}:${target.value.replaceAll(' ', '')}`)}
+          ? target.value.replaceAll(' ', '').replaceAll(':', '')
+          : `${prefix}:${target.value.replaceAll(' ', '').replaceAll(':', '')}`)}
       />
       {valueType === 'boolean' ? (
         <FormControl className={classes.valueTextField} classes={selectFormControlClasses} variant="outlined">

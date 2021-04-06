@@ -58,7 +58,7 @@ const MultipleNodeAutocomplete: React.FC<MultipleNodeAutocompleteProps> = ({
         });
         onChange(updatedDocument, values);
       }}
-      onInputChange={(_, updatedInputValue) => setInputValue(updatedInputValue.replaceAll(' ', ''))}
+      onInputChange={(_, updatedInputValue) => setInputValue(updatedInputValue.replaceAll(' ', '').replaceAll(':', ''))}
       renderTags={(tagValue, getTagProps) => tagValue.map((option, index) => (
         <Chip
           {...getTagProps({ index })}

@@ -89,7 +89,7 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
         variant="outlined"
         label="Name"
         value={name}
-        onChange={({ target }) => setName(target.value.replaceAll(' ', ''))}
+        onChange={({ target }) => setName(target.value.replaceAll(' ', '').replaceAll(':', ''))}
         error={!nameIsValid && name !== initialName}
         classes={{ root: classes.nameTextFieldRoot }}
         InputProps={{ classes: { root: classes.nameInputRoot, input: classes.nameInput } }}
