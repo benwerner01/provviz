@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { validatePROVJSONSchema } from '../../lib/ajv';
 import queries from '../queries';
-import { RelationVariant, RELATIONS } from './relation';
+import { RelationVariant, RELATIONS, RELATION_VARIANTS } from './relation';
 
 export type NodeVariant = 'activity' | 'agent' | 'entity'
 
@@ -152,108 +152,125 @@ export interface PROVJSONDocument extends PROVJSONBundle {
 
 export const validateDocument = (document: PROVJSONDocument): ReactNode[] => {
   const schemaValidation = validatePROVJSONSchema(document);
+  const globalPrefixes = queries.namespace.getAll()(document);
+
   if (schemaValidation === true) {
-    return (['agent', 'entity', 'activity'] as NodeVariant[]).map((variant) => {
-      const globalPrefixes = queries.namespace.getAll()(document);
-      const nodes = queries.node.getAll(variant)(document);
-      const capitalisedVariant = `${variant.charAt(0).toUpperCase()}${variant.slice(1)}`;
-      return [
-        // For each instance of the variant...
-        ...Object.keys(document[variant] || {})
-          .map((id) => {
-            const prefix = queries.document.parsePrefixFromID(id);
-            // ...check if a matching global namespace declaration exists
-            return globalPrefixes.includes(prefix)
-              ? []
-              : (
-                <>
-                  <i>{capitalisedVariant}</i>
-                  {' with identifier '}
-                  <strong>{`"${id}"`}</strong>
-                  {' references global namespace prefix '}
-                  <strong>{`"${prefix}"`}</strong>
-                  {' that is not defined'}
-                </>
-              );
-          }),
-        // For each bundle...
-        ...Object.entries(document.bundle || {})
-          .map(([bundleID, bundle]) => {
-            const bundlePrefixes = queries.namespace.getAll(bundleID)(document);
-            return [
-            // For each instance of the variant in the bundle...
-              ...Object.keys(bundle[variant] || {})
-                .map((id) => {
-                  const prefix = queries.document.parsePrefixFromID(id);
-                  // ...check if a matching global namespace declaration exists
-                  return [...globalPrefixes, ...bundlePrefixes].includes(prefix)
+    return [
+      // For each node variant...
+      (['agent', 'entity', 'activity'] as NodeVariant[]).map((variant) => {
+        const nodes = queries.node.getAll(variant)(document);
+        const capitalisedVariant = `${variant.charAt(0).toUpperCase()}${variant.slice(1)}`;
+        return [
+          ...Object.entries(document[variant] || {})
+            .map(([id, attributes]) => {
+              const prefix = queries.document.parsePrefixFromID(id);
+              // ...check if a matching global namespace declaration exists...
+              return [
+                // ...for its attributes
+                ...Object.keys(attributes).map((attributeKey) => {
+                  const attributePrefix = queries.document.parsePrefixFromID(attributeKey);
+                  return globalPrefixes.includes(attributePrefix)
                     ? []
                     : (
                       <>
                         <i>{capitalisedVariant}</i>
                         {' with identifier '}
                         <strong>{`"${id}"`}</strong>
-                        {' in the '}
-                        <i>Bundle</i>
-                        {' with identifier '}
-                        <strong>{`"${bundleID}"`}</strong>
-                        {' references namespace prefix '}
-                        <strong>{`"${prefix}"`}</strong>
+                        {' has attribute with key '}
+                        <strong>{`"${attributeKey}"`}</strong>
+                        {' that references global namespace declaration '}
+                        <strong>{`"${attributePrefix}"`}</strong>
                         {' that is not defined'}
                       </>
                     );
                 }),
-            ].flat();
-          }),
-        ...RELATIONS.map(({
-          name, domain, domainKey, range, rangeKey,
-        }) => {
-          if (
-            domain === variant
+                // ...for its identifier
+                globalPrefixes.includes(prefix)
+                  ? []
+                  : (
+                    <>
+                      <i>{capitalisedVariant}</i>
+                      {' with identifier '}
+                      <strong>{`"${id}"`}</strong>
+                      {' references global namespace declaration '}
+                      <strong>{`"${prefix}"`}</strong>
+                      {' that is not defined'}
+                    </>
+                  ),
+              ];
+            }).flat(),
+          // For each bundle...
+          ...Object.entries(document.bundle || {})
+            .map(([bundleID, bundle]) => {
+              const bundlePrefixes = queries.namespace.getAll(bundleID)(document);
+              const availablePrefixes = [...globalPrefixes, ...bundlePrefixes];
+              return [
+                // For each instance of the variant in the bundle...
+                ...Object.entries(bundle[variant] || {})
+                  .map(([id, attributes]) => {
+                    const prefix = queries.document.parsePrefixFromID(id);
+                    // ...check if a matching namespace declaration exists...
+                    return [
+                    // ...for its attributes...
+                      ...Object.keys(attributes).map((attributeKey) => {
+                        const attributePrefix = queries.document.parsePrefixFromID(attributeKey);
+                        return availablePrefixes.includes(attributePrefix)
+                          ? []
+                          : (
+                            <>
+                              <i>{capitalisedVariant}</i>
+                              {' with identifier '}
+                              <strong>{`"${id}"`}</strong>
+                              {' in the '}
+                              <i>Bundle</i>
+                              {' with identifier '}
+                              <strong>{`"${bundleID}"`}</strong>
+                              {' has attribute with key '}
+                              <strong>{`"${attributeKey}"`}</strong>
+                              {' references namespace declaration '}
+                              <strong>{`"${attributePrefix}"`}</strong>
+                              {' that is not defined in the bundle or globally'}
+                            </>
+                          );
+                      }),
+                      // ...and its identifier
+                      availablePrefixes.includes(prefix)
+                        ? []
+                        : (
+                          <>
+                            <i>{capitalisedVariant}</i>
+                            {' with identifier '}
+                            <strong>{`"${id}"`}</strong>
+                            {' in the '}
+                            <i>Bundle</i>
+                            {' with identifier '}
+                            <strong>{`"${bundleID}"`}</strong>
+                            {' references namespace declaration '}
+                            <strong>{`"${prefix}"`}</strong>
+                            {' that is not defined in the bundle or globally'}
+                          </>
+                        ),
+                    ];
+                  }).flat(),
+              ].flat();
+            }),
+          // For each relationship...
+          ...RELATIONS.map(({
+            name, domain, domainKey, range, rangeKey,
+          }) => [
+          // ...if the domain or range match the variant check that these are defined
+            (
+              domain === variant
             || range === variant
-          ) {
-            return [
-              ...Object.entries(document[name] || {})
-                .map(([id, value]) => [
-                  (domain === variant && !nodes.includes(value[domainKey]))
-                    ? (
-                      <>
-                        <i>{name}</i>
-                        {' relation with ID '}
-                        <strong>{`"${id}"`}</strong>
-                        {' references undefined '}
-                        <i>{variant}</i>
-                        {' '}
-                        <strong>{`"${value[domainKey]}"`}</strong>
-                      </>
-                    )
-                    : [],
-                  (range === variant && !nodes.includes(value[rangeKey]))
-                    ? (
-                      <>
-                        <i>{name}</i>
-                        {' relation with ID '}
-                        <strong>{`"${id}"`}</strong>
-                        {' references undefined '}
-                        <i>{variant}</i>
-                        {' '}
-                        <strong>{`"${value[rangeKey]}"`}</strong>
-                      </>
-                    )
-                    : [],
-                ].flat()).flat(),
-              ...Object.entries(document.bundle || {})
-                .map(([bundleID, bundle]) => Object.entries(bundle[name] || {})
+            ) ? [
+                ...Object.entries(document[name] || {})
                   .map(([id, value]) => [
                     (domain === variant && !nodes.includes(value[domainKey]))
                       ? (
                         <>
-                          {'Bundle '}
-                          <strong>{`"${bundleID}"`}</strong>
-                          {': '}
                           <i>{name}</i>
                           {' relation with ID '}
-                          <strong>{`${id}`}</strong>
+                          <strong>{`"${id}"`}</strong>
                           {' references undefined '}
                           <i>{variant}</i>
                           {' '}
@@ -264,9 +281,6 @@ export const validateDocument = (document: PROVJSONDocument): ReactNode[] => {
                     (range === variant && !nodes.includes(value[rangeKey]))
                       ? (
                         <>
-                          {'Bundle '}
-                          <strong>{`"${bundleID}"`}</strong>
-                          {': '}
                           <i>{name}</i>
                           {' relation with ID '}
                           <strong>{`"${id}"`}</strong>
@@ -277,13 +291,104 @@ export const validateDocument = (document: PROVJSONDocument): ReactNode[] => {
                         </>
                       )
                       : [],
-                  ].flat())).flat(),
-            ].flat();
-          }
-          return [];
-        }).flat(),
-      ].flat();
-    }).flat();
+                  ].flat()).flat(),
+                ...Object.entries(document.bundle || {})
+                  .map(([bundleID, bundle]) => Object.entries(bundle[name] || {})
+                    .map(([id, value]) => [
+                      (domain === variant && !nodes.includes(value[domainKey]))
+                        ? (
+                          <>
+                            {'Bundle '}
+                            <strong>{`"${bundleID}"`}</strong>
+                            {': '}
+                            <i>{name}</i>
+                            {' relation with ID '}
+                            <strong>{`${id}`}</strong>
+                            {' references undefined '}
+                            <i>{variant}</i>
+                            {' '}
+                            <strong>{`"${value[domainKey]}"`}</strong>
+                          </>
+                        )
+                        : [],
+                      (range === variant && !nodes.includes(value[rangeKey]))
+                        ? (
+                          <>
+                            {'Bundle '}
+                            <strong>{`"${bundleID}"`}</strong>
+                            {': '}
+                            <i>{name}</i>
+                            {' relation with ID '}
+                            <strong>{`"${id}"`}</strong>
+                            {' references undefined '}
+                            <i>{variant}</i>
+                            {' '}
+                            <strong>{`"${value[rangeKey]}"`}</strong>
+                          </>
+                        )
+                        : [],
+                    ].flat())).flat(),
+              ].flat() : [],
+          ]).flat(),
+        ].flat();
+      }).flat(),
+      // For each relationship variant...
+      RELATION_VARIANTS.map((variant) => {
+        const capitalisedVariant = `${variant.charAt(0).toUpperCase()}${variant.slice(1)}`;
+
+        return [
+          // ...check if a matching namespace declaration exists for its attributes
+          ...Object.entries(document[variant] || {})
+            .map(([id, attributes]) => [
+              ...Object.keys(attributes).map((attributeKey) => {
+                const attributePrefix = queries.document.parsePrefixFromID(attributeKey);
+                return globalPrefixes.includes(attributePrefix)
+                  ? []
+                  : (
+                    <>
+                      <i>{capitalisedVariant}</i>
+                      {' relationship with identifier '}
+                      <strong>{`"${id}"`}</strong>
+                      {' has attribute with key '}
+                      <strong>{`"${attributeKey}"`}</strong>
+                      {' that references global namespace declaration '}
+                      <strong>{`"${attributePrefix}"`}</strong>
+                      {' that is not defined'}
+                    </>
+                  );
+              }),
+            ]).flat(),
+          ...Object.entries(document.bundle || {})
+            .map(([bundleID, bundle]) => {
+              const bundlePrefixes = queries.namespace.getAll(bundleID)(document);
+              const availablePrefixes = [...globalPrefixes, ...bundlePrefixes];
+              return [
+                ...Object.values(bundle[variant] || {})
+                  .map((attributes) => Object.keys(attributes).map((attributeKey) => {
+                    const attributePrefix = queries.document.parsePrefixFromID(attributeKey);
+                    return availablePrefixes.includes(attributePrefix)
+                      ? []
+                      : (
+                        <>
+                          <i>{capitalisedVariant}</i>
+                          {' relationship '}
+                          {' in the '}
+                          <i>Bundle</i>
+                          {' with identifier '}
+                          <strong>{`"${bundleID}"`}</strong>
+                          {' has attribute with key '}
+                          <strong>{`"${attributeKey}"`}</strong>
+                          {' references namespace declaration '}
+                          <strong>{`"${attributePrefix}"`}</strong>
+                          {' that is not defined in the bundle or globally'}
+                        </>
+                      );
+                  })).flat(),
+              ];
+            }).flat(),
+        ].flat();
+      }).flat(),
+    ].flat();
   }
 
   return schemaValidation.map(({ dataPath, message }) => (
