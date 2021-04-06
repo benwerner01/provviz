@@ -307,12 +307,12 @@ const CustomAttributes: React.FC<CustomAttributesProps> = ({
   const [attributes, setAttributes] = useState<Attribute[]>([]);
 
   const [creating, setCreating] = useState<boolean>(false);
-  const [creatingName, setCreatingName] = useState<string>('');
+  const [creatingName, setCreatingName] = useState<string>(`${queries.namespace.getDefaultPrefix(document)}:`);
   const [creatingValue, setCreatingValue] = useState<AttributeValue>('');
 
   const resetCreating = () => {
     setCreating(false);
-    setCreatingName('');
+    setCreatingName(`${queries.namespace.getDefaultPrefix(document)}:`);
     setCreatingValue('');
   };
 
