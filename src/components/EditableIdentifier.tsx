@@ -56,7 +56,7 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
   const { document, setDocument } = useContext(DocumentContext);
   const classes = useStyles();
 
-  const initialPrefix = queries.document.parsePrefixFromID(initialID) || 'default';
+  const initialPrefix = queries.document.parsePrefixFromID(initialID);
   const initialName = queries.document.parseNameFromID(initialID);
 
   const [prefix, setPrefix] = useState<string>(initialPrefix);

@@ -107,7 +107,11 @@ const Visualiser: React.FC<VisualiserProps> = ({
 
   useLayoutEffect(() => {
     const topLevelPrefixes = Object.keys(contextDocument.prefix || {});
-    if (!topLevelPrefixes.includes('prov') || !topLevelPrefixes.includes('xsd')) {
+    if (
+      !topLevelPrefixes.includes('prov')
+      || !topLevelPrefixes.includes('xsd')
+      || !topLevelPrefixes.includes('provviz')
+    ) {
       contextSetDocument({
         ...contextDocument,
         prefix: {
