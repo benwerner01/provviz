@@ -114,6 +114,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
           ...contextDocument.prefix,
           xsd: 'http://www.w3.org/2001/XMLSchema#',
           prov: 'http://www.w3.org/ns/prov#',
+          provviz: 'http://provviz/ns/provviz#',
         },
       });
     }

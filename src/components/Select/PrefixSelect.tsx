@@ -32,11 +32,10 @@ type PrefixSelectProps = {
   onChange: (updatedPrefix: string) => void;
   bundleID?: string;
   additionalPrefixes?: string[];
-  nullable?: boolean;
 }
 
 const PrefixSelect: React.FC<PrefixSelectProps> = ({
-  prefix, onChange, bundleID, nullable, additionalPrefixes,
+  prefix, onChange, bundleID, additionalPrefixes,
 }) => {
   const { document } = useContext(DocumentContext);
   const classes = useStyles();
@@ -54,7 +53,6 @@ const PrefixSelect: React.FC<PrefixSelectProps> = ({
         onChange={({ target }) => onChange(target.value as string)}
         classes={{ select: classes.select }}
       >
-        {nullable && <MenuItem value=""><i>None</i></MenuItem> }
         {prefixes.map((p) => <MenuItem key={p} value={p}>{p}</MenuItem>)}
       </Select>
     </FromControl>

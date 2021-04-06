@@ -475,7 +475,7 @@ const NamespaceComponent: React.FC<NamespaceProps> = ({ bundleID }) => {
         <EditableNamespace
           key={namespace.key}
           bundleID={bundleID}
-          editable={!(!bundleID && ['prov', 'xsd'].includes(namespace.prefix))}
+          editable={!(!bundleID && ['prov', 'xsd', 'provviz'].includes(namespace.prefix))}
           isHidden={visualisationSettings
             .hiddenNamespaces
             .find(matchesHiddenNamespace(namespace.prefix, bundleID)) !== undefined}
