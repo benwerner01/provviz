@@ -54,33 +54,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const sanitiseNodeAttributeValue = (value: AttributeValue | undefined) => (
-  typeof value === 'object' && Array.isArray(value) && value.length > 0
-    ? value[0]
-    : value
-);
-
-const sanitiseDocument = (document: PROVJSONDocument): PROVJSONDocument => ({
-  ...document,
-  ...(RELATIONS.reduce<PROVJSONDocument>(
-    (prev, { name, domainKey, rangeKey }) => ({
-      ...prev,
-      [name]: Object.keys(document[name] || {}).reduce<{ [relationID: string]: any }>(
-        (prev2, id) => ({
-          ...prev2,
-          [id]: {
-            ...document[name]?.[id],
-            [domainKey]: sanitiseNodeAttributeValue(document[name]?.[id][domainKey]),
-            [rangeKey]: sanitiseNodeAttributeValue(document[name]?.[id][rangeKey]),
-          },
-        }),
-        {},
-      ),
-    }),
-    {},
-  )),
-});
-
 const Visualiser: React.FC<VisualiserProps> = ({
   wasmFolderURL, width, height, documentName, document, onChange, initialSettings, onSettingsChange,
 }) => {
@@ -93,16 +66,14 @@ const Visualiser: React.FC<VisualiserProps> = ({
     visualisationSettings,
     setVisualisationSettings] = useState<VisualisationSettings>(initialSettings || defaultSettings);
 
-  const santisedDocument = sanitiseDocument(document);
-
-  const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(santisedDocument);
+  const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(document);
   const [isEmptyDocument, setIsEmtpyDocument] = useState<boolean>(true);
   const [displayInspector, setDisplayInspector] = useState<boolean>(false);
   const [displayInspectorContent, setDisplayInspectorContent] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<View>('Graph');
   const [inspectorContentHeight, setInspectorContentHeight] = useState<number>(400);
   const [validationErrors, setValidationErrors] = useState<ReactNode[]>(
-    validateDocument(santisedDocument),
+    validateDocument(document),
   );
 
   const [selected, setSelected] = useState<Selection | undefined>();
@@ -128,7 +99,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
     setVisualisationSettings(initialSettings || defaultSettings);
   }, [documentName]);
 
-  const contextDocument: PROVJSONDocument = controllingState ? localDocument : santisedDocument;
+  const contextDocument: PROVJSONDocument = controllingState ? localDocument : document;
 
   const contextSetDocument = controllingState
     ? setLocalDocument
