@@ -7,7 +7,9 @@ import download from 'downloadjs';
 import { Typography } from '@material-ui/core';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
-import { PROVJSONDocument, validateDocument, Variant } from '../util/definition/document';
+import {
+  AttributeValue, PROVJSONDocument, validateDocument, Variant,
+} from '../util/definition/document';
 import DocumentContext from './contexts/DocumentContext';
 import Inspector, { TABS_HEIGHT } from './Inspector';
 import GraphView from './GraphView';
@@ -16,6 +18,7 @@ import MenuBar, { MENU_BAR_HEIGHT, View } from './MenuBar';
 import VisualisationContext, { VisualisationSettings, defaultSettings } from './contexts/VisualisationContext';
 import { palette } from '../util/theme';
 import queries from '../util/queries';
+import { RELATIONS } from '../util/definition/relation';
 
 export const MIN_WIDTH = 350;
 
@@ -51,6 +54,33 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const sanitiseNodeAttributeValue = (value: AttributeValue | undefined) => (
+  typeof value === 'object' && Array.isArray(value) && value.length > 0
+    ? value[0]
+    : value
+);
+
+const sanitiseDocument = (document: PROVJSONDocument): PROVJSONDocument => ({
+  ...document,
+  ...(RELATIONS.reduce<PROVJSONDocument>(
+    (prev, { name, domainKey, rangeKey }) => ({
+      ...prev,
+      [name]: Object.keys(document[name] || {}).reduce<{ [relationID: string]: any }>(
+        (prev2, id) => ({
+          ...prev2,
+          [id]: {
+            ...document[name]?.[id],
+            [domainKey]: sanitiseNodeAttributeValue(document[name]?.[id][domainKey]),
+            [rangeKey]: sanitiseNodeAttributeValue(document[name]?.[id][rangeKey]),
+          },
+        }),
+        {},
+      ),
+    }),
+    {},
+  )),
+});
+
 const Visualiser: React.FC<VisualiserProps> = ({
   wasmFolderURL, width, height, documentName, document, onChange, initialSettings, onSettingsChange,
 }) => {
@@ -63,13 +93,17 @@ const Visualiser: React.FC<VisualiserProps> = ({
     visualisationSettings,
     setVisualisationSettings] = useState<VisualisationSettings>(initialSettings || defaultSettings);
 
-  const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(document);
+  const santisedDocument = sanitiseDocument(document);
+
+  const [localDocument, setLocalDocument] = useState<PROVJSONDocument>(santisedDocument);
   const [isEmptyDocument, setIsEmtpyDocument] = useState<boolean>(true);
   const [displayInspector, setDisplayInspector] = useState<boolean>(false);
   const [displayInspectorContent, setDisplayInspectorContent] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<View>('Graph');
   const [inspectorContentHeight, setInspectorContentHeight] = useState<number>(400);
-  const [validationErrors, setValidationErrors] = useState<ReactNode[]>(validateDocument(document));
+  const [validationErrors, setValidationErrors] = useState<ReactNode[]>(
+    validateDocument(santisedDocument),
+  );
 
   const [selected, setSelected] = useState<Selection | undefined>();
   const [displaySettings, setDisplaySettings] = useState<boolean>(false);
@@ -94,7 +128,7 @@ const Visualiser: React.FC<VisualiserProps> = ({
     setVisualisationSettings(initialSettings || defaultSettings);
   }, [documentName]);
 
-  const contextDocument: PROVJSONDocument = controllingState ? localDocument : document;
+  const contextDocument: PROVJSONDocument = controllingState ? localDocument : santisedDocument;
 
   const contextSetDocument = controllingState
     ? setLocalDocument
