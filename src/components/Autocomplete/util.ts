@@ -17,13 +17,14 @@ export const parseNewNodeFromInput = (
   if (queries.namespace.getAll(bundleID)(document).includes(prefix)) {
     // ...then let's use it as the namespace...
     return {
-      prefix,
+      prefix: prefix === 'default' ? undefined : prefix,
       name: queries.document.parseNameFromID(input),
     };
   }
   // ...otherwise let's use the default namespace instead.
+  const defaultPrefix = queries.namespace.getDefaultPrefix(document);
   return {
-    prefix: queries.namespace.getDefaultPrefix(document),
+    prefix: defaultPrefix === 'default' ? undefined : defaultPrefix,
     name: input,
   };
 };
