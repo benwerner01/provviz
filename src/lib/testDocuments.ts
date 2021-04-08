@@ -20,7 +20,9 @@ export const testDocument1: PROVJSONDocument = {
     },
   },
   entity: {
-    'prefix1:Entity': { },
+    'prefix1:Entity': {
+      customAttributeKey: 'customAttributeValue',
+    },
   },
   wasAttributedTo: {
     '_:id1': {

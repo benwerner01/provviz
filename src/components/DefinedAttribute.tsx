@@ -11,7 +11,7 @@ import Box from '@material-ui/core/Box';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import {
-  AttributeValue, NodeVariant, PROVVIZ_SHAPES, tbdIsNodeVariant,
+  NodeVariant, PROVVIZ_SHAPES, tbdIsNodeVariant,
 } from '../lib/definition/document';
 import { PROVAttributeDefinition } from '../lib/definition/attribute';
 import queries from '../lib/queries';
@@ -21,12 +21,6 @@ import VisualisationContext from './context/VisualisationContext';
 import ColorPicker from './ColorPicker';
 import NodeAutocomplete from './Autocomplete/NodeAutocomplete';
 import { RelationVariant } from '../lib/definition/relation';
-
-const useDateTimeStyles = makeStyles((theme) => ({
-  root: {
-    display: 'block',
-  },
-}));
 
 type DateTimeAttributeProps = {
   variant: NodeVariant | RelationVariant;
@@ -271,7 +265,7 @@ const NodeAttribute: React.FC<NodeAttributeProps> = ({
   );
 };
 
-type DefinedAttributeProps = {
+export type DefinedAttributeProps = {
   attribute: PROVAttributeDefinition;
   domainID: string;
   bundleID?: string;
