@@ -293,7 +293,7 @@ const attributeValueIsValid = (attributeValue: AttributeValue) => !(
   )
 );
 
-type CustomAttributesProps = {
+export type CustomAttributesProps = {
   variant: NodeVariant | RelationVariant;
   id: string;
 }
