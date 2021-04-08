@@ -20,3 +20,8 @@ To start the local developer environment:
 - use `yarn install` to install the NPM dependencies
 - use `yarn storybook` to run the StoryBook environment
 
+## Run Tests
+
+To run the test-suite:
+- use `yarn install` to install the NPM dependencies
+- use `yarn test` to run the test-suite
