@@ -33,6 +33,10 @@ export const RELATION_VARIANTS: RelationVariant[] = [
   'hadMember',
 ];
 
+export const tbdIsRelationVariant = (
+  tbd: string,
+): tbd is RelationVariant => RELATION_VARIANTS.includes(tbd as RelationVariant);
+
 export type Relation = {
 name: RelationVariant;
 documentation: ReactNode;

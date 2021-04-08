@@ -8,7 +8,7 @@ import { Typography } from '@material-ui/core';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import {
-  AttributeValue, PROVJSONDocument, validateDocument, Variant,
+  AttributeValue, PROVJSONBundle, PROVJSONDocument, validateDocument, Variant,
 } from '../util/definition/document';
 import DocumentContext from './contexts/DocumentContext';
 import Inspector, { TABS_HEIGHT } from './Inspector';
@@ -18,7 +18,7 @@ import MenuBar, { MENU_BAR_HEIGHT, View } from './MenuBar';
 import VisualisationContext, { VisualisationSettings, defaultSettings } from './contexts/VisualisationContext';
 import { palette } from '../util/theme';
 import queries from '../util/queries';
-import { RELATIONS } from '../util/definition/relation';
+import { RELATIONS, tbdIsRelationVariant } from '../util/definition/relation';
 
 export const MIN_WIDTH = 350;
 
@@ -53,6 +53,58 @@ const useStyles = makeStyles((theme) => ({
     color: palette.danger.main,
   },
 }));
+
+const sanitiseNodeAttributeValue = (value: AttributeValue | undefined) => (
+  typeof value === 'object' && Array.isArray(value) && value.length > 0
+    ? value[0]
+    : value
+);
+
+const sanitiseDocument = (document: PROVJSONDocument): PROVJSONDocument => ({
+  ...document,
+  ...(RELATIONS.reduce<PROVJSONDocument>(
+    (prev, { name, domainKey, rangeKey }) => ({
+      ...prev,
+      [name]: Object.keys(document[name] || {}).reduce<{ [relationID: string]: any }>(
+        (prev2, id) => ({
+          ...prev2,
+          [id]: {
+            ...document[name]?.[id],
+            [domainKey]: sanitiseNodeAttributeValue(document[name]?.[id][domainKey]),
+            [rangeKey]: sanitiseNodeAttributeValue(document[name]?.[id][rangeKey]),
+          },
+        }),
+        {},
+      ),
+    }),
+    {},
+  )),
+  ...(document.bundle ? {
+    bundle: Object.entries(document.bundle).reduce<{ [bundleName: string]: PROVJSONBundle }>(
+      (prev, [bundleName, bundle]) => ({
+        ...prev,
+        [bundleName]: sanitiseDocument(bundle),
+      }),
+      {},
+    ),
+  } : {}),
+});
+
+const shouldBeSanitised = (document: PROVJSONDocument): boolean => (
+  Object.entries(document).find(([variant, value]) => {
+    if (tbdIsRelationVariant(variant)) {
+      const { domainKey, rangeKey } = RELATIONS.find(({ name }) => name === variant)!;
+      return Object.values(value as { [id: string]: { [key: string]: any } })
+        .find((attributes) => Object.entries(attributes)
+          .find(([key, attributeValue]) => (
+            [domainKey, rangeKey].includes(key)
+            && typeof attributeValue === 'object'
+            && Array.isArray(attributeValue))) !== undefined) !== undefined;
+    }
+    return false;
+  }) !== undefined
+  || Object.values(document.bundle || {}).find(shouldBeSanitised) !== undefined
+);
 
 const Visualiser: React.FC<VisualiserProps> = ({
   wasmFolderURL, width, height, documentName, document, onChange, initialSettings, onSettingsChange,
@@ -109,6 +161,12 @@ const Visualiser: React.FC<VisualiserProps> = ({
         else onChange(action);
       }
     };
+
+  useLayoutEffect(() => {
+    if (shouldBeSanitised(contextDocument)) {
+      contextSetDocument(sanitiseDocument(contextDocument));
+    }
+  }, [contextDocument]);
 
   useLayoutEffect(() => {
     const topLevelPrefixes = Object.keys(contextDocument.prefix || {});
