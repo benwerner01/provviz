@@ -9,7 +9,7 @@ import mutations from '../../lib/mutations';
 import { PROVJSONBundle } from '../../lib/definition/document';
 import { filterOptions, NewNode, parseNewNodeFromInput } from './util';
 
-type MultipleNodeAutocompleteProps = {
+export type MultipleNodeAutocompleteProps = {
   label: string;
   value: string[];
   exclude?: string[];

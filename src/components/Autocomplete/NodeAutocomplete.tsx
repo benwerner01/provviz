@@ -8,7 +8,7 @@ import mutations from '../../lib/mutations';
 import { PROVJSONBundle } from '../../lib/definition/document';
 import { filterOptions, NewNode, parseNewNodeFromInput } from './util';
 
-type NodeAutocompleteProps = {
+export type NodeAutocompleteProps = {
   label: string;
   value: string | null;
   disableClearable?: boolean;
