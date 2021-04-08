@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type EditableIdentifierProps = {
+export type EditableIdentifierProps = {
   initialID: string;
   bundleID?: string;
   onChange?: (id: string) => void;
