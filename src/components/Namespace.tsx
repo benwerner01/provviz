@@ -14,12 +14,12 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import Tooltip from '@material-ui/core/Tooltip';
 import debounce from 'lodash.debounce';
-import { PROVJSONDocument } from '../util/definition/document';
-import mutations from '../util/mutations';
+import { PROVJSONDocument } from '../lib/definition/document';
+import mutations from '../lib/mutations';
 import DocumentContext from './contexts/DocumentContext';
-import { palette } from '../util/theme';
+import { palette } from '../lib/theme';
 import VisualisationContext, { HiddenNamespace } from './contexts/VisualisationContext';
-import queries from '../util/queries';
+import queries from '../lib/queries';
 
 const NAMESPACE_PREFIX_WIDTH = 150;
 const NAMESPACE_VALUE_WIDTH = 300;

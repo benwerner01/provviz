@@ -3,7 +3,7 @@ import { render, cleanup, fireEvent } from '@testing-library/react';
 import BundleInspector, { BundleInspectorProps } from './BundleInspector';
 import { document1 as document } from '../../lib/examples';
 import DocumentContext from '../contexts/DocumentContext';
-import { PROVJSONDocument } from '../../util/definition/document';
+import { PROVJSONDocument } from '../../lib/definition/document';
 
 afterEach(cleanup);
 

@@ -6,9 +6,9 @@ import Typography from '@material-ui/core/Typography';
 import 'react-sortable-tree/style.css';
 import Color from 'color';
 import DocumentContext from './contexts/DocumentContext';
-import { PROVJSONBundle, PROVJSONDocument, tbdIsNodeVariant } from '../util/definition/document';
-import queries from '../util/queries';
-import mutations from '../util/mutations';
+import { PROVJSONBundle, PROVJSONDocument, tbdIsNodeVariant } from '../lib/definition/document';
+import queries from '../lib/queries';
+import mutations from '../lib/mutations';
 import VisualisationContext from './contexts/VisualisationContext';
 import { Selection } from './Visualiser';
 

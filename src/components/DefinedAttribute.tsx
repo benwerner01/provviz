@@ -12,15 +12,15 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import {
   AttributeValue, NodeVariant, PROVVIZ_SHAPES, tbdIsNodeVariant,
-} from '../util/definition/document';
-import { PROVAttributeDefinition } from '../util/definition/attribute';
-import queries from '../util/queries';
+} from '../lib/definition/document';
+import { PROVAttributeDefinition } from '../lib/definition/attribute';
+import queries from '../lib/queries';
 import DocumentContext from './contexts/DocumentContext';
-import mutations from '../util/mutations';
+import mutations from '../lib/mutations';
 import VisualisationContext from './contexts/VisualisationContext';
 import ColorPicker from './ColorPicker';
 import NodeAutocomplete from './Autocomplete/NodeAutocomplete';
-import { RelationVariant } from '../util/definition/relation';
+import { RelationVariant } from '../lib/definition/relation';
 
 const useDateTimeStyles = makeStyles((theme) => ({
   root: {

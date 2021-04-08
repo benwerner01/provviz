@@ -6,8 +6,8 @@ import Box from '@material-ui/core/Box';
 import TextField from '@material-ui/core/TextField';
 import debounce from 'lodash.debounce';
 import DocumentContext from './contexts/DocumentContext';
-import queries from '../util/queries';
-import mutations from '../util/mutations';
+import queries from '../lib/queries';
+import mutations from '../lib/mutations';
 import VisualisationContext from './contexts/VisualisationContext';
 import PrefixSelect from './Select/PrefixSelect';
 

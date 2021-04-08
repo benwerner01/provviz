@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { validatePROVJSONSchema } from '../../lib/ajv';
+import { validatePROVJSONSchema } from '../ajv';
 import queries from '../queries';
 import { RelationVariant, RELATIONS, RELATION_VARIANTS } from './relation';
 

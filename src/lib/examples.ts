@@ -1,4 +1,4 @@
-import { PROVJSONDocument } from '../util/definition/document';
+import { PROVJSONDocument } from './definition/document';
 
 export const document1: PROVJSONDocument = {
   prefix: {

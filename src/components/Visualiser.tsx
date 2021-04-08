@@ -9,16 +9,16 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import {
   AttributeValue, PROVJSONBundle, PROVJSONDocument, validateDocument, Variant,
-} from '../util/definition/document';
+} from '../lib/definition/document';
 import DocumentContext from './contexts/DocumentContext';
 import Inspector, { TABS_HEIGHT } from './Inspector';
 import GraphView from './GraphView';
 import TreeView from './TreeView';
 import MenuBar, { MENU_BAR_HEIGHT, View } from './MenuBar';
 import VisualisationContext, { VisualisationSettings, defaultSettings } from './contexts/VisualisationContext';
-import { palette } from '../util/theme';
-import queries from '../util/queries';
-import { RELATIONS, tbdIsRelationVariant } from '../util/definition/relation';
+import { palette } from '../lib/theme';
+import queries from '../lib/queries';
+import { RELATIONS, tbdIsRelationVariant } from '../lib/definition/relation';
 
 export const MIN_WIDTH = 350;
 

@@ -13,13 +13,13 @@ import WarningIcon from '@material-ui/icons/Warning';
 import { Link } from '@material-ui/core';
 import DocumentContext from '../contexts/DocumentContext';
 import EditableIdentifier from '../EditableIdentifier';
-import queries from '../../util/queries';
-import mutations from '../../util/mutations';
+import queries from '../../lib/queries';
+import mutations from '../../lib/mutations';
 import Section from './Section';
 import Documentation from './Documentation';
-import { palette } from '../../util/theme';
+import { palette } from '../../lib/theme';
 import { Selection } from '../Visualiser';
-import { NodeVariant } from '../../util/definition/document';
+import { NodeVariant } from '../../lib/definition/document';
 import Namespace from '../Namespace';
 
 const useStyles = makeStyles((theme) => ({

@@ -18,13 +18,13 @@ import {
   AttributeValue,
   NodeVariant,
   PROVJSONDocument,
-} from '../util/definition/document';
-import { ATTRIBUTE_DEFINITIONS, PROVVIZ_ATTRIBUTE_DEFINITIONS } from '../util/definition/attribute';
-import queries from '../util/queries';
+} from '../lib/definition/document';
+import { ATTRIBUTE_DEFINITIONS, PROVVIZ_ATTRIBUTE_DEFINITIONS } from '../lib/definition/attribute';
+import queries from '../lib/queries';
 import DocumentContext from './contexts/DocumentContext';
-import mutations from '../util/mutations';
+import mutations from '../lib/mutations';
 import PrefixSelect from './Select/PrefixSelect';
-import { RelationVariant } from '../util/definition/relation';
+import { RelationVariant } from '../lib/definition/relation';
 
 const useCustomAttributeStyles = makeStyles((theme) => ({
   wrapper: {

@@ -18,11 +18,11 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import Tooltip from '@material-ui/core/Tooltip';
 import Fade from '@material-ui/core/Fade';
-import queries from '../util/queries';
-import mutations from '../util/mutations';
+import queries from '../lib/queries';
+import mutations from '../lib/mutations';
 import DocumentContext from './contexts/DocumentContext';
 import VisualisationContext from './contexts/VisualisationContext';
-import { NodeVariant, NODE_VARIANTS } from '../util/definition/document';
+import { NodeVariant, NODE_VARIANTS } from '../lib/definition/document';
 import SearchTextField from './TextField/SearchTextField';
 import { Selection } from './Visualiser';
 

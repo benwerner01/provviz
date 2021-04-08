@@ -3,9 +3,9 @@ import { makeStyles } from '@material-ui/core/styles';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import TextField from '@material-ui/core/TextField';
 import DocumentContext from '../contexts/DocumentContext';
-import queries from '../../util/queries';
-import mutations from '../../util/mutations';
-import { PROVJSONBundle } from '../../util/definition/document';
+import queries from '../../lib/queries';
+import mutations from '../../lib/mutations';
+import { PROVJSONBundle } from '../../lib/definition/document';
 import { filterOptions, NewNode, parseNewNodeFromInput } from './util';
 
 type NodeAutocompleteProps = {

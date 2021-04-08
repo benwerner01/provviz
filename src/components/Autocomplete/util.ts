@@ -1,6 +1,6 @@
 import { createFilterOptions } from '@material-ui/lab/Autocomplete';
-import { PROVJSONDocument } from '../../util/definition/document';
-import queries from '../../util/queries';
+import { PROVJSONDocument } from '../../lib/definition/document';
+import queries from '../../lib/queries';
 
 export const filterOptions = createFilterOptions<string | NewNode>();
 

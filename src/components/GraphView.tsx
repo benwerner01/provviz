@@ -14,14 +14,14 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
-import { mapDocumentToDots } from '../util/dot';
+import { mapDocumentToDots } from '../lib/dot';
 import DocumentContext from './contexts/DocumentContext';
 import VisualisationContext from './contexts/VisualisationContext';
-import queries from '../util/queries';
+import queries from '../lib/queries';
 import { Selection as PROVVizSelection } from './Visualiser';
-import { Relation, RELATIONS } from '../util/definition/relation';
-import mutations from '../util/mutations';
-import { tbdIsNodeVariant } from '../util/definition/document';
+import { Relation, RELATIONS } from '../lib/definition/relation';
+import mutations from '../lib/mutations';
+import { tbdIsNodeVariant } from '../lib/definition/document';
 
 interface Datum {
   attributes: {

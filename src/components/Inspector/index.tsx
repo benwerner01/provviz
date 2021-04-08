@@ -17,7 +17,7 @@ import NodeInspector from './NodeInspector';
 import SettingsInspector from './SettingsInspector';
 import RelationInspector from './RelationInspector';
 import BundleInspector from './BundleInspector';
-import { tbdIsNodeVariant, Variant } from '../../util/definition/document';
+import { tbdIsNodeVariant, Variant } from '../../lib/definition/document';
 import { Selection } from '../Visualiser';
 
 export const TABS_HEIGHT = 48 + 1;

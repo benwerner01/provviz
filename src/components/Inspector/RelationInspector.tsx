@@ -11,11 +11,11 @@ import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
 import Documentation from './Documentation';
 import DocumentContext from '../contexts/DocumentContext';
-import { RELATIONS, RelationVariant } from '../../util/definition/relation';
-import { ATTRIBUTE_DEFINITIONS, PROVVIZ_ATTRIBUTE_DEFINITIONS } from '../../util/definition/attribute';
-import { palette } from '../../util/theme';
+import { RELATIONS, RelationVariant } from '../../lib/definition/relation';
+import { ATTRIBUTE_DEFINITIONS, PROVVIZ_ATTRIBUTE_DEFINITIONS } from '../../lib/definition/attribute';
+import { palette } from '../../lib/theme';
 import DefinedAttribute from '../DefinedAttribute';
-import mutations from '../../util/mutations';
+import mutations from '../../lib/mutations';
 import CustomAttributes from '../CustomAttributes';
 import Section from './Section';
 
