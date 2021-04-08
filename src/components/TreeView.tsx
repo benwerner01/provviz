@@ -5,11 +5,11 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import 'react-sortable-tree/style.css';
 import Color from 'color';
-import DocumentContext from './contexts/DocumentContext';
+import DocumentContext from './context/DocumentContext';
 import { PROVJSONBundle, PROVJSONDocument, tbdIsNodeVariant } from '../lib/definition/document';
 import queries from '../lib/queries';
 import mutations from '../lib/mutations';
-import VisualisationContext from './contexts/VisualisationContext';
+import VisualisationContext from './context/VisualisationContext';
 import { Selection } from './Visualiser';
 
 type TreeViewProps = {

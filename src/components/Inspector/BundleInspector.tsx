@@ -11,7 +11,7 @@ import Divider from '@material-ui/core/Divider';
 import Button from '@material-ui/core/Button';
 import WarningIcon from '@material-ui/icons/Warning';
 import { Link } from '@material-ui/core';
-import DocumentContext from '../contexts/DocumentContext';
+import DocumentContext from '../context/DocumentContext';
 import EditableIdentifier from '../EditableIdentifier';
 import queries from '../../lib/queries';
 import mutations from '../../lib/mutations';

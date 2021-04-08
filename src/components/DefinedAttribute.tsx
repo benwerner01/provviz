@@ -15,9 +15,9 @@ import {
 } from '../lib/definition/document';
 import { PROVAttributeDefinition } from '../lib/definition/attribute';
 import queries from '../lib/queries';
-import DocumentContext from './contexts/DocumentContext';
+import DocumentContext from './context/DocumentContext';
 import mutations from '../lib/mutations';
-import VisualisationContext from './contexts/VisualisationContext';
+import VisualisationContext from './context/VisualisationContext';
 import ColorPicker from './ColorPicker';
 import NodeAutocomplete from './Autocomplete/NodeAutocomplete';
 import { RelationVariant } from '../lib/definition/relation';

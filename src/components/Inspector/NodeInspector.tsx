@@ -10,7 +10,7 @@ import Fade from '@material-ui/core/Fade';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
-import DocumentContext from '../contexts/DocumentContext';
+import DocumentContext from '../context/DocumentContext';
 import EditableIdentifier from '../EditableIdentifier';
 import MultipleNodeAutocomplete from '../Autocomplete/MultipleNodeAutocomplete';
 import queries from '../../lib/queries';

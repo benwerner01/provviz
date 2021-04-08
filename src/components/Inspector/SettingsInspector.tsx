@@ -9,7 +9,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
 import Section from './Section';
 import ColorPicker from '../ColorPicker';
-import VisualisationContext, { defaultSettings, ProvenanceView, PROVENANCE_VIEW_NAMES } from '../contexts/VisualisationContext';
+import VisualisationContext, { defaultSettings, ProvenanceView, PROVENANCE_VIEW_NAMES } from '../context/VisualisationContext';
 import { NodeVariant, NODE_VARIANTS } from '../../lib/definition/document';
 import Namespace from '../Namespace';
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { render, fireEvent, cleanup } from '@testing-library/react';
 import Inspector, { InspectorProps } from '.';
 import { document1 as document } from '../../lib/examples';
-import DocumentContext from '../contexts/DocumentContext';
+import DocumentContext from '../context/DocumentContext';
 
 afterEach(cleanup);
 

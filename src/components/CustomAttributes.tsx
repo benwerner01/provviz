@@ -21,7 +21,7 @@ import {
 } from '../lib/definition/document';
 import { ATTRIBUTE_DEFINITIONS, PROVVIZ_ATTRIBUTE_DEFINITIONS } from '../lib/definition/attribute';
 import queries from '../lib/queries';
-import DocumentContext from './contexts/DocumentContext';
+import DocumentContext from './context/DocumentContext';
 import mutations from '../lib/mutations';
 import PrefixSelect from './Select/PrefixSelect';
 import { RelationVariant } from '../lib/definition/relation';

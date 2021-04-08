@@ -3,7 +3,7 @@ import {
   VisualisationSettings,
   tbdIsVisualisationSettings,
   defaultSettings as defaultVisualisationSettings,
-} from './components/contexts/VisualisationContext';
+} from './components/context/VisualisationContext';
 
 export {
   MIN_WIDTH,

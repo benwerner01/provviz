@@ -2,7 +2,7 @@ import React, { SetStateAction } from 'react';
 import { render, cleanup, fireEvent } from '@testing-library/react';
 import NodeInspector, { NodeInspectorProps } from './NodeInspector';
 import { document3 as document } from '../../lib/examples';
-import DocumentContext from '../contexts/DocumentContext';
+import DocumentContext from '../context/DocumentContext';
 import { PROVJSONDocument } from '../../lib/definition/document';
 
 afterEach(cleanup);

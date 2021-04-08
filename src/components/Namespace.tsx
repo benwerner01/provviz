@@ -16,9 +16,9 @@ import Tooltip from '@material-ui/core/Tooltip';
 import debounce from 'lodash.debounce';
 import { PROVJSONDocument } from '../lib/definition/document';
 import mutations from '../lib/mutations';
-import DocumentContext from './contexts/DocumentContext';
+import DocumentContext from './context/DocumentContext';
 import { palette } from '../lib/theme';
-import VisualisationContext, { HiddenNamespace } from './contexts/VisualisationContext';
+import VisualisationContext, { HiddenNamespace } from './context/VisualisationContext';
 import queries from '../lib/queries';
 
 const NAMESPACE_PREFIX_WIDTH = 150;

@@ -4,7 +4,7 @@ import DateFnsUtils from '@date-io/date-fns';
 import { render, cleanup, fireEvent } from '@testing-library/react';
 import RelationInspector, { RelationInspectorProps } from './RelationInspector';
 import { document3 as document } from '../../lib/examples';
-import DocumentContext from '../contexts/DocumentContext';
+import DocumentContext from '../context/DocumentContext';
 import { PROVJSONDocument } from '../../lib/definition/document';
 
 afterEach(cleanup);

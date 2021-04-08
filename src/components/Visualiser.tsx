@@ -10,12 +10,12 @@ import DateFnsUtils from '@date-io/date-fns';
 import {
   AttributeValue, PROVJSONBundle, PROVJSONDocument, validateDocument, Variant,
 } from '../lib/definition/document';
-import DocumentContext from './contexts/DocumentContext';
+import DocumentContext from './context/DocumentContext';
 import Inspector, { TABS_HEIGHT } from './Inspector';
 import GraphView from './GraphView';
 import TreeView from './TreeView';
 import MenuBar, { MENU_BAR_HEIGHT, View } from './MenuBar';
-import VisualisationContext, { VisualisationSettings, defaultSettings } from './contexts/VisualisationContext';
+import VisualisationContext, { VisualisationSettings, defaultSettings } from './context/VisualisationContext';
 import { palette } from '../lib/theme';
 import queries from '../lib/queries';
 import { RELATIONS, tbdIsRelationVariant } from '../lib/definition/relation';

@@ -4,7 +4,7 @@ import FromControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
-import DocumentContext from '../contexts/DocumentContext';
+import DocumentContext from '../context/DocumentContext';
 import queries from '../../lib/queries';
 
 const useStyles = makeStyles((theme) => ({

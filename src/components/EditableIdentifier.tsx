@@ -5,10 +5,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import TextField from '@material-ui/core/TextField';
 import debounce from 'lodash.debounce';
-import DocumentContext from './contexts/DocumentContext';
+import DocumentContext from './context/DocumentContext';
 import queries from '../lib/queries';
 import mutations from '../lib/mutations';
-import VisualisationContext from './contexts/VisualisationContext';
+import VisualisationContext from './context/VisualisationContext';
 import PrefixSelect from './Select/PrefixSelect';
 
 const useStyles = makeStyles((theme) => ({

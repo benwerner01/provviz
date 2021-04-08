@@ -10,7 +10,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
 import Documentation from './Documentation';
-import DocumentContext from '../contexts/DocumentContext';
+import DocumentContext from '../context/DocumentContext';
 import { RELATIONS, RelationVariant } from '../../lib/definition/relation';
 import { ATTRIBUTE_DEFINITIONS, PROVVIZ_ATTRIBUTE_DEFINITIONS } from '../../lib/definition/attribute';
 import { palette } from '../../lib/theme';

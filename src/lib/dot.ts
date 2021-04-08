@@ -1,5 +1,5 @@
 import Color from 'color';
-import { PROVENANVE_VIEW_DEFINITIONS, VisualisationSettings } from '../components/contexts/VisualisationContext';
+import { PROVENANVE_VIEW_DEFINITIONS, VisualisationSettings } from '../components/context/VisualisationContext';
 import {
   NodeVariant,
   NODE_VARIANTS,
