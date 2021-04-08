@@ -12,7 +12,7 @@ import mutations from '../lib/mutations';
 import VisualisationContext from './context/VisualisationContext';
 import { Selection } from './Visualiser';
 
-type TreeViewProps = {
+export type TreeViewProps = {
   width: number;
   height: number;
   selected: Selection | undefined;
