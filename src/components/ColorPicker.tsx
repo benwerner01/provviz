@@ -52,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-type ColorPickerProps = {
+export type ColorPickerProps = {
   label?: string;
   initialColor: string;
   onChange: (updatedColor: string) => void;
