@@ -62,7 +62,7 @@ const useEditableNamespaceStyles = makeStyles((theme) => ({
   },
 }));
 
-type EditableNamespaceProps = {
+export type EditableNamespaceProps = {
   initialNamespace: Namespace;
   isHidden: boolean;
   editable: boolean;
@@ -357,7 +357,7 @@ const CreateNamespace: React.FC<CreateNamespaceProps> = ({
   );
 };
 
-type NamespaceProps = {
+export type NamespaceProps = {
   bundleID?: string;
 }
 
