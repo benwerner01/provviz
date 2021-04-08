@@ -20,8 +20,14 @@ To start the local developer environment:
 - use `yarn install` to install the NPM dependencies
 - use `yarn storybook` to run the StoryBook environment
 
-## Run Tests
+## Run Test-Suite
 
 To run the test-suite:
 - use `yarn install` to install the NPM dependencies
 - use `yarn test` to run the test-suite
+
+## Build NPM Package
+
+To build the *ProvViz Visualiser*:
+- use `yarn install` to install the NPM dependencies
+- use `yarn build` to build the project
