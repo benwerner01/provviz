@@ -1,5 +1,6 @@
 import { PROVJSONDocument } from './definition/document';
 
+// Taken from the ProvStore (https://openprovenance.org/store/)
 export const document1: PROVJSONDocument = {
   prefix: {
     rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
@@ -42,6 +43,7 @@ export const document1: PROVJSONDocument = {
   },
 };
 
+// Taken from the ProvStore (https://openprovenance.org/store/)
 export const document2: PROVJSONDocument = {
   prefix: { method: 'http://www.java.com/', ex: 'http://example.com/#', user: 'http://loophabits.org/' },
   wasGeneratedBy: { '_:id1': { 'prov:activity': 'method:input', 'prov:time': '2018-01-22T10:00:02+00:00', 'prov:entity': 'user:HabitData' }, '_:id2': { 'prov:activity': 'method:aggregate', 'prov:time': '2018-01-22T10:00:02+00:00', 'prov:entity': 'user:HabitSummary' }, '_:id3': { 'prov:activity': 'method:export', 'prov:time': '2018-01-22T10:00:02+00:00', 'prov:entity': 'user:HabitReport' } },
@@ -56,6 +58,7 @@ export const document2: PROVJSONDocument = {
   },
 };
 
+// Taken from the ProvStore (https://openprovenance.org/store/)
 export const document3: PROVJSONDocument = {
   prefix: { ex: 'http://s11.no/survey4/' },
   bundle: {
@@ -79,6 +82,7 @@ export const document3: PROVJSONDocument = {
 
 };
 
+// Taken from the ProvBook website (http://www.provbook.org/provapi/documents/bk.json)
 export const document4: PROVJSONDocument = {
   prefix: {
     dct: 'http://purl.org/dc/terms/',
