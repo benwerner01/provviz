@@ -1,5 +1,6 @@
 import React, {
   Dispatch, SetStateAction, useEffect, useRef, useState,
+  useContext,
 } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
@@ -17,8 +18,10 @@ import NodeInspector from './NodeInspector';
 import SettingsInspector from './SettingsInspector';
 import RelationInspector from './RelationInspector';
 import BundleInspector from './BundleInspector';
-import { tbdIsNodeVariant, Variant } from '../../lib/definition/document';
+import { PROVJSONDocument, tbdIsNodeVariant, Variant } from '../../lib/definition/document';
 import { Selection } from '../Visualiser';
+import DocumentContext from '../context/DocumentContext';
+import queries from '../../lib/queries';
 
 export const TABS_HEIGHT = 48 + 1;
 
@@ -90,6 +93,36 @@ export type InspectorProps = {
   setOpen: (open: boolean) => void;
 }
 
+const possiblyUpdateNodeInspectorTabIDs = (
+  prevDocument: PROVJSONDocument,
+  document: PROVJSONDocument,
+  tabs: TapType[],
+): false | TapType[] => {
+  let hasChanged = false;
+
+  const updatedTabs = tabs.map((tab) => {
+    const { variant } = tab;
+
+    if (
+      tbdIsNodeVariant(variant)
+      && !queries.document.hasNode(tab.id)(document)
+      && queries.document.hasNode(tab.id)(prevDocument)
+    ) {
+      hasChanged = true;
+
+      const updatedID = queries.document.getUpdatedNodeID(prevDocument, document);
+
+      return updatedID
+        ? { ...tab, id: updatedID }
+        : [];
+    }
+
+    return tab;
+  }).flat();
+
+  return hasChanged ? updatedTabs : false;
+};
+
 const Inspector: React.FC<InspectorProps> = ({
   displaySettings,
   setDisplaySettings,
@@ -106,8 +139,24 @@ const Inspector: React.FC<InspectorProps> = ({
   const theme = useTheme();
   const wrapperRef = useRef<HTMLDivElement>(null);
 
+  const { document } = useContext(DocumentContext);
+
+  const prevDocumentRef = useRef<PROVJSONDocument>(document);
+
   const [currentTabIndex, setCurrentTabIndex] = useState<number>(-1);
   const [tabs, setTabs] = useState<TapType[]>(defaultTabs);
+
+  useEffect(() => {
+    const updatedTabs = possiblyUpdateNodeInspectorTabIDs(
+      prevDocumentRef.current,
+      document,
+      tabs,
+    );
+
+    if (updatedTabs) setTabs(updatedTabs);
+
+    prevDocumentRef.current = document;
+  }, [document]);
 
   const [dragging, setDragging] = useState<boolean>(false);
 

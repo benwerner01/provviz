@@ -1,5 +1,6 @@
 import React, {
   useCallback, useContext, useEffect, useState,
+  useMemo, useLayoutEffect,
 } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
@@ -56,15 +57,17 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
   const { document, setDocument } = useContext(DocumentContext);
   const classes = useStyles();
 
-  const initialPrefix = queries.document.parsePrefixFromID(initialID);
-  const initialName = queries.document.parseNameFromID(initialID);
+  const initialPrefix = useMemo(() => queries.document.parsePrefixFromID(initialID), [initialID]);
+  const initialName = useMemo(() => queries.document.parseNameFromID(initialID), [initialID]);
 
+  const [changed, setChanged] = useState<boolean>(false);
   const [prefix, setPrefix] = useState<string>(initialPrefix);
   const [name, setName] = useState<string>(initialName);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setPrefix(initialPrefix);
     setName(initialName);
+    setChanged(false);
   }, [initialPrefix, initialName]);
 
   const prefixIsValid = prefix !== '';
@@ -73,23 +76,41 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
   const debouncedUpdateIdentifier = useCallback(debounce((prevID: string, updatedID: string) => {
     setDocument(mutations.updateIdentifier(prevID, updatedID));
     if (onChange) onChange(updatedID);
-  }, 200), [document, setDocument, visualisationSettings, setVisualisationSettings]);
+  }, 1000), [document, setDocument, visualisationSettings, setVisualisationSettings]);
 
   useEffect(() => {
     const updatedID = prefix === 'default' ? name : `${prefix}:${name}`;
-    if (prefixIsValid && nameIsValid && initialID !== updatedID) {
+
+    if (
+      changed
+      && initialID.includes(initialPrefix)
+      && initialID.includes(initialName)
+      && prefixIsValid
+      && nameIsValid
+      && initialID !== updatedID
+    ) {
       debouncedUpdateIdentifier(initialID, updatedID);
     }
-  }, [prefix, name, prefixIsValid, nameIsValid, initialID]);
+  }, [changed, prefix, name, prefixIsValid, nameIsValid, initialID]);
 
   return (
     <Box className={classes.wrapper} display="flex">
-      <PrefixSelect prefix={prefix} onChange={setPrefix} bundleID={bundleID} />
+      <PrefixSelect
+        prefix={prefix}
+        onChange={(updatedPrefix) => {
+          setPrefix(updatedPrefix);
+          if (!changed) setChanged(true);
+        }}
+        bundleID={bundleID}
+      />
       <TextField
         variant="outlined"
         label="Name"
         value={name}
-        onChange={({ target }) => setName(target.value.replaceAll(' ', '').replaceAll(':', ''))}
+        onChange={({ target }) => {
+          setName(target.value.replaceAll(' ', '').replaceAll(':', ''));
+          if (!changed) setChanged(true);
+        }}
         error={!nameIsValid && name !== initialName}
         classes={{ root: classes.nameTextFieldRoot }}
         InputProps={{ classes: { root: classes.nameInputRoot, input: classes.nameInput } }}

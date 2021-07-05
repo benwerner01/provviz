@@ -27,6 +27,18 @@ const queries = {
     },
   },
   document: {
+    getUpdatedNodeID: (
+      prevDocument: PROVJSONDocument,
+      document: PROVJSONDocument,
+    ) => {
+      const prevNodes = queries.document.getAllNodes(prevDocument);
+
+      return queries.document.getAllNodes(document)
+        .find((id) => !prevNodes.includes(id));
+    },
+    getAllNodes: (document: PROVJSONDocument) => NODE_VARIANTS
+      .map((v) => queries.node.getAll(v)(document))
+      .flat(),
     parseStringFromAttributeValue: (value: AttributeValue) => (typeof value === 'string'
       ? value
       : (typeof value === 'object' && !Array.isArray(value) && value.type === 'xsd:string')
