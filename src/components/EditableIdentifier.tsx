@@ -76,7 +76,7 @@ const EditableIdentifier: React.FC<EditableIdentifierProps> = ({
   const debouncedUpdateIdentifier = useCallback(debounce((prevID: string, updatedID: string) => {
     setDocument(mutations.updateIdentifier(prevID, updatedID));
     if (onChange) onChange(updatedID);
-  }, 1000), [document, setDocument, visualisationSettings, setVisualisationSettings]);
+  }, 500), [document, setDocument, visualisationSettings, setVisualisationSettings]);
 
   useEffect(() => {
     const updatedID = prefix === 'default' ? name : `${prefix}:${name}`;
